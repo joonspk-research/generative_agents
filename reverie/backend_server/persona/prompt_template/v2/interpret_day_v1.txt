@@ -1,0 +1,17 @@
+task_decomp_v1.txt
+
+Variables: 
+!<INPUT 0>! -- Commonset
+!<INPUT 1>! -- Persona first name
+!<INPUT 2>! -- Day summary string 
+!<INPUT 3>! -- Persona first name
+!<INPUT 3>! -- Persona first name
+
+<commentblockmarker>###</commentblockmarker>
+!<INPUT 0>!
+
+Memorable things that happened to !<INPUT 1>! today:
+!<INPUT 2>!
+
+Q: Let's think step by step. How does !<INPUT 3>! feel about their day today, and how does !<INPUT 4>! want tomorrow to be?
+A:

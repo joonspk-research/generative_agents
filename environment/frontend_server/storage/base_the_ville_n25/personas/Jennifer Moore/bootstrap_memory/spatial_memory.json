@@ -1,0 +1,52 @@
+{
+  "the Ville": {
+    "Moore family's house": {
+      "main room": [
+        "closet",
+        "bed",
+        "desk",
+        "cooking area",
+        "kitchen sink",
+        "refrigerator",
+        "common room sofa"
+      ],
+      "bathroom": [
+        "bathroom sink",
+        "shower",
+        "toilet"
+      ]
+    },
+    "Johnson Park": {
+      "park": [
+        "park garden"
+      ]
+    },
+    "Harvey Oak Supply Store": {
+      "supply store": [
+        "supply store product shelf",
+        "behind the supply store counter",
+        "supply store counter"
+      ]
+    },
+    "The Willows Market and Pharmacy": {
+      "store": [
+        "behind the pharmacy counter",
+        "pharmacy store shelf",
+        "pharmacy store counter",
+        "grocery store shelf",
+        "behind the grocery counter",
+        "grocery store counter"
+      ]
+    },
+    "Hobbs Cafe": {
+      "cafe": [
+        "refrigerator",
+        "cafe customer seating",
+        "cooking area",
+        "kitchen sink",
+        "behind the cafe counter",
+        "piano"
+      ]
+    }
+  }
+}

@@ -1,0 +1,14 @@
+get_keywords_v1.txt
+
+Variables: 
+!<INPUT 0>! -- description
+
+<commentblockmarker>###</commentblockmarker>
+Given a text description of an event or a conversation, output CSV (comma-separated values) of factually descriptive and emotive keywords about the description.
+Below is the format of the output. 
+Description of an event or a conversation: [Provided]
+Factually descriptive keywords: [Fill in]
+Emotive keywords: [Fill in]
+===
+Description of an event or a conversation: !<INPUT 0>!
+Factually descriptive keywords:

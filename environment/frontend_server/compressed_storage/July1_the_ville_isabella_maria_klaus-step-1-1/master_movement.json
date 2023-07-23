@@ -1,0 +1,36 @@
+{
+  "0": {
+    "Klaus Mueller": {
+      "movement": [
+        127,
+        46
+      ],
+      "pronunciatio": "\ud83d\udca4",
+      "description": "sleeping @ the Ville:Dorm for Oak Hill College:Klaus Mueller's room:bed",
+      "chat": null
+    },
+    "Isabella Rodriguez": {
+      "movement": [
+        73,
+        14
+      ],
+      "pronunciatio": "\ud83d\ude34",
+      "description": "sleeping @ the Ville:Isabella Rodriguez's apartment:main room:bed",
+      "chat": null
+    },
+    "Maria Lopez": {
+      "movement": [
+        123,
+        57
+      ],
+      "pronunciatio": "\ud83d\ude34",
+      "description": "sleeping @ the Ville:Dorm for Oak Hill College:Maria Lopez's room:bed",
+      "chat": null
+    }
+  },
+  "1": {},
+  "2": {},
+  "3": {},
+  "4": {},
+  "5": {}
+}

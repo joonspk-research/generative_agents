@@ -1,0 +1,24 @@
+Variables: 
+!<INPUT 0>! -- Persona full name
+!<INPUT 1>! -- Persona age
+!<INPUT 2>! -- Persona backstory
+!<INPUT 3>! -- Persona personality
+!<INPUT 4>! -- Persona first name
+!<INPUT 5>! -- Persona's current sector
+!<INPUT 6>! -- Persona's accessible arenas within the sector
+!<INPUT 7>! -- Persona currently
+!<INPUT 8>! -- World special constraint in a complete sentence
+!<INPUT 9>! -- Reverie date time now
+!<INPUT 10>! -- Persona first names
+
+<commentblockmarker>###</commentblockmarker>
+Name: !<INPUT 0>!
+Age: !<INPUT 1>!
+Backstory: !<INPUT 2>!
+Personality: !<INPUT 3>!
+Location: !<INPUT 4>! is in !<INPUT 5>! that has the following areas: {!<INPUT 6>!}. 
+Currently: !<INPUT 7>!
+Daily plan requirement: !<INPUT 8>!
+
+Today is !<INPUT 9>!. !<INPUT 10>! will do the following five things:
+1.

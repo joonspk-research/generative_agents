@@ -1,0 +1,16 @@
+Variables: 
+!<INPUT 0>! -- Persona name
+!<INPUT 1>! -- Persona's current arena
+!<INPUT 2>! -- Persona's current sector
+!<INPUT 3>! -- Persona name
+!<INPUT 4>! -- target sector
+!<INPUT 5>! -- Persona's sector's all arenas (minus no access)
+!<INPUT 6>! -- Curr action seq
+!<INPUT 7>! -- Persona name
+!<INPUT 8>! -- Persona's current sector
+
+<commentblockmarker>###</commentblockmarker>
+!<INPUT 0>! is in {!<INPUT 1>!} in !<INPUT 2>!.
+!<INPUT 3>! is going to !<INPUT 4>! that has ONLY the following areas: {!<INPUT 5>!}
+Stay in the current area if the activity can be done there. Never go into other people's rooms unless necessary.
+!<INPUT 6>! is !<INPUT 7>!. For !<INPUT 8>!, !<INPUT 9>! should go to the following area in !<INPUT 10>!: {

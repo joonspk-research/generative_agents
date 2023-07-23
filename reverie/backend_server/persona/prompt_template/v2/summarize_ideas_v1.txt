@@ -1,0 +1,16 @@
+summarize_ideas_v1.txt
+
+Variables: 
+!<INPUT 0>! -- Statements
+!<INPUT 1>! -- agent name
+!<INPUT 2>! -- interviewer question
+
+<commentblockmarker>###</commentblockmarker>
+Statements: 
+!<INPUT 0>!
+
+An interviewer said to !<INPUT 1>!: 
+"!<INPUT 2>!"
+
+Summarize the Statements that are most relevant to the interviewer's line:
+"

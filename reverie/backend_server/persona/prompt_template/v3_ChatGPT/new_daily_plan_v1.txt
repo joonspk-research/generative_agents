@@ -1,0 +1,20 @@
+new_daily_plan_v1.txt
+
+Variables: 
+!<INPUT 0>! -- Commonset
+!<INPUT 1>! -- Persona first name
+!<INPUT 2>! -- Day summary string 
+!<INPUT 3>! -- Persona first name
+!<INPUT 4>! -- Yesterday's daily plan
+!<INPUT 5>! -- Yesterday's interpretation
+!<INPUT 6>! -- Persona first name
+
+<commentblockmarker>###</commentblockmarker>
+!<INPUT 0>!
+
+Memorable things that actually happened to !<INPUT 1>! yesterday:
+!<INPUT 2>!
+
+Here the hourly breakdown of !<INPUT 3>!'s original plan yesterday: !<INPUT 4>!
+
+!<INPUT 5>! (No matter what happens, Dolores is absolutely planning to stay at home all day and never go out.) Let's think step by step -- how would !<INPUT 6>! change their plan for today: 1)

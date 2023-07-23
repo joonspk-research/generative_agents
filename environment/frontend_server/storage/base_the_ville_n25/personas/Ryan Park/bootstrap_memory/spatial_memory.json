@@ -1,0 +1,67 @@
+{
+  "the Ville": {
+    "Ryan Park's apartment": {
+      "bathroom": [
+        "shower",
+        "bathroom sink",
+        "toilet"
+      ],
+      "main room": [
+        "bed",
+        "computer desk",
+        "cooking area",
+        "kitchen sink",
+        "closet",
+        "refrigerator"
+      ]
+    },
+    "The Rose and Crown Pub": {
+      "pub": [
+        "shelf",
+        "refrigerator",
+        "bar customer seating",
+        "behind the bar counter",
+        "kitchen sink",
+        "cooking area",
+        "microphone"
+      ]
+    },
+    "Hobbs Cafe": {
+      "cafe": [
+        "refrigerator",
+        "cafe customer seating",
+        "cooking area",
+        "kitchen sink",
+        "behind the cafe counter",
+        "piano"
+      ]
+    },
+    "Dorm for Oak Hill College": {
+      "garden": [
+        "dorm garden"
+      ]
+    },
+    "The Willows Market and Pharmacy": {
+      "store": [
+        "grocery store shelf",
+        "behind the grocery counter",
+        "grocery store counter",
+        "behind the pharmacy counter",
+        "pharmacy store shelf",
+        "pharmacy store counter"
+      ]
+    },
+    "Harvey Oak Supply Store": {
+      "supply store": [
+        "supply store product shelf",
+        "behind the supply store counter",
+        "supply store counter"
+      ]
+    },
+    "Johnson Park": {
+      "park": [
+        "park garden"
+      ]
+    }
+  }
+}

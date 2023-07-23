@@ -1,0 +1,11 @@
+Variables: 
+!<INPUT 0>! -- Persona first name
+!<INPUT 1>! -- target arena
+!<INPUT 2>! -- game objects
+!<INPUT 3>! -- curr action seq
+!<INPUT 4>! -- Persona first name
+
+<commentblockmarker>###</commentblockmarker>
+!<INPUT 0>! is in {!<INPUT 1>!} that has {!<INPUT 2>!}. 
+
+To !<INPUT 3>!, !<INPUT 4>! should use {

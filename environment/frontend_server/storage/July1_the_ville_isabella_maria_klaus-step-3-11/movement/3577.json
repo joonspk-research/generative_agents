@@ -1,0 +1,52 @@
+{
+  "persona": {
+    "Isabella Rodriguez": {
+      "movement": [
+        77,
+        19
+      ],
+      "pronunciatio": "\ud83e\udd61",
+      "description": "serving customers at the cafe counter (preparing to-go orders) @ the Ville:Hobbs Cafe:cafe:kitchen sink",
+      "chat": null
+    },
+    "Maria Lopez": {
+      "movement": [
+        126,
+        50
+      ],
+      "pronunciatio": "\ud83d\udcac",
+      "description": "conversing about two friends named Klaus Mueller and Maria Lopez discussing their morning plans and progress on a research paper before Maria heads off to college. @ <persona> Klaus Mueller",
+      "chat": [
+        [
+          "Klaus Mueller",
+          "Hey Maria, I didn't expect to run into you here! How's your morning going?"
+        ],
+        [
+          "Maria Lopez",
+          "Hey Klaus! Yeah, it's a pleasant surprise indeed. My morning is going well, just getting ready to head off to college. What about you? How's the research paper coming along?"
+        ]
+      ]
+    },
+    "Klaus Mueller": {
+      "movement": [
+        128,
+        50
+      ],
+      "pronunciatio": "\ud83d\udcac",
+      "description": "conversing about two friends named Klaus Mueller and Maria Lopez discussing their morning plans and progress on a research paper before Maria heads off to college. @ <persona> Maria Lopez",
+      "chat": [
+        [
+          "Klaus Mueller",
+          "Hey Maria, I didn't expect to run into you here! How's your morning going?"
+        ],
+        [
+          "Maria Lopez",
+          "Hey Klaus! Yeah, it's a pleasant surprise indeed. My morning is going well, just getting ready to head off to college. What about you? How's the research paper coming along?"
+        ]
+      ]
+    }
+  },
+  "meta": {
+    "curr_time": "February 13, 2023, 09:56:10"
+  }
+}

@@ -1,0 +1,33 @@
+create_conversation_v1.txt
+
+Variables: 
+!<INPUT 0>! -- init_persona_name
+!<INPUT 1>! -- target_persona_name
+!<INPUT 2>! -- init_persona's thoughts
+
+!<INPUT 3>! -- target_persona_name
+!<INPUT 4>! -- init_persona_name
+!<INPUT 5>! -- target_persona's thoughts
+
+!<INPUT 6>! -- current time
+!<INPUT 7>! -- init_persona curr action description
+!<INPUT 8>! -- target_persona curr action description
+
+!<INPUT 9>! -- init_persona_name
+!<INPUT 10>! -- target_persona_name
+!<INPUT 11>! -- curr_location name
+!<INPUT 12>! -- init_persona_name
+
+<commentblockmarker>###</commentblockmarker>
+Context: 
+Here is what !<INPUT 0>! thinks about !<INPUT 1>!: 
+!<INPUT 2>!
+Here is what !<INPUT 3>! thinks about !<INPUT 4>!:
+!<INPUT 5>!
+Currently, it is !<INPUT 6>!
+-- !<INPUT 7>!
+-- !<INPUT 8>!
+
+!<INPUT 9>! and !<INPUT 10>! met at !<INPUT 11>!. Here is the conversation they had.
+
+!<INPUT 12>!: "

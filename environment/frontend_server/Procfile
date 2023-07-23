@@ -1,0 +1,1 @@
+web: gunicorn frontend_server.wsgi --timeout 600 --log-file -

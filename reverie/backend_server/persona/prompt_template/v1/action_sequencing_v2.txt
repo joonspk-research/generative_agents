@@ -1,0 +1,36 @@
+Variables: 
+!<INPUT 0>! -- Current hour activity
+
+<commentblockmarker>###</commentblockmarker>
+Current activity: "Go to bed"
+Action sequence: [brush teeth -> change to pajama -> lie down in bed]
+---
+Current activity: "Sleep" 
+Action sequence: [sleep in bed]
+---
+Current activity: "Make dinner"
+Action sequence: [take out ingredients from refrigerator -> cook -> put on the plate -> bring it to the table]
+---
+Current activity: "Relax, watch TV"
+Action sequence: [turn on the TV -> find a show to watch -> sit on the couch]
+---
+Current activity: "Dolores is asleep in her bedroom"
+Action sequence: [sleep in bed]
+---
+Current activity: "Dolores works on her painting for her solo show"
+Action sequence: [select colors -> mix colors on palette -> paint on canvas]
+---
+Current activity: "starts cleaning her apartment"
+Action sequence: [pick up trash -> put it in the trash can -> sweep the floor -> mop the floor]
+---
+Current activity: "Joon works on his research"
+Action sequence: [look up information online -> take notes -> summarize findings]
+---
+Current activity: "Eat lunch"
+Action sequence: [make food -> sit down to eat -> eat]
+---
+Current activity: "Wake up and get ready for the day"
+Action sequence: [wake up -> brush teeth -> take a shower -> get dressed -> eat breakfast]
+---
+Current activity: "!<INPUT 0>!"
+Action sequence: [

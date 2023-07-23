@@ -1,0 +1,14 @@
+Variables: 
+!<INPUT 0>! -- Persona first name
+!<INPUT 1>! -- Persona's current arena
+!<INPUT 2>! -- Persona's current sector
+!<INPUT 3>! -- Persona's sector's all arenas (minus no access)
+!<INPUT 4>! -- Persona's current arena
+!<INPUT 5>! -- Persona's current arena's all game objects (minus no access)
+!<INPUT 6>! -- Curr action seq
+!<INPUT 7>! -- Persona first name
+
+<commentblockmarker>###</commentblockmarker>
+!<INPUT 0>! is in {!<INPUT 1>!} in a !<INPUT 2>! that has the following areas: {!<INPUT 3>!}. In {!<INPUT 4>!}, Dolores has {!<INPUT 5>!}. 
+
+To !<INPUT 6>!, !<INPUT 7>! should go to the following area: {

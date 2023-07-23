@@ -1,0 +1,16 @@
+Variables: 
+!<INPUT 0>! -- an action phrae
+
+<commentblockmarker>###</commentblockmarker>
+Output the best keyword that describes an action.
+Action: "Dolores is making breakfast"
+Keyword: "Cooking"
+---
+Action: "Joey is off to see a baseball game"
+Keyword: "Watching"
+---
+Action: "driving to work"
+Keyword: "Commuting"
+---
+Action: "!<INPUT 0>!"
+Keyword: "

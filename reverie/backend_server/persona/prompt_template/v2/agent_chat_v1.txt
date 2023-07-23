@@ -1,0 +1,26 @@
+agent_chat_v1.txt
+
+Variables: 
+!<INPUT 0>! -- Init persona currently 
+!<INPUT 1>! -- Target persona currently
+!<INPUT 2>! -- prior convo summary
+!<INPUT 3>! -- Context
+!<INPUT 4>! -- init persona retrieved info
+!<INPUT 5>! -- target persona retrieved info
+!<INPUT 6>! -- init persona name
+
+<commentblockmarker>###</commentblockmarker>
+Character 1: !<INPUT 0>!
+Character 2: !<INPUT 1>!
+
+Past Context: !<INPUT 2>!
+
+Current Context: !<INPUT 3>!
+
+(Note: !<INPUT 4>!) 
+
+(Note: !<INPUT 5>!) 
+
+Here is their conversation. 
+
+!<INPUT 6>!: "

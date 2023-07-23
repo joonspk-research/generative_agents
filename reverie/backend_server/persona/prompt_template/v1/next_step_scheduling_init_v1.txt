@@ -1,0 +1,31 @@
+Variables: 
+!<INPUT 0>! -- Persona full name
+!<INPUT 1>! -- Persona age
+!<INPUT 2>! -- Persona backstory
+!<INPUT 3>! -- Persona personality
+!<INPUT 4>! -- Persona first name
+!<INPUT 5>! -- Persona's current sector
+!<INPUT 6>! -- Persona's accessible arenas within the sector
+!<INPUT 7>! -- Persona currently
+!<INPUT 8>! -- World special constraint in a complete sentence
+!<INPUT 9>! -- Persona first name
+!<INPUT 10>! -- Daily plan in str form
+!<INPUT 11>! -- Persona first name
+!<INPUT 12>! -- Activity list so far
+!<INPUT 13>! -- Persona life style
+!<INPUT 14>! -- Activity timestamp
+!<INPUT 15>! -- First name
+
+<commentblockmarker>###</commentblockmarker>
+Name: !<INPUT 0>!
+Age: !<INPUT 1>!
+Backstory: !<INPUT 2>!
+Personality: !<INPUT 3>!
+Location: !<INPUT 4>! is in !<INPUT 5>! that has the following areas: {!<INPUT 6>!}. 
+Currently: !<INPUT 7>!
+Daily plan requirement: !<INPUT 8>!
+Daily plan: Today, !<INPUT 9>! is planning to do the following five things: !<INPUT 10>!
+
+In general, !<INPUT 11>!
+[!<INPUT 12>!]
+Activity: !<INPUT 13>! is

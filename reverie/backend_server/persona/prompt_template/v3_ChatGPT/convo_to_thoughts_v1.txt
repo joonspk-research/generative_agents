@@ -1,0 +1,15 @@
+convo_to_thoughts_v1.txt
+
+Variables: 
+!<INPUT 0>! -- init persona name
+!<INPUT 1>! -- target persona name
+!<INPUT 2>! -- convo string
+!<INPUT 3>! -- init persona name
+!<INPUT 4>! -- target persona name or "the conversation"
+
+<commentblockmarker>###</commentblockmarker>
+Here is the conversation that happened between !<INPUT 0>! and !<INPUT 1>!. 
+
+!<INPUT 2>!
+
+Summarize what !<INPUT 3>! thought about !<INPUT 4>! in one short sentence. The sentence needs to be in third person:

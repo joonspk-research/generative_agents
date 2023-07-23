@@ -1,0 +1,22 @@
+next_step_scheduling_v3.txt
+
+Variables: 
+!<INPUT 0>! -- Commonset
+!<INPUT 1>! -- Persona first name
+!<INPUT 2>! -- Schedule so far
+!<INPUT 3>! -- Persona first name
+!<INPUT 4>! -- Daily plan requirement
+!<INPUT 5>! -- Persona first name
+!<INPUT 6>! -- Daily plan 
+!<INPUT 7>! -- Curr persona time
+!<INPUT 8>! -- Persona first name
+
+<commentblockmarker>###</commentblockmarker>
+!<INPUT 0>!
+
+Here is !<INPUT 1>!'s schedule so far broken into time durations between 5 minutes and 60 minutes:
+!<INPUT 2>!
+Here is the continuation of !<INPUT 3>!'s schedule, with time durations that absolutely must be between 5 minutes and 60 minutes:
+!<INPUT 4>!
+Let's think step by step. Here is the hourly breakdown of !<INPUT 5>!'s schedule today: !<INPUT 6>!
+[!<INPUT 7>!] Activity: !<INPUT 8>! is

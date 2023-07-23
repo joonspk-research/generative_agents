@@ -1,0 +1,84 @@
+{
+  "the Ville": {
+    "Lin family's house": {
+      "bathroom": [
+        "toilet",
+        "shower",
+        "bathroom sink"
+      ],
+      "common room": [
+        "shelf",
+        "common room table"
+      ],
+      "Mei and John Lin's bedroom": [
+        "closet",
+        "desk",
+        "bed"
+      ],
+      "garden": [
+        "house garden"
+      ]
+    },
+    "The Willows Market and Pharmacy": {
+      "store": [
+        "grocery store shelf",
+        "behind the grocery counter",
+        "grocery store counter",
+        "behind the pharmacy counter",
+        "pharmacy store shelf",
+        "pharmacy store counter"
+      ]
+    },
+    "Harvey Oak Supply Store": {
+      "supply store": [
+        "supply store product shelf",
+        "behind the supply store counter",
+        "supply store counter"
+      ]
+    },
+    "Johnson Park": {
+      "park": [
+        "park garden"
+      ]
+    },
+    "The Rose and Crown Pub": {
+      "pub": [
+        "shelf",
+        "refrigerator",
+        "bar customer seating",
+        "behind the bar counter",
+        "kitchen sink",
+        "cooking area",
+        "microphone"
+      ]
+    },
+    "Hobbs Cafe": {
+      "cafe": [
+        "refrigerator",
+        "cafe customer seating",
+        "cooking area",
+        "kitchen sink",
+        "behind the cafe counter",
+        "piano"
+      ]
+    },
+    "Oak Hill College": {
+      "hallway": [],
+      "classroom": [
+        "blackboard",
+        "classroom podium",
+        "classroom student seating"
+      ],
+      "library": [
+        "library sofa",
+        "library table",
+        "bookshelf"
+      ]
+    },
+    "Dorm for Oak Hill College": {
+      "garden": [
+        "dorm garden"
+      ]
+    }
+  }
+}

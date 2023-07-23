@@ -1,0 +1,247 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+
+{% block content %}
+
+<style>
+	.scratch_table {
+		font-size: 1.3em;
+	}
+</style>
+
+
+<h3 style="width:80%; margin:0 auto; margin-top:5em; padding:1em; padding-left:3.5em; padding-right:2em; border-radius:10px; padding-top:3em"><a href="{{request.META.HTTP_REFERER}}">< Return to simulation</a></h3>
+
+
+<div class="media" style="width:80%; margin:0 auto; margin-top:2em; background-color:#EEEEEE; padding:1em; padding-left:3.5em; padding-right:2em; border-radius:10px; padding-top:3em">
+  <div class="media-left media">
+    <a href="#">
+    	{% with 'assets/characters/profile/'|add:persona_name_underscore|add:'.png' as image_static %}
+      <img class="media-object" src="{% static image_static %}" style="width:5em">
+      {% endwith %}
+    </a>
+  </div>
+  <div class="media-body" style='padding-left:3em; padding-top:0.5em; padding-bottom:1em'>
+  	<div class="row">
+    	<h1 class="col-md-8" style="margin-bottom:0.8em; font-size:2em; ">
+    		{{persona_name}}
+    	</h1>
+    </div>
+    <div style="">
+
+		  <h3 style="font-size:1.65em"><strong>Basic information</strong></h3>
+		  <table class="scratch_table" style="width:100%">
+			  <tr>
+			    <td style="width:20%; font-weight:800">First name</td>
+			    <td>{{scratch.first_name}}</td>
+			  </tr>
+			  <tr>
+			    <td style="font-weight:800">Last name</td>
+			    <td>{{scratch.last_name}}</td>
+			  </tr>
+			  <tr>
+			    <td style="font-weight:800">Age</td>
+			    <td>{{scratch.age}}</td>
+			  </tr>
+			  <tr>
+			    <td style="font-weight:800">Current time</td>
+			    <td>{{scratch.curr_time}}</td>
+			  </tr>
+			  <tr>
+			    <td style="font-weight:800">Current tile</td>
+			    <td>{{scratch.curr_tile}}</td>
+			  </tr>
+			</table>
+			<br>
+
+
+			<hr style="border:solid; border-width:1px">
+			<h3 style="font-size:1.65em"><strong>Settings</strong></h3>
+		  <table class="scratch_table" style="width:100%">
+			  <tr>
+			    <td style="width:20%; font-weight:800">Vision Radius</td>
+			    <td>{{scratch.vision_r}}</td>
+			  </tr>
+			  <tr>
+			    <td style="font-weight:800">Attention Bandwidth</td>
+			    <td>{{scratch.att_bandwidth}}</td>
+			  </tr>
+			  <tr>
+			    <td style="font-weight:800">Retention</td>
+			    <td>{{scratch.retention}}</td>
+			  </tr>
+			</table>
+			<br>
+
+
+			<hr style="border:solid; border-width:1px">
+			<h3 style="font-size:1.65em"><strong>Personality and Lifestyle</strong></h3>
+			<table class="scratch_table" style="width:100%">
+			  <tr>
+			    <td style="font-weight:800">Innate tendency</td>
+			    <td>{{scratch.innate}}</td>
+			  </tr>
+			  <tr>
+			    <td style="font-weight:800">Learned tendency</td>
+			    <td>{{scratch.learned}}</td>
+			  </tr>
+			  <tr>
+			    <td style="font-weight:800">Currently</td>
+			    <td>{{scratch.currently}}</td>
+			  </tr>
+			  <tr>
+			    <td style="font-weight:800">Lifestyle</td>
+			    <td>{{scratch.lifestyle}}</td>
+			  </tr>
+			</table>
+			<br>
+
+
+			<hr style="border:solid; border-width:1px">
+			<h3 style="font-size:1.65em; "><strong>Current Action State</strong></h3>
+			<table class="scratch_table" style="width:100%">
+			  <tr>
+			    <td style="width:20%; font-weight:800">Daily Requirement</td>
+			    <td>
+			    	<ol>
+			    	{% for i in scratch.daily_req %}
+			    	  <li>{{ i }}</li>
+			    	{% endfor %}
+			    	</ol>
+			    </td>
+			  </tr>
+			  <tr>
+			    <td style="font-weight:800">Daily Schedule</td>
+			    <td>
+			    	<ol>
+			    	{% for i in scratch.f_daily_schedule %}
+			    	  <li>{{ i }}</li>
+			    	{% endfor %}
+			    	</ol>
+			    </td>
+			  </tr>
+			  <tr>
+			    <td style="font-weight:800">Action Address</td>
+			    <td>{{scratch.act_address}}</td>
+			  </tr>
+			  <tr>
+			    <td style="font-weight:800">Action Start Time</td>
+			    <td>{{scratch.act_start_time}}</td>
+			  </tr>
+			  <tr>
+			    <td style="font-weight:800">Action Duration</td>
+			    <td>{{scratch.act_duration}}</td>
+			  </tr>
+			  <tr>
+			    <td style="font-weight:800">Action Description</td>
+			    <td>{{scratch.act_description}}</td>
+			  </tr>
+			  <tr>
+			    <td style="font-weight:800">Action Pronunciatio</td>
+			    <td>{{scratch.act_pronunciatio}}</td>
+			  </tr>
+			</table>
+			<br>
+
+
+
+			<hr style="border:solid; border-width:1px">
+			<h3 style="font-size:1.65em"><strong>Agent's Memory</strong></h3>
+			<h4 style="font-size:1.45em"><strong>Event</strong></h4>
+			<div class="" style="width:100%">
+			  {% for node_details in a_mem_event %}
+				  <p>
+				  	<!-- <strong>Node ID: node_{{ node_details.node_count }}</strong><br> -->
+				  	<!-- Node Count: {{ node_details.node_count }} ||  -->
+				  	<!-- Type Count: {{ node_details.type_count }}  -->
+				  	<!-- <br> -->
+				  	[node_{{ node_details.node_count }}] {{ node_details.created }}: <strong>{{ node_details.description }}</strong>
+				  	<!-- || -->
+				  	<!-- Expiration: {{ node_details.expiration }} -->
+				  	<!-- <br> -->
+				  	<!-- S, P, O 
+				  	 node_details.subject , 
+				  	 node_details.predicate , 
+				  	 node_details.object 
+				  	<br> -->
+				  	<!-- Description: {{ node_details.description }} -->
+				  	<!-- <br> -->
+				  	<!-- Keywords: {{ node_details.keywords }} -->
+				  	<!-- <br> -->
+				  	<!-- Filling: {{ node_details.filling }} -->
+				  </p> 
+				   
+			  {% endfor %}
+			</div>
+			<br>
+
+			
+			<h4 style="font-size:1.45em"><strong>Agent's Conversation History</strong></h4>
+			<div class="" style="width:100%">
+			  {% for node_details in a_mem_chat %}
+				  <p>
+				  	Created: {{ node_details.created }} 
+				  	<br>
+				  	Description: {{ node_details.description }}
+				  	<br>
+				  	Filling: <br>
+				  	{% for name, utt in node_details.filling %}
+				  	<span style="font-style: italic;">{{ name }}</span>: {{ utt }}<br>
+				  	{% endfor %}
+				  </p> 
+			  {% endfor %}
+			</div>
+			<br>
+
+			<h4 style="font-size:1.45em"><strong>Agent's Thought</strong></h4>
+			<div class="" style="width:100%">
+			  {% for node_details in a_mem_thought %}
+				  <p>
+				  	[node_{{ node_details.node_count }}] {{ node_details.created }}: <strong>{{ node_details.description }}</strong> 
+
+				  	<br>(Depth: {{ node_details.depth }}; Evidence: {{ node_details.filling }})
+				  	
+				  </p> 
+			  {% endfor %}
+			</div>
+			<br>
+
+
+
+		</div>
+  </div>
+</div>
+{% endblock content %}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

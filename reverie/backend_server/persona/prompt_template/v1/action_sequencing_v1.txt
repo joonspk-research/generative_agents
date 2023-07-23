@@ -1,0 +1,20 @@
+Variables: 
+!<INPUT 0>! -- Persona full name
+!<INPUT 1>! -- Persona age
+!<INPUT 2>! -- Persona backstory
+!<INPUT 3>! -- Persona personality
+!<INPUT 4>! -- Persona location
+!<INPUT 5>! -- Persona currently
+!<INPUT 6>! -- Persona first name
+!<INPUT 7>! -- Current hour activity
+
+<commentblockmarker>###</commentblockmarker>
+Name: !<INPUT 0>!
+Age: !<INPUT 1>!
+Backstory: !<INPUT 2>!
+Personality: !<INPUT 3>!
+Location: !<INPUT 4>!
+Currently: !<INPUT 5>!
+
+What are the detailed steps !<INPUT 6>! will take to !<INPUT 7>!?
+Step 1)

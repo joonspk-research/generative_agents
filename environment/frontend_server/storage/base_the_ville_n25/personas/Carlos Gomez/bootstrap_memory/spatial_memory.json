@@ -1,0 +1,70 @@
+{
+  "the Ville": {
+    "Carlos Gomez's apartment": {
+      "bathroom": [
+        "shower",
+        "bathroom sink",
+        "toilet"
+      ],
+      "main room": [
+        "bed",
+        "desk",
+        "cooking area",
+        "kitchen sink",
+        "closet",
+        "refrigerator"
+      ]
+    },
+    "Hobbs Cafe": {
+      "cafe": [
+        "refrigerator",
+        "cafe customer seating",
+        "cooking area",
+        "kitchen sink",
+        "behind the cafe counter",
+        "piano"
+      ]
+    },
+    "The Rose and Crown Pub": {
+      "pub": [
+        "shelf",
+        "refrigerator",
+        "bar customer seating",
+        "behind the bar counter",
+        "kitchen sink",
+        "cooking area",
+        "microphone"
+      ]
+    },
+    "Harvey Oak Supply Store": {
+      "supply store": [
+        "supply store product shelf",
+        "behind the supply store counter",
+        "supply store counter"
+      ]
+    },
+    "The Willows Market and Pharmacy": {
+      "store": [
+        "pharmacy store counter",
+        "pharmacy store shelf",
+        "grocery store shelf",
+        "grocery store counter",
+        "behind the grocery counter",
+        "behind the pharmacy counter"
+      ]
+    },
+    "Johnson Park": {
+      "park": [
+        "park garden"
+      ]
+    },
+    "Dorm for Oak Hill College": {
+      "garden": [
+        "dorm garden"
+      ]
+    },
+    "Oak Hill College": {
+      "hallway": []
+    }
+  }
+}

@@ -1,0 +1,31 @@
+generate_obj_event_v1.txt
+
+Variables: 
+!<INPUT 0>! -- Object name 
+!<INPUT 1>! -- Persona name
+!<INPUT 2>! -- Persona action event description 
+!<INPUT 3>! -- Object name 
+!<INPUT 4>! -- Object name 
+
+<commentblockmarker>###</commentblockmarker>
+Task: We want to understand the state of an object that is being used by someone. 
+
+Let's think step by step. 
+We want to know about oven's state. 
+Step 1. Sam Johnson is eating breakfast at/using the oven. 
+Step 2. Describe the cooking utensils's state: oven is being heated to cook breakfast. 
+---
+Let's think step by step. 
+We want to know about computer's state. 
+Step 1. Michael Bernstein is writing email at/using the computer. 
+Step 2. Describe the computer's state: computer is being used to write email.
+---
+Let's think step by step. 
+We want to know about sink's state. 
+Step 1. Tom Kane is washing his face at/using the sink.
+Step 2. Describe the sink's state: sink is running with water.
+---
+Let's think step by step. 
+We want to know about !<INPUT 0>!'s state. 
+Step 1. !<INPUT 1>! is at/using the !<INPUT 2>!.
+Step 2. Describe the !<INPUT 3>!'s state: !<INPUT 4>! is

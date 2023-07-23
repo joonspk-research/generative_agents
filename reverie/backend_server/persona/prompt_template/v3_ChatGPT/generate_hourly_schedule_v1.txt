@@ -1,0 +1,32 @@
+generate_hourly_schedule_v1.txt
+
+Variables: 
+!<INPUT 0>! -- Schedule format
+!<INPUT 0>! -- Persona full name
+!<INPUT 1>! -- Persona age
+!<INPUT 2>! -- Persona backstory
+!<INPUT 3>! -- Persona personality
+!<INPUT 4>! -- Persona first name
+!<INPUT 5>! -- Persona's current sector
+!<INPUT 6>! -- Persona's accessible arenas within the sector
+!<INPUT 7>! -- Persona currently
+!<INPUT 8>! -- Daily plan requirement
+!<INPUT 9>! -- Persona first name
+!<INPUT 10>! -- Daily requirement
+!<INPUT 11>! -- Lifestyle
+!<INPUT 12>! -- Persona first names
+
+<commentblockmarker>###</commentblockmarker>
+Hourly schedule format: 
+!<INPUT 0>!
+===
+Name: !<INPUT 1>!
+Age: !<INPUT 2>!
+Backstory: !<INPUT 3>!
+Personality: !<INPUT 4>!
+Location: !<INPUT 5>! is in !<INPUT 6>! that has the following areas: {!<INPUT 7>!}. 
+Currently: !<INPUT 8>!
+Daily plan requirement: !<INPUT 9>!
+!<INPUT 10>!
+!<INPUT 11>!
+!<INPUT 12>!

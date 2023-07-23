@@ -1,0 +1,7 @@
+Variables: 
+!<INPUT 0>! -- next_step_scheduling_v1 prompt
+!<INPUT 0>! -- next_step_scheduling_v1 output
+
+<commentblockmarker>###</commentblockmarker>
+!<INPUT 0>! !<INPUT 1>!
+Duration in minutes (e.g., x min):

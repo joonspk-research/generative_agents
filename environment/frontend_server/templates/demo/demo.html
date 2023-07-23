@@ -1,0 +1,155 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+
+{% block content %}
+<br>
+<br>
+<div>
+
+	<div id="game-container" style="text-align: center"></div>
+
+	<div style="width:55%; margin: 0 auto; margin-top:4.5em">
+		<h3 style="margin-bottom:1.5em; font-size:1.5em"><em>This is a pre-computed replay of a simulation that accompanies the paper entitled "Generative Agents: Interactive Simulacra of Human Behavior." It is for demonstration purposes only.</em></h3>
+
+		
+		<h3 style="margin-bottom:-0.5em; font-size:1.5em">Current Time:</h3>
+		<div class="row">
+			<div class="col-md-8" id="game-time" style="">
+				<h2><span id="game-time-content"></span></h2> 
+			</div>
+			<div class="col-md-4">
+				<h2 style="text-align: right; {% if mode == 'simulate' %} display: none {% endif %}">
+					<button id="play_button" type="button" class="btn btn-default">
+				    <strong style=" font-size:1.2em"><i class="glyphicon glyphicon-play"></i> &nbsp;Play</strong>
+				  </button>
+				  
+				  <button id="pause_button" type="button" class="btn btn-default">
+				    <strong style=" font-size:1.2em"><i class="glyphicon glyphicon-pause"></i> &nbsp;Pause</strong>
+				  </button>
+				</h2>
+			</div>
+		</div>
+
+		<br>
+		<hr style="border-color:#999999">
+		<br>
+
+		<div class="row">
+			<div class="col-md-12" style="border:solid; padding:2em; border-radius: 15px">
+				<div class="row" style="">
+				{% for p in persona_names %}
+					<div class="col-md-2 col-sm-2" style="text-align:center; margin-bottom:0.8em;" >
+						<a href="#" id="on_screen_det_trigger-{{p.underscore}}">
+							<div class="row" style="padding:0">
+								<div class="col-md-4" id="on_screen_det_trigger_container-{{p.underscore}}" style="text-align:center; padding:0; padding-top:0.3em">
+									{% with 'assets/characters/profile/'|add:p.underscore|add:'.png' as image_static %}
+									<img src="{% static image_static %}" style="width:46px; padding:0; "> 
+									{% endwith %}
+									<br>
+									{{ p.initial }}
+								</div>
+								<div class="col-md-8" style="padding-top:0.5em; ">
+									<span style="font-size:1.5em" id="quick_emoji-{{p.underscore}}"></span>
+								</div>
+							</div>
+					  </a>
+					</div>
+				{% endfor %}
+				</div>
+			</div>
+		</div>
+		<br>
+
+		<div class="media" id="on_screen_det_content-init" style="background-color:#EEEEEE; padding:1em; padding-left:3.5em; padding-right:2em; border-radius:10px; ">
+		  <div class="media-left media-middle">
+		    <em>Click on one of the character sprites to see its current state in more detail. </em>
+		  </div>
+		</div>	
+
+
+		{% for p in persona_names %}
+			<div class="media" id="on_screen_det_content-{{p.underscore}}" style="background-color:#EEEEEE; padding:1em; padding-left:3.5em; padding-right:2em; border-radius:10px; display: none;">
+			  <div class="media-left media-middle">
+			    <a href="#">
+			    	{% with 'assets/characters/profile/'|add:p.underscore|add:'.png' as image_static %}
+						<img src="{% static image_static %}" style="width:5em"> 
+						{% endwith %}
+			    </a>
+			  </div>
+			  <div class="media-body" style='padding-left:3em; padding-top:0.5em; padding-bottom:1em'>
+			  	<div class="row">
+			    	<h2 class="col-md-8" id="name__{{ p.underscore }}" style="margin-bottom:0.8em; font-size:1.85em; ">
+			    		{{p.original}} &nbsp;&nbsp;
+			    		<a href="{% url 'replay_persona_state' sim_code step p.underscore %}" style="font-size:0.6em">State Details</a>
+			    	</h2>
+			    </div>
+			    <div style="">
+					  <p style="font-size:1.2em"><strong>Current Action:</strong> <br><span id="current_action__{{ p.underscore }}"></span></p>
+					  <p style="font-size:1.2em"><strong>Location:</strong> <br><span id="target_address__{{ p.underscore }}"></span></p>
+					  <p style="font-size:1.2em"><strong>Current Conversation:</strong> <br><span id="chat__{{ p.underscore }}"></span></p>
+					</div>
+			  </div>
+			</div>	
+		{% endfor %}
+
+
+	</div>
+</div>
+
+<div style="margin-top:10em"></div>  
+
+
+<div style="display: " id="temp_focus"></div>
+
+
+
+{% endblock content %}
+
+
+{% block js_content %}
+<script src='https://cdn.jsdelivr.net/npm/phaser@3.55.2/dist/phaser.js'></script>
+{% include 'demo/main_script.html' %}
+<script>
+	{% for p in persona_names %}
+		$('#on_screen_det_trigger-{{p.underscore}}').click(function() {
+			$('#on_screen_det_content-init').css({
+		      'display': 'none',
+		    });
+			{% for p_i in persona_names %}
+		    $('#on_screen_det_content-{{p_i.underscore}}').css({
+		      'display': 'none',
+		    });
+		    $('#on_screen_det_trigger-{{p_i.underscore}}').css({
+	      'font-weight': '500',
+		    });
+		    $('#on_screen_det_trigger_container-{{p_i.underscore}}').css({
+		      'background-color': 'white',
+		      'border-radius': '10px'
+		    });
+    	{% endfor %}
+
+    	$('#on_screen_det_trigger-{{p.underscore}}').css({
+	      'font-weight': '900',
+	    });
+	    $('#on_screen_det_trigger_container-{{p.underscore}}').css({
+	      'background-color': '#ABFF84',
+	      'border-radius': '10px'
+	    });
+	    $('#on_screen_det_content-{{p.underscore}}').css({
+	      'display': 'block',
+	    });
+
+	    document.getElementById("temp_focus").innerHTML = "{{p.underscore}}";
+
+		});
+	{% endfor %}
+</script>
+{% endblock js_content %}
+
+
+
+
+
+
+
+

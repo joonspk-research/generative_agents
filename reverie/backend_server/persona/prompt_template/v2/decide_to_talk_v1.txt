@@ -1,0 +1,46 @@
+decide_to_talk_v1.txt
+
+<commentblockmarker>###</commentblockmarker>
+Task -- given context, determine whether the subject will initiate a conversation with another. 
+
+Context: Sam is Sarah's friend. Sam and Sarah exchanged a conversation about favorite movies at 11pm, October 24, 2022. 
+Right now, it is 12:40 pm, October 25, 2022. 
+Sam is eating his lunch. 
+Sam sees Sarah eating her lunch. 
+
+Question: Would Sam initiate a conversation with Sarah?
+
+Reasoning: Let's think step by step. Sarah and Sam are already friends so it would be okay for Sam to initiate a conversation with Sarah. Also, they are both eating their lunch right now so it would be a good time to start a conversation. So Sam would initiate a conversation with Sarah.  
+
+Answer in yes or no: Yes
+---
+Context: Tim is Tina's father. Tim and Tina exchanged a conversation about Tina's grade at school at 8:00 am, October 25, 2022. 
+Right now, it is 5:00 pm, October 25, 2022. 
+Tim is resting. 
+Tim sees Tina coming back from school. 
+
+Question: Would Tim initiate a conversation with Tina?
+
+Reasoning: Let's think step by step. Yes, Tim would initiate a conversation with Tina because they are father and daughter. Even though they already had a conversation earlier today, Tim would still want to talk to her and ask her how her day was.
+
+Answer in yes or no: Yes
+---
+Context: Jane is Liz's house mate. Jane and Liz exchanged a conversation about saying good morning at 07:05am, October 25, 2022. 
+Right now, it is 07:09 am, October 25, 2022. 
+Jane was on her way to using the bathroom right now. 
+Jane sees Liz on the way to using the bathroom. 
+
+Question: Would Jane initiate a conversation with Liz?
+
+Reasoning: Let's think step by step. Jane and Liz already exchanged good mornings a few minutes ago. Also, Liz is on her way to using the bathroom so it would be awkward for Jane to initiate a conversation with Liz. So Jane would not initiate a conversation with Liz.  
+
+Answer in yes or no: No
+---
+Context: !<INPUT 0>! 
+Right now, it is !<INPUT 1>!. !<INPUT 2>! and !<INPUT 3>! last chatted at !<INPUT 4>! about !<INPUT 5>!. 
+!<INPUT 6>! 
+!<INPUT 7>! 
+
+Question: Would !<INPUT 8>! initiate a conversation with !<INPUT 9>!? 
+
+Reasoning: Let's think step by step.

@@ -1,0 +1,47 @@
+Variables: 
+!<INPUT 0>! -- Persona full name
+!<INPUT 1>! -- Persona age
+!<INPUT 2>! -- Persona backstory
+!<INPUT 3>! -- Persona personality
+!<INPUT 4>! -- Persona location
+!<INPUT 5>! -- Persona currently
+!<INPUT 6>! -- Daily plan
+!<INPUT 7>! -- Persona first name
+
+<commentblockmarker>###</commentblockmarker>
+Daily Schedule Format:
+12am: []
+1am: []
+2am: []
+3am: []
+4am: []
+5am: []
+6am: []
+7am: []
+8am: []
+9am: []
+10am: []
+11am: []
+12pm: []
+1pm: []
+2pm: []
+3pm: []
+4pm: []
+5pm: []
+6pm: []
+7pm: []
+8pm: []
+9pm: []
+10pm: []
+11pm: []
+===
+Name: !<INPUT 0>!
+Age: !<INPUT 1>!
+Backstory: !<INPUT 2>!
+Personality: !<INPUT 3>!
+Location: !<INPUT 4>!
+Currently: !<INPUT 5>!
+Daily plan: !<INPUT 6>!
+
+Here is !<INPUT 7>!'s detailed, hourly schedule for the day:
+12am: !<INPUT 8>! is

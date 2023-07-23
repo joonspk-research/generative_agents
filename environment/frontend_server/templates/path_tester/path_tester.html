@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+
+{% block content %}
+<br>
+<br>
+<div>
+	<div id="game-container" style="text-align: center"></div>
+</div>
+
+  
+<!-- partial -->
+<script src='https://cdn.jsdelivr.net/npm/phaser@3.55.2/dist/phaser.js'></script>
+{% include 'path_tester/main_script.html' %}
+{% endblock content %}
+

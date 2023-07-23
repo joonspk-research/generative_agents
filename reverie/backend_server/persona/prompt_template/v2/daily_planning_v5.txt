@@ -1,0 +1,28 @@
+daily_planning_v5.txt
+
+Variables: 
+!<INPUT 0>! -- Persona full name
+!<INPUT 1>! -- Persona age
+!<INPUT 2>! -- Persona backstory
+!<INPUT 3>! -- Persona personality
+!<INPUT 4>! -- Persona first name
+!<INPUT 5>! -- Persona's current sector
+!<INPUT 6>! -- Persona's accessible arenas within the sector
+!<INPUT 7>! -- Persona currently
+!<INPUT 8>! -- World special constraint in a complete sentence
+!<INPUT 9>! -- Lifestyle
+!<INPUT 10>! -- Reverie date time now
+!<INPUT 11>! -- Persona first names
+!<INPUT 12>! -- wake_up_hour
+
+<commentblockmarker>###</commentblockmarker>
+Name: !<INPUT 0>!
+Age: !<INPUT 1>!
+Backstory: !<INPUT 2>!
+Personality: !<INPUT 3>!
+Location: !<INPUT 4>! is in !<INPUT 5>! that has the following areas: {!<INPUT 6>!}. 
+Currently: !<INPUT 7>!
+Daily plan requirement: !<INPUT 8>!
+
+In general, !<INPUT 9>!
+Today is !<INPUT 10>!. Here is !<INPUT 11>!'s plan today in broad-strokes (with the time of the day. e.g., have a lunch at 12:00 pm, watch TV from 7 to 8 pm): 1) wake up and complete the morning routine at !<INPUT 12>!, 2)

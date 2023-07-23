@@ -1,0 +1,22 @@
+Variables: 
+!<INPUT 0>! -- Persona name
+!<INPUT 1>! -- Maze all possible sectors
+!<INPUT 2>! -- Persona name
+!<INPUT 3>! -- Persona living sector
+!<INPUT 4>! -- Persona living sector arenas
+!<INPUT 5>! -- Persona name
+!<INPUT 6>! -- Persona current sector
+!<INPUT 7>! -- Persona current sector arenas
+!<INPUT 8>! -- curr action description
+!<INPUT 9>! -- Persona name
+<commentblockmarker>###</commentblockmarker>
+This is a classification task -- choose an appropriate area from the area options for a task at hand. 
+
+!<INPUT 0>! lives in {!<INPUT 1>!} that has ONLY !<INPUT 2>!.
+!<INPUT 3>! is currently in {!<INPUT 4>!} that has ONLY !<INPUT 5>!. !<INPUT 6>!
+
+Stay in the current area if the activity can be done there. Only go out if the activity needs to take place in another place.
+
+Area Options Available (Class label): {!<INPUT 7>!}
+
+Classification Task: !<INPUT 8>! is !<INPUT 10>! as a part of !<INPUT 9>!. Pick one of the choices given in the Area options that !<INPUT 11>! should go to. 

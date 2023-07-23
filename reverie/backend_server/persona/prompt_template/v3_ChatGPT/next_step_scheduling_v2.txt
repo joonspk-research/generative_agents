@@ -1,0 +1,37 @@
+next_step_scheduling_v2.txt
+
+Variables: 
+!<INPUT 0>! -- Persona full name
+!<INPUT 1>! -- Persona age
+!<INPUT 2>! -- Persona backstory
+!<INPUT 3>! -- Persona personality
+!<INPUT 4>! -- Persona first name
+!<INPUT 5>! -- Persona's current sector
+!<INPUT 6>! -- Persona's accessible arenas within the sector
+!<INPUT 7>! -- Persona currently
+!<INPUT 8>! -- Daily plan requirement
+!<INPUT 9>! -- Persona first name
+!<INPUT 10>! -- Schedule so far
+!<INPUT 11>! -- Persona first name
+!<INPUT 12>! -- Daily plan requirement
+!<INPUT 13>! -- Persona first name
+!<INPUT 14>! -- Daily plan 
+!<INPUT 15>! -- Curr persona time
+!<INPUT 16>! -- Persona first name
+
+<commentblockmarker>###</commentblockmarker>
+Name: !<INPUT 0>!
+Age: !<INPUT 1>!
+Backstory: !<INPUT 2>!
+Personality: !<INPUT 3>!
+Location: !<INPUT 4>! is in !<INPUT 5>! that has the following areas: {!<INPUT 6>!}. 
+Currently: !<INPUT 7>!
+Daily plan requirement: !<INPUT 8>!
+
+Here is !<INPUT 9>!'s schedule so far broken into time durations between 5 minutes and 60 minutes:
+!<INPUT 10>!
+
+Here is the continuation of !<INPUT 11>!'s schedule, with time durations that absolutely must be between 5 minutes and 60 minutes:
+!<INPUT 12>!
+Here is the hourly breakdown of !<INPUT 13>!'s schedule today: !<INPUT 14>!
+[!<INPUT 15>!] Activity: !<INPUT 16>! is

@@ -1,0 +1,13 @@
+task_decomp_v1.txt
+
+Variables: 
+!<INPUT 0>! -- Persona first name
+!<INPUT 1>! -- Detailed day schedule
+!<INPUT 2>! -- Persona first name
+
+<commentblockmarker>###</commentblockmarker>
+!<INPUT 0>!'s day today:
+!<INPUT 1>!
+
+What are the three most memorable things that happened to !<INPUT 2>! today?
+1)

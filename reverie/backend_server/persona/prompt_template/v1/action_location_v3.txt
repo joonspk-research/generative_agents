@@ -1,0 +1,32 @@
+Variables: 
+!<INPUT 0>! -- Persona name
+!<INPUT 1>! -- Persona's current arena
+!<INPUT 2>! -- Persona's current sector
+!<INPUT 3>! -- Persona's sector's all arenas (minus no access)
+!<INPUT 4>! -- Persona's current arena
+!<INPUT 5>! -- Persona's current arena's all game objects (minus no access)
+!<INPUT 6>! -- Curr action seq
+!<INPUT 7>! -- Persona name
+
+<commentblockmarker>###</commentblockmarker>
+Sarah is in {bathroom} in a apartment that has the following areas: {bedroom, kitchen, dining room, office, bathroom}. In her {bathroom}, Sarah has shower, toilet, sink, toothbrush, hairbrush, makeup. 
+To make breakfast, Sarah should go to the following area: {kitchen}
+---
+Kevin is in {personal office} in a work building that has the following areas: {meeting room, personal office, boss's office, kitchen, bathroom}. In {personal office}, Kevin has desk, chair, computer, notebook, window. 
+To attend the morning meeting, Kevin should go to the following area: {meeting room}
+---
+Madiha is in {weight room} in a gym that has the following areas: {weight room, cardio room, dance room, changing room, front desk}. In the {weight room}, Madiha has weights, bench, rack, yoga mat, mirror. 
+To do squats, Madiha should go to the following area: {weight room}
+---
+Elena is in {classroom} in a university building that has the following areas: {classroom, office, bathroom, auditorium}. In {classroom}, Elena has whiteboard, projector, desks, laptop. 
+To give an invited talk, Elena should go to the following area: {auditorium}
+---
+Jose is in {bathroom} in a residence hall that has the following areas: {bathroom, communal kitchen, lobby, meeting room, dorm room, lounge}. In a {dorm room}, Jose has bed, laptop, desk, minifridge, closet, toiletry bag. 
+To shower, Jose should go to the following area: {bathroom}
+---
+Sam is in {kitchen} in a house that has the following areas: {kitchen, living room, dining room, bathroom, his bedroom, kid's bedroom}. In {kitchen}, Sam has refrigerator, food, stove, oven, sink. 
+To wake up his daughter, Sam should go to the following area: {kid's bedroom}
+---
+!<INPUT 0>! is in {!<INPUT 1>!} in a !<INPUT 2>! that has the following areas: {!<INPUT 3>!}. In {!<INPUT 4>!}, !<INPUT 0>! has !<INPUT 5>!. 
+Stay in the current area if the activity can be done there. Never go into other people's rooms unless necessary.
+For !<INPUT 6>!, !<INPUT 7>! should go to the following area: {

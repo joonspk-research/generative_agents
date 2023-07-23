@@ -1,0 +1,85 @@
+task_decomp_v1.txt
+
+Variables: 
+!<INPUT 0>! -- Persona full name
+!<INPUT 1>! -- Persona age
+!<INPUT 2>! -- Persona backstory
+!<INPUT 3>! -- Persona personality
+!<INPUT 4>! -- Persona first name
+!<INPUT 5>! -- Persona's current sector
+!<INPUT 6>! -- Persona's accessible arenas within the sector
+!<INPUT 7>! -- Persona currently
+!<INPUT 8>! -- Daily plan requirement
+!<INPUT 9>! -- Reverie date time now
+!<INPUT 10>! -- Persona first name
+!<INPUT 11>! -- Persona first name
+!<INPUT 12>! -- Current action
+!<INPUT 11>! -- Current action duration in min
+!<INPUT 12>! -- Persona first names
+
+<commentblockmarker>###</commentblockmarker>
+Describe subtasks in 5 min increments. 
+---
+Name: Sam Kissin
+Age: 28
+Backstory: Raised by a single mother who was always working, Sam was often left to her own devices. She learned to fend for herself at an early age and developed a hard edge. She doesn’t let anyone get too close, but she’s fiercely loyal to those she cares about.
+Personality: hard-edged, independent, loyal
+Location: Sam is in double studio that has the following areas: {kitchen, common room, dining, bedroom 2, balcony, piano lounge, bathroom, recreation, hallway}.
+Currently: Sam is a painter who is preparing for her first solo show. She mostly works from home. She is currently living alone in a two bedroom apartment.
+Daily plan requirement: Sam is planning to stay at home all day and never go out of her home.
+
+In 5 min increments, list the subtasks Sam does when Sam is working on her painting (total duration in minutes 270):
+1) Sam is setting up her easel and canvas (duration in minutes: 15, minutes left: 255)
+2) Sam is sketching out her painting (duration in minutes: 30, minutes left: 225)
+3) Sam is mixing her paint (duration in minutes: 15, minutes left: 210)
+4) Sam is turning on classical music to listen to as she paints (duration in minutes: 5, minutes left: 205)
+5) Sam is painting the background of her painting (duration in minutes: 55, minutes left: 150)
+6) Sam is getting up to stretch (duration in minutes: 10, minutes left: 140)
+7) Sam is painting the foreground of her painting (duration in minutes: 80, minutes left: 60)
+8) Sam is adding the finishing touches to her painting (duration in minutes: 45, minutes left: 15)
+9) Sam is cleaning her brushes (duration in minutes: 15, minutes left: 0)
+---
+Name: Kelly Bronson
+Age: 35
+Backstory: Kelly always wanted to be a teacher, and now she teaches kindergarten. During the week, she dedicates herself to her students, but on the weekends, she likes to try out new restaurants and hang out with friends. She is very warm and friendly, and loves caring for others.
+Personality: sweet, gentle, meticulous
+Location: Kelly is in an older condo that has the following areas: {kitchen, bedroom, dining, porch, office, bathroom, living room, hallway}.
+Currently: Kelly is a teacher during the school year. She teaches at the school but works on lesson plans at home. She is currently living alone in a single bedroom condo.
+Daily plan requirement: Kelly is planning to teach during the morning and work from home in the afternoon.
+
+In 5 min increments, list the subtasks Kelly does when Kelly is working on the next day's kindergarten lesson plan (total duration in minutes: 210):
+1) Kelly is reviewing the kindergarten curriculum standards. (duration in minutes: 15, minutes left: 195)
+2) Kelly is brainstorming ideas for the lesson. (duration in minutes: 30, minutes left: 165)
+3) Kelly is creating the lesson plan. (duration in minutes: 60, minutes left: 105)
+4) Kelly is creating materials for the lesson. (duration in minutes: 30, minutes left: 75)
+5) Kelly is taking a break. (duration in minutes: 15, minutes left: 60)
+6) Kelly is reviewing the lesson plan. (duration in minutes: 30, minutes left: 30)
+7) Kelly is making final changes to the lesson plan. (duration in minutes: 15, minutes left: 15)
+8) Kelly is printing the lesson plan. (duration in minutes: 10, minutes left: 5)
+9) Kelly is putting the lesson plan in her bag. (duration in minutes: 5, minutes left: 0)
+---
+Name: Anthony Wang
+Age: 19
+Backstory: A sophomore in college, Anthony is a varsity soccer player majoring in biomedical engineering. He is close with his family, even though they live across the country, and keeps a lively social schedule. He often leaves work to the last minute, but always manages to finish it before the deadline.
+Personality: social, hardworking, busy
+Location: Anthony lives in a single bedroom in a dorm that has the following areas: {single dorm room, communal bathroom, lounge, shared kitchen, hallway, mailroom, dining hall}.
+Currently: Anthony is a student during midterms. He attends his college classes virtually. He is currently living alone in a single dorm room.
+
+In 5 min increments, list the subtasks Anthony does when Anthony is studying for midterms (total duration in minutes 120):
+1) Anthony is reviewing the lecture notes from the past few weeks. (duration in minutes: 15, minutes left: 105)
+2) Anthony is doing practice problems from the textbook. (duration in minutes: 30, minutes left: 75)
+3) Anthony is checking his answers in the back of the textbook. (duration in minutes: 10, minutes left: 65)
+4) Anthony makes a snack. (duration in minutes: 5, minutes left: 60)
+5) Anthony is making a study guide. (duration in minutes: 15, minutes left: 45)
+6) Anthony is calls a friend to work through problems together. (duration in minutes: 45, minutes left: 0)
+---
+Name: !<INPUT 0>!
+Age: !<INPUT 1>!
+Backstory: !<INPUT 2>!
+Personality: !<INPUT 3>!
+Location: !<INPUT 4>! is in !<INPUT 5>! that has the following areas: {!<INPUT 6>!}. 
+Currently: !<INPUT 7>!
+Daily plan requirement: !<INPUT 8>!
+
+Today is !<INPUT 9>!. In 5 min increments, list the subtasks !<INPUT 10>! does when !<INPUT 11>! is !<INPUT 12>! (total duration in minutes !<INPUT 13>!): 
+1) !<INPUT 14>! is

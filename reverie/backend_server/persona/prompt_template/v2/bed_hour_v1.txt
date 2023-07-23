@@ -1,0 +1,15 @@
+bed_hour_v1.txt
+
+Variables: 
+!<INPUT 0>! -- Commonset
+!<INPUT 1>! -- Persona first name
+!<INPUT 2>! -- Daily requirement
+!<INPUT 3>! -- Lifestyle
+!<INPUT 4>! -- Persona first names
+
+<commentblockmarker>###</commentblockmarker>
+!<INPUT 0>!
+Daily plan: Today, !<INPUT 1>! is planning to do the following five things: !<INPUT 2>!
+
+In general, !<INPUT 3>!
+!<INPUT 4>!'s bed hour:

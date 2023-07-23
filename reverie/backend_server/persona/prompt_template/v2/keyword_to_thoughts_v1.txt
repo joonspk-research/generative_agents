@@ -1,0 +1,12 @@
+keyword_to_thoughts_v1.txt
+
+Variables: 
+!<INPUT 0>! -- current keyword
+!<INPUT 1>! -- events/thoughts list
+!<INPUT 2>! -- persona name
+
+<commentblockmarker>###</commentblockmarker>
+The following events/thoughts happened about "!<INPUT 0>!". 
+!<INPUT 1>!
+
+Here is what !<INPUT 2>! thinks about these events/thoughts in one sentence. The sentence needs to be in third person:

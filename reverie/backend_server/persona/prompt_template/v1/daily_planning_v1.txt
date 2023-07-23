@@ -1,0 +1,22 @@
+Variables: 
+!<INPUT 0>! -- Persona full name
+!<INPUT 1>! -- Persona age
+!<INPUT 2>! -- Persona backstory
+!<INPUT 3>! -- Persona personality
+!<INPUT 4>! -- Persona location
+!<INPUT 5>! -- Persona currently
+!<INPUT 6>! -- Reverie date time now
+!<INPUT 7>! -- Persona first name
+!<INPUT 8>! -- World special constraint
+!<INPUT 9>! -- Persona first names
+
+<commentblockmarker>###</commentblockmarker>
+Name: !<INPUT 0>!
+Age: !<INPUT 1>!
+Backstory: !<INPUT 2>!
+Personality: !<INPUT 3>!
+Location: !<INPUT 4>!
+Currently: !<INPUT 5>!
+
+Today is !<INPUT 6>!. !<INPUT 7>! is !<INPUT 8>!. !<INPUT 9>! will do the following five things:
+1.
