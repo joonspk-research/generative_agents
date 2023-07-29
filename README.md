@@ -97,7 +97,7 @@ Characters: [ぴぽ (@pipohi)](https://twitter.com/pipohi)
 
 ## <img src="https://joonsungpark.s3.amazonaws.com:443/static/assets/characters/profile/Eddy_Lin.png" alt="Generative-Agent">   Authors and Citation 
 
-**Authors:** Joon Sung Park, Joseph C. O'Brien, Carrie J. Cai, Meredith Ringel Morris, Percy Liang, Michael S. S. Bernstein
+**Authors:** Joon Sung Park, Joseph C. O'Brien, Carrie J. Cai, Meredith Ringel Morris, Percy Liang, Michael S. Bernstein
 
 Please cite our paper if you use the code or data in this repository. 
 ```
