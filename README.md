@@ -107,7 +107,7 @@ We strongly encourage you to support the following three artists who have provid
 
 Background art: [PixyMoon (@_PixyMoon _)](https://twitter.com/_PixyMoon_)
 
-Furniture design: [LimeZu (@lime_px)](https://twitter.com/lime_px)
+Furniture/interior design: [LimeZu (@lime_px)](https://twitter.com/lime_px)
 
 Character design: [ぴぽ (@pipohi)](https://twitter.com/pipohi)
 
