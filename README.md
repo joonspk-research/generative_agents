@@ -89,14 +89,19 @@ All simulations that you save will be located in `environment/frontend_server/st
 
 There are two ways to optionally customize your simulations. 
 
-### Author and load agent history
+### Author and Load Agent History
 First is to initialize agents with unique history at the start of the simulation. To do this, you would want to 1) start your simulation using one of the base simulations, and 2) author and load agent history. More specifically, here are the steps:
 
-There are two base simulations included in the repository: `base_the_ville_n25` with 25 agents, and `base_the_ville_isabella_maria_klaus` with 3 agents. Load one of the base simulations by following the steps until step 2 above. Then, when prompted with "Enter option: ", you should load the agent history by responding with the following command:
+#### Step 1. Starting Up a Base Simulation 
+There are two base simulations included in the repository: `base_the_ville_n25` with 25 agents, and `base_the_ville_isabella_maria_klaus` with 3 agents. Load one of the base simulations by following the steps until step 2 above. 
+
+#### Step 2. Loading a History File 
+Then, when prompted with "Enter option: ", you should load the agent history by responding with the following command:
 
     call -- load history the_ville/<history_file_name>.csv
 Note that you will need to replace `<history_file_name>` with the name of an existing history file. There are two history files included in the repo as examples: `agent_history_init_n25.csv` for `base_the_ville_n25` and `agent_history_init_n3.csv` for `base_the_ville_isabella_maria_klaus`. These files include semicolon-separated lists of memory records for each of the agents—loading them will insert the memory records into the agents' memory stream.
 
+#### Step 3. Further Customization 
 To customize the initialization by authoring your own history file, place your file in the following folder: `environment/frontend_server/static_dirs/assets/the_ville`. The column format for your custom history file will have to match the example history files included. Therefore, we recommend starting the process by copying and pasting the ones that are already in the repository.
 
 ### Author and load agent history
