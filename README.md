@@ -89,7 +89,9 @@ All simulations that you save will be located in `environment/frontend_server/st
 We strongly encourage you to support the following three artists who have provided the game assets for this project, especially if you are planning to use the assets included here for your own project. 
 
 Background art: [PixyMoon (@_PixyMoon _)](https://twitter.com/_PixyMoon_)
+
 Furniture: [LimeZu (@lime_px)](https://twitter.com/lime_px)
+
 Characters: [ぴぽ (@pipohi)](https://twitter.com/pipohi)
 
 
