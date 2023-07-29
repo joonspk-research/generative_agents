@@ -90,9 +90,9 @@ We strongly encourage you to support the following three artists who have provid
 
 Background art: [PixyMoon (@_PixyMoon _)](https://twitter.com/_PixyMoon_)
 
-Furniture: [LimeZu (@lime_px)](https://twitter.com/lime_px)
+Furniture design: [LimeZu (@lime_px)](https://twitter.com/lime_px)
 
-Characters: [ぴぽ (@pipohi)](https://twitter.com/pipohi)
+Character design: [ぴぽ (@pipohi)](https://twitter.com/pipohi)
 
 
 ## <img src="https://joonsungpark.s3.amazonaws.com:443/static/assets/characters/profile/Eddy_Lin.png" alt="Generative-Agent">   Authors and Citation 
