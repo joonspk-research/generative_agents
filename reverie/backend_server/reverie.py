@@ -421,6 +421,8 @@ class ReverieServer:
     OUTPUT
       None
     """
+    print ("Note: The agents in this simulation package are computational constructs powered by generative agents architecture and LLM. We clarify that these agents lack human-like agency, consciousness, and independent decision-making.\n---")
+
     # <sim_folder> points to the current simulation folder.
     sim_folder = f"{fs_storage}/{self.sim_code}"
 
@@ -594,13 +596,13 @@ class ReverieServer:
 if __name__ == '__main__':
   # rs = ReverieServer("base_the_ville_isabella_maria_klaus", 
   #                    "July1_the_ville_isabella_maria_klaus-step-3-1")
-  rs = ReverieServer("July1_the_ville_isabella_maria_klaus-step-3-11", 
-                     "July1_the_ville_isabella_maria_klaus-step-3-12")
+  rs = ReverieServer("July1_the_ville_isabella_maria_klaus-step-3-20", 
+                     "July1_the_ville_isabella_maria_klaus-step-3-21")
   rs.open_server()
 
 
 
-
+  # 20 is the current portable main
 
 
 

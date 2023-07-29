@@ -1,0 +1,164 @@
+{
+  "persona": {
+    "Isabella Rodriguez": {
+      "movement": [
+        77,
+        19
+      ],
+      "pronunciatio": "\ud83e\uddf9\ud83c\udfeb",
+      "description": "attending to guests at the cafe (cleaning up the cafe) @ the Ville:Hobbs Cafe:cafe:kitchen sink",
+      "chat": null
+    },
+    "Maria Lopez": {
+      "movement": [
+        119,
+        25
+      ],
+      "pronunciatio": "\ud83d\udcac",
+      "description": "conversing about This is a conversation between Maria Lopez and Klaus Mueller about Maria's research paper on the applications of quantum physics in computer science and Klaus's interest in reading it and discussing it over lunch. @ <persona> Klaus Mueller",
+      "chat": [
+        [
+          "Maria Lopez",
+          "Hey Klaus! I saw you working on your research paper. How's it going so far?"
+        ],
+        [
+          "Klaus Mueller",
+          "Hey Maria! It's going well so far. I just finished writing the introduction. How about you? How's your Physics class going?"
+        ],
+        [
+          "Maria Lopez",
+          "I'm actually really excited about my research paper too! I wanted to get your thoughts on it."
+        ],
+        [
+          "Klaus Mueller",
+          "That's great, Maria! I would love to hear more about your research paper. What is it about?"
+        ],
+        [
+          "Maria Lopez",
+          "My research paper is about the applications of quantum physics in computer science. I've been exploring how quantum computing could revolutionize various fields such as cryptography and optimization algorithms. I think it's a fascinating topic!"
+        ],
+        [
+          "Klaus Mueller",
+          "Wow, Maria! Your research paper sounds really interesting. I would love to hear more about your findings and the potential impact of quantum computing in different fields."
+        ],
+        [
+          "Maria Lopez",
+          "Thank you, Klaus! I'm glad you find it interesting. I actually found some really compelling evidence supporting the potential of quantum computing in revolutionizing cryptography. Would you be interested in reading my research paper?"
+        ],
+        [
+          "Klaus Mueller",
+          "Yes, Maria! I would be really interested in reading your research paper. It sounds like you have made some compelling findings."
+        ],
+        [
+          "Maria Lopez",
+          "I can email you a copy of my research paper if you're interested."
+        ],
+        [
+          "Klaus Mueller",
+          "That would be great, Maria! I would love to read your research paper. Can you send it to me at my college email?"
+        ],
+        [
+          "Maria Lopez",
+          "Sure, Klaus! I'll send you the research paper to your college email. What's your email address?"
+        ],
+        [
+          "Klaus Mueller",
+          "My college email address is klaus.mueller@oakhill.edu. Thanks for sending me the research paper!"
+        ],
+        [
+          "Maria Lopez",
+          "Great! I'll email you the research paper right away."
+        ],
+        [
+          "Klaus Mueller",
+          "Once I finish reading your research paper, would you like to grab lunch and discuss it further?"
+        ],
+        [
+          "Maria Lopez",
+          "That sounds like a plan! Let's grab lunch and discuss my research paper after you've finished reading it."
+        ],
+        [
+          "Klaus Mueller",
+          "By the way, Maria, how are you finding the research process overall? Is it challenging or exciting?"
+        ]
+      ]
+    },
+    "Klaus Mueller": {
+      "movement": [
+        119,
+        26
+      ],
+      "pronunciatio": "\ud83d\udcac",
+      "description": "conversing about This is a conversation between Maria Lopez and Klaus Mueller about Maria's research paper on the applications of quantum physics in computer science and Klaus's interest in reading it and discussing it over lunch. @ <persona> Maria Lopez",
+      "chat": [
+        [
+          "Maria Lopez",
+          "Hey Klaus! I saw you working on your research paper. How's it going so far?"
+        ],
+        [
+          "Klaus Mueller",
+          "Hey Maria! It's going well so far. I just finished writing the introduction. How about you? How's your Physics class going?"
+        ],
+        [
+          "Maria Lopez",
+          "I'm actually really excited about my research paper too! I wanted to get your thoughts on it."
+        ],
+        [
+          "Klaus Mueller",
+          "That's great, Maria! I would love to hear more about your research paper. What is it about?"
+        ],
+        [
+          "Maria Lopez",
+          "My research paper is about the applications of quantum physics in computer science. I've been exploring how quantum computing could revolutionize various fields such as cryptography and optimization algorithms. I think it's a fascinating topic!"
+        ],
+        [
+          "Klaus Mueller",
+          "Wow, Maria! Your research paper sounds really interesting. I would love to hear more about your findings and the potential impact of quantum computing in different fields."
+        ],
+        [
+          "Maria Lopez",
+          "Thank you, Klaus! I'm glad you find it interesting. I actually found some really compelling evidence supporting the potential of quantum computing in revolutionizing cryptography. Would you be interested in reading my research paper?"
+        ],
+        [
+          "Klaus Mueller",
+          "Yes, Maria! I would be really interested in reading your research paper. It sounds like you have made some compelling findings."
+        ],
+        [
+          "Maria Lopez",
+          "I can email you a copy of my research paper if you're interested."
+        ],
+        [
+          "Klaus Mueller",
+          "That would be great, Maria! I would love to read your research paper. Can you send it to me at my college email?"
+        ],
+        [
+          "Maria Lopez",
+          "Sure, Klaus! I'll send you the research paper to your college email. What's your email address?"
+        ],
+        [
+          "Klaus Mueller",
+          "My college email address is klaus.mueller@oakhill.edu. Thanks for sending me the research paper!"
+        ],
+        [
+          "Maria Lopez",
+          "Great! I'll email you the research paper right away."
+        ],
+        [
+          "Klaus Mueller",
+          "Once I finish reading your research paper, would you like to grab lunch and discuss it further?"
+        ],
+        [
+          "Maria Lopez",
+          "That sounds like a plan! Let's grab lunch and discuss my research paper after you've finished reading it."
+        ],
+        [
+          "Klaus Mueller",
+          "By the way, Maria, how are you finding the research process overall? Is it challenging or exciting?"
+        ]
+      ]
+    }
+  },
+  "meta": {
+    "curr_time": "February 13, 2023, 15:02:00"
+  }
+}

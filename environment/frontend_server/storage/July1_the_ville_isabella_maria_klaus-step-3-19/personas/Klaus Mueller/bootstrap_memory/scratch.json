@@ -1,0 +1,661 @@
+{
+  "vision_r": 8,
+  "att_bandwidth": 8,
+  "retention": 8,
+  "curr_time": "February 13, 2023, 23:59:00",
+  "curr_tile": [
+    127,
+    46
+  ],
+  "daily_plan_req": "Klaus Mueller goes to the library at Oak Hill College early in the morning, spends his days writing, and eats at Hobbs Cafe.",
+  "name": "Klaus Mueller",
+  "first_name": "Klaus",
+  "last_name": "Mueller",
+  "age": 20,
+  "innate": "kind, inquisitive, passionate",
+  "learned": "Klaus Mueller is a student at Oak Hill College studying sociology. He is passionate about social justice and loves to explore different perspectives.",
+  "currently": "Klaus Mueller is writing a research paper on the effects of gentrification in low-income communities.",
+  "lifestyle": "Klaus Mueller goes to bed around 11pm, awakes up around 7am, eats dinner around 5pm.",
+  "living_area": "the Ville:Dorm for Oak Hill College:Klaus Mueller's room",
+  "concept_forget": 100,
+  "daily_reflection_time": 180,
+  "daily_reflection_size": 5,
+  "overlap_reflect_th": 4,
+  "kw_strg_event_reflect_th": 10,
+  "kw_strg_thought_reflect_th": 9,
+  "recency_w": 1,
+  "relevance_w": 1,
+  "importance_w": 1,
+  "recency_decay": 0.99,
+  "importance_trigger_max": 150,
+  "importance_trigger_curr": 43,
+  "importance_ele_n": 62,
+  "thought_count": 5,
+  "daily_req": [
+    "wake up and complete the morning routine at 7:00 am",
+    "go to the library at Oak Hill College and work on his research paper from 8:00 am to 1:00 pm",
+    "have lunch at Hobbs Cafe at 12:00 pm",
+    "continue work at the library from 2:00 pm to 5:00 pm",
+    "Eat dinner at 5:00 pm",
+    "Watch TV for an hour from 7:00 pm to 8:00 pm",
+    "read a Sociology-related book from 8:00 pm to 9:00 pm"
+  ],
+  "f_daily_schedule": [
+    [
+      "sleeping",
+      420
+    ],
+    [
+      "waking up and completing his morning routine (getting out of bed)",
+      5
+    ],
+    [
+      "waking up and completing his morning routine (brushing his teeth)",
+      5
+    ],
+    [
+      "waking up and completing his morning routine (taking a shower)",
+      10
+    ],
+    [
+      "waking up and completing his morning routine (getting dressed)",
+      10
+    ],
+    [
+      "waking up and completing his morning routine (eating breakfast)",
+      10
+    ],
+    [
+      "waking up and completing his morning routine (packing his bag)",
+      5
+    ],
+    [
+      "waking up and completing his morning routine (checking his emails)",
+      5
+    ],
+    [
+      "waking up and completing his morning routine (gathering his books and supplies)",
+      5
+    ],
+    [
+      "waking up and completing his morning routine (leaving for the library)",
+      5
+    ],
+    [
+      "going to the library at Oak Hill College to work on his research paper (walking to the library)",
+      15
+    ],
+    [
+      "going to the library at Oak Hill College to work on his research paper (gathering his research materials)",
+      15
+    ],
+    [
+      "going to the library at Oak Hill College to work on his research paper (setting up his workspace)",
+      15
+    ],
+    [
+      "going to the library at Oak Hill College to work on his research paper (reviewing his research paper)",
+      15
+    ],
+    [
+      "working on his research paper at the library (researching the topic)",
+      15
+    ],
+    [
+      "working on his research paper at the library (taking notes)",
+      30
+    ],
+    [
+      "working on his research paper at the library (organizing his notes)",
+      15
+    ],
+    [
+      "working on his research paper at the library (on the way to outlining the paper)",
+      0
+    ],
+    [
+      "working on his research paper at the library (conversing about two friends named Klaus Mueller and Maria Lopez discussing their morning plans and progress on a research paper before Maria heads off to college.)",
+      2
+    ],
+    [
+      "working on his research paper at the library (outlining the paper)",
+      28
+    ],
+    [
+      "working on his research paper at the library (taking a break)",
+      30
+    ],
+    [
+      "having lunch at Hobbs Cafe (ordering his food)",
+      10
+    ],
+    [
+      "having lunch at Hobbs Cafe (waiting for his food)",
+      10
+    ],
+    [
+      "having lunch at Hobbs Cafe (eating his food)",
+      30
+    ],
+    [
+      "having lunch at Hobbs Cafe (on the way to talking to the people around him)",
+      0
+    ],
+    [
+      "having lunch at Hobbs Cafe (conversing about a conversation about Isabella inviting Klaus to her Valentine's Day party at Hobbs Cafe on February 14th, 2023 from 5pm to 7pm.)",
+      2
+    ],
+    [
+      "having lunch at Hobbs Cafe (talking to the people around him)",
+      18
+    ],
+    [
+      "having lunch at Hobbs Cafe (paying for his food)",
+      10
+    ],
+    [
+      "having lunch at Hobbs Cafe (taking a break)",
+      10
+    ],
+    [
+      "having lunch at Hobbs Cafe (reading a book)",
+      10
+    ],
+    [
+      "having lunch at Hobbs Cafe (on the way to writing in his journal)",
+      0
+    ],
+    [
+      "having lunch at Hobbs Cafe (conversing about conversing about Maria's research paper mentioned by Klaus)",
+      2
+    ],
+    [
+      "having lunch at Hobbs Cafe (writing in his journal)",
+      8
+    ],
+    [
+      "having lunch at Hobbs Cafe (packing up his things)",
+      10
+    ],
+    [
+      "working on his research paper at the library (researching the topic)",
+      30
+    ],
+    [
+      "working on his research paper at the library (taking notes)",
+      30
+    ],
+    [
+      "working on his research paper at the library (outlining the paper)",
+      30
+    ],
+    [
+      "working on his research paper at the library (writing the introduction)",
+      30
+    ],
+    [
+      "working on his research paper at the library (on the way to taking a break)",
+      0
+    ],
+    [
+      "working on his research paper at the library (conversing about This is a conversation between Maria Lopez and Klaus Mueller about Maria's research paper on the applications of quantum physics in computer science and Klaus's interest in reading it and discussing it over lunch.)",
+      9
+    ],
+    [
+      "working on his research paper at the library (taking a break)",
+      6
+    ],
+    [
+      "working on his research paper at the library (writing the body of the paper)",
+      45
+    ],
+    [
+      "working on his research paper at the library (revising the paper)",
+      30
+    ],
+    [
+      "working on his research paper at the library (proofreading the paper)",
+      15
+    ],
+    [
+      "working on his research paper at the library (printing the paper)",
+      10
+    ],
+    [
+      "working on his research paper at the library (putting the paper in his bag)",
+      5
+    ],
+    [
+      "eating dinner (ordering his food)",
+      10
+    ],
+    [
+      "eating dinner (waiting for his food)",
+      10
+    ],
+    [
+      "eating dinner (eating his food)",
+      20
+    ],
+    [
+      "eating dinner (on the way to paying for his food)",
+      0
+    ],
+    [
+      "eating dinner (conversing about conversing about the Valentine's Day party at Hobbs Cafe, including the invitation, assistance with decorations, and suggestions for snacks)",
+      9
+    ],
+    [
+      "eating dinner (paying for his food)",
+      1
+    ],
+    [
+      "eating dinner (talking to the staff)",
+      5
+    ],
+    [
+      "eating dinner (cleaning up his table)",
+      5
+    ],
+    [
+      "watching TV (turning on the TV)",
+      5
+    ],
+    [
+      "watching TV (selecting a show to watch)",
+      10
+    ],
+    [
+      "watching TV (watching the show)",
+      30
+    ],
+    [
+      "watching TV (taking a break)",
+      15
+    ],
+    [
+      "watching TV (selecting another show to watch)",
+      10
+    ],
+    [
+      "watching TV (on the way to watching the show)",
+      0
+    ],
+    [
+      "watching TV (conversing about Maria and Klaus are conversing about their research papers on the applications of quantum physics in computer science and their plans to discuss it over lunch tomorrow at Hobbs Cafe, along with Klaus sharing his progress on quantum computing and Maria expressing her interest in learning about any interesting applications Klaus came across during his research.)",
+      10
+    ],
+    [
+      "watching TV (watching the show)",
+      20
+    ],
+    [
+      "watching TV (taking a break)",
+      10
+    ],
+    [
+      "watching TV (turning off the TV)",
+      5
+    ],
+    [
+      "watching TV (getting ready for bed)",
+      5
+    ],
+    [
+      "reading a Sociology-related book (selecting a book to read)",
+      10
+    ],
+    [
+      "reading a Sociology-related book (skimming the book to get an overview)",
+      15
+    ],
+    [
+      "reading a Sociology-related book (reading the book)",
+      30
+    ],
+    [
+      "reading a Sociology-related book (taking notes on the book)",
+      30
+    ],
+    [
+      "reading a Sociology-related book (summarizing the book)",
+      15
+    ],
+    [
+      "reading a Sociology-related book (discussing the book with a friend)",
+      15
+    ],
+    [
+      "reading a Sociology-related book (reflecting on the book)",
+      5
+    ],
+    [
+      "getting ready for bed",
+      120
+    ],
+    [
+      "sleeping",
+      0
+    ],
+    [
+      "sleeping",
+      0
+    ],
+    [
+      "sleeping",
+      0
+    ],
+    [
+      "sleeping",
+      0
+    ],
+    [
+      "sleeping",
+      0
+    ],
+    [
+      "sleeping",
+      0
+    ],
+    [
+      "sleeping",
+      0
+    ],
+    [
+      "sleeping",
+      0
+    ],
+    [
+      "sleeping",
+      0
+    ],
+    [
+      "sleeping",
+      0
+    ],
+    [
+      "sleeping",
+      0
+    ],
+    [
+      "sleeping",
+      0
+    ],
+    [
+      "sleeping",
+      0
+    ],
+    [
+      "sleeping",
+      0
+    ],
+    [
+      "sleeping",
+      0
+    ],
+    [
+      "sleeping",
+      0
+    ],
+    [
+      "sleeping",
+      0
+    ],
+    [
+      "sleeping",
+      0
+    ],
+    [
+      "sleeping",
+      0
+    ],
+    [
+      "sleeping",
+      0
+    ],
+    [
+      "sleeping",
+      0
+    ],
+    [
+      "sleeping",
+      0
+    ],
+    [
+      "sleeping",
+      0
+    ],
+    [
+      "sleeping",
+      0
+    ],
+    [
+      "sleeping",
+      0
+    ],
+    [
+      "sleeping",
+      0
+    ],
+    [
+      "sleeping",
+      0
+    ],
+    [
+      "sleeping",
+      0
+    ],
+    [
+      "sleeping",
+      0
+    ],
+    [
+      "sleeping",
+      0
+    ],
+    [
+      "sleeping",
+      0
+    ],
+    [
+      "sleeping",
+      0
+    ],
+    [
+      "sleeping",
+      0
+    ],
+    [
+      "sleeping",
+      0
+    ],
+    [
+      "sleeping",
+      0
+    ],
+    [
+      "sleeping",
+      0
+    ],
+    [
+      "sleeping",
+      0
+    ],
+    [
+      "sleeping",
+      0
+    ],
+    [
+      "sleeping",
+      0
+    ],
+    [
+      "sleeping",
+      0
+    ],
+    [
+      "sleeping",
+      0
+    ],
+    [
+      "sleeping",
+      0
+    ],
+    [
+      "sleeping",
+      0
+    ],
+    [
+      "sleeping",
+      0
+    ],
+    [
+      "sleeping",
+      0
+    ],
+    [
+      "sleeping",
+      0
+    ],
+    [
+      "sleeping",
+      0
+    ],
+    [
+      "sleeping",
+      0
+    ],
+    [
+      "sleeping",
+      0
+    ],
+    [
+      "sleeping",
+      0
+    ],
+    [
+      "sleeping",
+      0
+    ],
+    [
+      "sleeping",
+      0
+    ],
+    [
+      "sleeping",
+      0
+    ],
+    [
+      "sleeping",
+      0
+    ],
+    [
+      "sleeping",
+      0
+    ],
+    [
+      "sleeping",
+      0
+    ],
+    [
+      "sleeping",
+      0
+    ],
+    [
+      "sleeping",
+      0
+    ],
+    [
+      "sleeping",
+      0
+    ],
+    [
+      "sleeping",
+      0
+    ],
+    [
+      "sleeping",
+      0
+    ],
+    [
+      "sleeping",
+      0
+    ],
+    [
+      "sleeping",
+      0
+    ],
+    [
+      "sleeping",
+      0
+    ]
+  ],
+  "f_daily_schedule_hourly_org": [
+    [
+      "sleeping",
+      420
+    ],
+    [
+      "waking up and completing his morning routine",
+      60
+    ],
+    [
+      "going to the library at Oak Hill College to work on his research paper",
+      60
+    ],
+    [
+      "working on his research paper at the library",
+      120
+    ],
+    [
+      "having lunch at Hobbs Cafe",
+      120
+    ],
+    [
+      "working on his research paper at the library",
+      240
+    ],
+    [
+      "eating dinner",
+      60
+    ],
+    [
+      "watching TV",
+      120
+    ],
+    [
+      "reading a Sociology-related book",
+      120
+    ],
+    [
+      "getting ready for bed",
+      120
+    ]
+  ],
+  "act_address": "the Ville:Dorm for Oak Hill College:Klaus Mueller's room:bed",
+  "act_start_time": "February 13, 2023, 22:02:00",
+  "act_duration": 120,
+  "act_description": "getting ready for bed",
+  "act_pronunciatio": "\ud83d\udec1\ud83e\uddd6\u200d",
+  "act_event": [
+    "Klaus Mueller",
+    "get",
+    "ready"
+  ],
+  "act_obj_description": "being slept on",
+  "act_obj_pronunciatio": "\ud83d\ude34",
+  "act_obj_event": [
+    "bed",
+    "be",
+    "slept"
+  ],
+  "chatting_with": null,
+  "chat": null,
+  "chatting_with_buffer": {
+    "Maria Lopez": -923,
+    "Isabella Rodriguez": -1505
+  },
+  "chatting_end_time": null,
+  "act_path_set": true,
+  "planned_path": []
+}

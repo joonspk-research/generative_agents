@@ -1,0 +1,34 @@
+{
+  "persona": {
+    "Isabella Rodriguez": {
+      "movement": [
+        78,
+        14
+      ],
+      "pronunciatio": "\u2764\ufe0f\ud83d\udc9d",
+      "description": "taking a lunch break (preparing for the Valentine's Day party) @ the Ville:Isabella Rodriguez's apartment:main room:shelf",
+      "chat": null
+    },
+    "Maria Lopez": {
+      "movement": [
+        112,
+        37
+      ],
+      "pronunciatio": "\ud83d\udc42",
+      "description": "attending her Physics class (listening to the lecture) @ the Ville:Oak Hill College:classroom:classroom podium",
+      "chat": null
+    },
+    "Klaus Mueller": {
+      "movement": [
+        131,
+        45
+      ],
+      "pronunciatio": "\ud83d\udce6",
+      "description": "having lunch at Hobbs Cafe (packing up his things) @ the Ville:Dorm for Oak Hill College:Klaus Mueller's room:closet",
+      "chat": null
+    }
+  },
+  "meta": {
+    "curr_time": "February 13, 2023, 13:01:00"
+  }
+}

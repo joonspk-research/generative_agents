@@ -9,6 +9,7 @@ Variables:
 [Statements]
 !<INPUT 0>!
 
-Based on the statements above, characterize !<INPUT 1>! and !<INPUT 2>!'s relationship.
+Based on the statements above, summarize !<INPUT 1>! and !<INPUT 2>!'s relationship. What do they feel or know about each other?
+
 
 "

@@ -164,6 +164,32 @@ def ChatGPT_safe_generate_response(prompt,
   return False
 
 
+def ChatGPT_safe_generate_response_OLD(prompt, 
+                                   repeat=3,
+                                   fail_safe_response="error",
+                                   func_validate=None,
+                                   func_clean_up=None,
+                                   verbose=False): 
+  if verbose: 
+    print ("CHAT GPT PROMPT")
+    print (prompt)
+
+  for i in range(repeat): 
+    try: 
+      curr_gpt_response = ChatGPT_request(prompt).strip()
+      if func_validate(curr_gpt_response, prompt=prompt): 
+        return func_clean_up(curr_gpt_response, prompt=prompt)
+      if verbose: 
+        print (f"---- repeat count: {i}")
+        print (curr_gpt_response)
+        print ("~~~~")
+
+    except: 
+      pass
+  print ("FAIL SAFE TRIGGERED") 
+  return fail_safe_response
+
+
 # ============================================================================
 # ###################[SECTION 2: ORIGINAL GPT-3 STRUCTURE] ###################
 # ============================================================================

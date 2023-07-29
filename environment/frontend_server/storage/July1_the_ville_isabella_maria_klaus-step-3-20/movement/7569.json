@@ -1,0 +1,34 @@
+{
+  "persona": {
+    "Isabella Rodriguez": {
+      "movement": [
+        73,
+        14
+      ],
+      "pronunciatio": "\ud83d\udec1\ud83e\uddd6\u200d",
+      "description": "watching TV (getting ready for bed) @ the Ville:Isabella Rodriguez's apartment:main room:bed",
+      "chat": null
+    },
+    "Maria Lopez": {
+      "movement": [
+        118,
+        51
+      ],
+      "pronunciatio": "\ud83c\udfae",
+      "description": "taking a break and enjoying some free time (playing a game) @ the Ville:Dorm for Oak Hill College:common room:pool table",
+      "chat": null
+    },
+    "Klaus Mueller": {
+      "movement": [
+        77,
+        30
+      ],
+      "pronunciatio": "\ud83d\udcdd",
+      "description": "reading a Sociology-related book (taking notes on the book) @ the Ville:Oak Hill College:library:library table",
+      "chat": null
+    }
+  },
+  "meta": {
+    "curr_time": "February 13, 2023, 21:01:30"
+  }
+}

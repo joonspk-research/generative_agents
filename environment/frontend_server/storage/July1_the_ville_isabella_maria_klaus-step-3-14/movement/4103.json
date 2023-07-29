@@ -1,0 +1,52 @@
+{
+  "persona": {
+    "Isabella Rodriguez": {
+      "movement": [
+        76,
+        21
+      ],
+      "pronunciatio": "\ud83d\udcac",
+      "description": "conversing about a conversation about Isabella inviting Klaus to her Valentine's Day party at Hobbs Cafe on February 14th, 2023 from 5pm to 7pm. @ <persona> Klaus Mueller",
+      "chat": [
+        [
+          "Isabella Rodriguez",
+          "Hi Klaus! How are you enjoying your meal? I wanted to let you know that I'm planning a Valentine's Day party at Hobbs Cafe on February 14th, 2023 from 5pm to 7pm. I would love for you to join us!"
+        ],
+        [
+          "Klaus Mueller",
+          "Oh, hi Isabella! I'm doing well, thank you. The meal is delicious as always. A Valentine's Day party sounds fun. I'd love to join! Thank you for inviting me."
+        ]
+      ]
+    },
+    "Maria Lopez": {
+      "movement": [
+        123,
+        55
+      ],
+      "pronunciatio": "\ud83d\udcd6",
+      "description": "studying for her Physics class (reading her textbook) @ the Ville:Dorm for Oak Hill College:Maria Lopez's room:desk",
+      "chat": null
+    },
+    "Klaus Mueller": {
+      "movement": [
+        75,
+        21
+      ],
+      "pronunciatio": "\ud83d\udcac",
+      "description": "conversing about a conversation about Isabella inviting Klaus to her Valentine's Day party at Hobbs Cafe on February 14th, 2023 from 5pm to 7pm. @ <persona> Isabella Rodriguez",
+      "chat": [
+        [
+          "Isabella Rodriguez",
+          "Hi Klaus! How are you enjoying your meal? I wanted to let you know that I'm planning a Valentine's Day party at Hobbs Cafe on February 14th, 2023 from 5pm to 7pm. I would love for you to join us!"
+        ],
+        [
+          "Klaus Mueller",
+          "Oh, hi Isabella! I'm doing well, thank you. The meal is delicious as always. A Valentine's Day party sounds fun. I'd love to join! Thank you for inviting me."
+        ]
+      ]
+    }
+  },
+  "meta": {
+    "curr_time": "February 13, 2023, 11:23:50"
+  }
+}

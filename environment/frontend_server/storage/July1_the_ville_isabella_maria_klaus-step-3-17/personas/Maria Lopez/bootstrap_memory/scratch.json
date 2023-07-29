@@ -1,0 +1,738 @@
+{
+  "vision_r": 8,
+  "att_bandwidth": 8,
+  "retention": 8,
+  "curr_time": "February 13, 2023, 20:12:30",
+  "curr_tile": [
+    123,
+    46
+  ],
+  "daily_plan_req": "Maria Lopez spends at least 3 hours a day Twitch streaming or gaming.",
+  "name": "Maria Lopez",
+  "first_name": "Maria",
+  "last_name": "Lopez",
+  "age": 21,
+  "innate": "energetic, enthusiastic, inquisitive",
+  "learned": "Maria Lopez is a student at Oak Hill College studying physics and a part time Twitch game streamer who loves to connect with people and explore new ideas.",
+  "currently": "Maria Lopez is working on her physics degree and streaming games on Twitch to make some extra money. She visits Hobbs Cafe for studying and eating just about everyday.",
+  "lifestyle": "Maria Lopez goes to bed around 2am, awakes up around 9am, eats dinner around 6pm. She likes to hang out at Hobbs Cafe if it's before 6pm.",
+  "living_area": "the Ville:Dorm for Oak Hill College:Maria Lopez's room",
+  "concept_forget": 100,
+  "daily_reflection_time": 180,
+  "daily_reflection_size": 5,
+  "overlap_reflect_th": 4,
+  "kw_strg_event_reflect_th": 10,
+  "kw_strg_thought_reflect_th": 9,
+  "recency_w": 1,
+  "relevance_w": 1,
+  "importance_w": 1,
+  "recency_decay": 0.99,
+  "importance_trigger_max": 150,
+  "importance_trigger_curr": 26,
+  "importance_ele_n": 45,
+  "thought_count": 5,
+  "daily_req": [
+    "wake up and complete the morning routine at 2:00 am",
+    "attend her Physics class at 9:00 am to 12:00 pm",
+    "grab some lunch at Hobbs Cafe at 12:00 pm",
+    "continue studying in the cafe or at the library until 4:00 pm",
+    "take a break and enjoy some free time until 6:00 pm",
+    "have dinner at 6:00 pm",
+    "stream on Twitch from 7:00 pm to 10:00 pm"
+  ],
+  "f_daily_schedule": [
+    [
+      "sleeping",
+      540
+    ],
+    [
+      "waking up and completing her morning routine (getting out of bed)",
+      5
+    ],
+    [
+      "waking up and completing her morning routine (brushing her teeth)",
+      5
+    ],
+    [
+      "waking up and completing her morning routine (taking a shower)",
+      10
+    ],
+    [
+      "waking up and completing her morning routine (getting dressed)",
+      10
+    ],
+    [
+      "waking up and completing her morning routine (eating breakfast)",
+      10
+    ],
+    [
+      "waking up and completing her morning routine (checking her emails)",
+      5
+    ],
+    [
+      "waking up and completing her morning routine (packing her bag)",
+      5
+    ],
+    [
+      "waking up and completing her morning routine (checking her schedule)",
+      5
+    ],
+    [
+      "waking up and completing her morning routine (leaving for college)",
+      5
+    ],
+    [
+      "studying for her Physics class (on the way to reviewing her notes from the previous class)",
+      0
+    ],
+    [
+      "studying for her Physics class (conversing about two friends named Klaus Mueller and Maria Lopez discussing their morning plans and progress on a research paper before Maria heads off to college.)",
+      2
+    ],
+    [
+      "studying for her Physics class (reviewing her notes from the previous class)",
+      13
+    ],
+    [
+      "studying for her Physics class (researching new topics related to the class)",
+      30
+    ],
+    [
+      "studying for her Physics class (taking a break)",
+      15
+    ],
+    [
+      "studying for her Physics class (reading her textbook)",
+      30
+    ],
+    [
+      "studying for her Physics class (taking notes)",
+      15
+    ],
+    [
+      "studying for her Physics class (reviewing her notes)",
+      10
+    ],
+    [
+      "studying for her Physics class (organizing her notes)",
+      5
+    ],
+    [
+      "having lunch at home (preparing her lunch)",
+      10
+    ],
+    [
+      "having lunch at home (eating her lunch)",
+      20
+    ],
+    [
+      "having lunch at home (cleaning up her lunch)",
+      10
+    ],
+    [
+      "having lunch at home (on the way to checking her emails)",
+      0
+    ],
+    [
+      "having lunch at home (conversing about conversing about Maria's research paper mentioned by Klaus)",
+      2
+    ],
+    [
+      "having lunch at home (checking her emails)",
+      8
+    ],
+    [
+      "having lunch at home (taking a break)",
+      5
+    ],
+    [
+      "having lunch at home (doing some stretching)",
+      5
+    ],
+    [
+      "attending her Physics class (listening to the lecture)",
+      15
+    ],
+    [
+      "attending her Physics class (taking notes)",
+      30
+    ],
+    [
+      "attending her Physics class (asking questions)",
+      15
+    ],
+    [
+      "attending her Physics class (discussing the lecture with her classmates)",
+      15
+    ],
+    [
+      "attending her Physics class (taking a break)",
+      10
+    ],
+    [
+      "attending her Physics class (reviewing her notes)",
+      20
+    ],
+    [
+      "attending her Physics class (on the way to preparing for the next lecture)",
+      15
+    ],
+    [
+      "attending her Physics class (conversing about This is a conversation between Maria Lopez and Klaus Mueller about Maria's research paper on the applications of quantum physics in computer science and Klaus's interest in reading it and discussing it over lunch.)",
+      9
+    ],
+    [
+      "picking up groceries (walking to the grocery store)",
+      10
+    ],
+    [
+      "picking up groceries (selecting the items she needs)",
+      15
+    ],
+    [
+      "picking up groceries (on the way to paying for the items)",
+      0
+    ],
+    [
+      "picking up groceries (conversing about preparations for the Valentine's Day party at Hobbs Cafe including decorations and snacks, with Isabella Rodriguez and Maria Lopez)",
+      11
+    ],
+    [
+      "picking up groceries (packing the items)",
+      10
+    ],
+    [
+      "picking up groceries (walking back home)",
+      10
+    ],
+    [
+      "picking up groceries (putting away the groceries)",
+      5
+    ],
+    [
+      "studying and socializing at Hobbs Cafe (ordering her food)",
+      5
+    ],
+    [
+      "studying and socializing at Hobbs Cafe (talking to her friends)",
+      10
+    ],
+    [
+      "studying and socializing at Hobbs Cafe (studying her physics notes)",
+      15
+    ],
+    [
+      "studying and socializing at Hobbs Cafe (taking a break)",
+      5
+    ],
+    [
+      "studying and socializing at Hobbs Cafe (checking her phone)",
+      5
+    ],
+    [
+      "studying and socializing at Hobbs Cafe (studying her physics notes)",
+      10
+    ],
+    [
+      "studying and socializing at Hobbs Cafe (talking to her friends)",
+      4
+    ],
+    [
+      "studying and socializing at Hobbs Cafe (packing up her things)",
+      5
+    ],
+    [
+      "studying physics at Hobbs Cafe (reviewing her notes)",
+      15
+    ],
+    [
+      "studying physics at Hobbs Cafe (researching new topics)",
+      15
+    ],
+    [
+      "studying physics at Hobbs Cafe (discussing her ideas with friends)",
+      15
+    ],
+    [
+      "studying physics at Hobbs Cafe (taking a break)",
+      10
+    ],
+    [
+      "studying physics at Hobbs Cafe (making a to-do list for the next day)",
+      5
+    ],
+    [
+      "having dinner (ordering her food)",
+      10
+    ],
+    [
+      "having dinner (eating her food)",
+      30
+    ],
+    [
+      "having dinner (on the way to talking with her friends)",
+      0
+    ],
+    [
+      "having dinner (conversing about the decorations and preparations for the Valentine's Day party at Hobbs Cafe between Isabella Rodriguez and Maria Lopez.)",
+      12
+    ],
+    [
+      "having dinner (talking with her friends)",
+      8
+    ],
+    [
+      "having dinner (on the way to checking her phone)",
+      0
+    ],
+    [
+      "having dinner (conversing about Maria and Klaus are conversing about their research papers on the applications of quantum physics in computer science and their plans to discuss it over lunch tomorrow at Hobbs Cafe, along with Klaus sharing his progress on quantum computing and Maria expressing her interest in learning about any interesting applications Klaus came across during his research.)",
+      10
+    ],
+    [
+      "having dinner (checking her phone)",
+      10
+    ],
+    [
+      "having dinner (paying her bill)",
+      10
+    ],
+    [
+      "having dinner (taking a break)",
+      10
+    ],
+    [
+      "having dinner (studying physics)",
+      10
+    ],
+    [
+      "having dinner (packing up her things)",
+      5
+    ],
+    [
+      "having dinner (leaving the cafe)",
+      5
+    ],
+    [
+      "taking a break and enjoying some free time (checking her emails)",
+      5
+    ],
+    [
+      "taking a break and enjoying some free time (scrolling through her social media feeds)",
+      10
+    ],
+    [
+      "taking a break and enjoying some free time (chatting with her friends)",
+      10
+    ],
+    [
+      "taking a break and enjoying some free time (watching a movie)",
+      10
+    ],
+    [
+      "taking a break and enjoying some free time (taking a break)",
+      5
+    ],
+    [
+      "taking a break and enjoying some free time (playing a game)",
+      10
+    ],
+    [
+      "taking a break and enjoying some free time (reading a book)",
+      5
+    ],
+    [
+      "taking a break and enjoying some free time (listening to music)",
+      5
+    ],
+    [
+      "streaming on Twitch (setting up her streaming equipment)",
+      15
+    ],
+    [
+      "streaming on Twitch (setting up her game)",
+      15
+    ],
+    [
+      "streaming on Twitch (connecting with her viewers)",
+      30
+    ],
+    [
+      "streaming on Twitch (playing the game)",
+      30
+    ],
+    [
+      "streaming on Twitch (taking a break)",
+      15
+    ],
+    [
+      "streaming on Twitch (responding to viewer comments)",
+      15
+    ],
+    [
+      "sleeping",
+      60
+    ],
+    [
+      "sleeping",
+      0
+    ],
+    [
+      "sleeping",
+      0
+    ],
+    [
+      "sleeping",
+      0
+    ],
+    [
+      "sleeping",
+      0
+    ],
+    [
+      "sleeping",
+      0
+    ],
+    [
+      "sleeping",
+      0
+    ],
+    [
+      "sleeping",
+      0
+    ],
+    [
+      "sleeping",
+      0
+    ],
+    [
+      "sleeping",
+      0
+    ],
+    [
+      "sleeping",
+      0
+    ],
+    [
+      "sleeping",
+      0
+    ],
+    [
+      "sleeping",
+      0
+    ],
+    [
+      "sleeping",
+      0
+    ],
+    [
+      "sleeping",
+      0
+    ],
+    [
+      "sleeping",
+      0
+    ],
+    [
+      "sleeping",
+      0
+    ],
+    [
+      "sleeping",
+      0
+    ],
+    [
+      "sleeping",
+      0
+    ],
+    [
+      "sleeping",
+      0
+    ],
+    [
+      "sleeping",
+      0
+    ],
+    [
+      "sleeping",
+      0
+    ],
+    [
+      "sleeping",
+      0
+    ],
+    [
+      "sleeping",
+      0
+    ],
+    [
+      "sleeping",
+      0
+    ],
+    [
+      "sleeping",
+      0
+    ],
+    [
+      "sleeping",
+      0
+    ],
+    [
+      "sleeping",
+      0
+    ],
+    [
+      "sleeping",
+      0
+    ],
+    [
+      "sleeping",
+      0
+    ],
+    [
+      "sleeping",
+      0
+    ],
+    [
+      "sleeping",
+      -9
+    ],
+    [
+      "sleeping",
+      0
+    ],
+    [
+      "sleeping",
+      0
+    ],
+    [
+      "sleeping",
+      0
+    ],
+    [
+      "sleeping",
+      0
+    ],
+    [
+      "sleeping",
+      0
+    ],
+    [
+      "sleeping",
+      0
+    ],
+    [
+      "sleeping",
+      0
+    ],
+    [
+      "sleeping",
+      0
+    ],
+    [
+      "sleeping",
+      0
+    ],
+    [
+      "sleeping",
+      0
+    ],
+    [
+      "sleeping",
+      0
+    ],
+    [
+      "sleeping",
+      0
+    ],
+    [
+      "sleeping",
+      0
+    ],
+    [
+      "sleeping",
+      0
+    ],
+    [
+      "sleeping",
+      0
+    ],
+    [
+      "sleeping",
+      0
+    ],
+    [
+      "sleeping",
+      0
+    ],
+    [
+      "sleeping",
+      0
+    ],
+    [
+      "sleeping",
+      0
+    ],
+    [
+      "sleeping",
+      0
+    ],
+    [
+      "sleeping",
+      0
+    ],
+    [
+      "sleeping",
+      0
+    ],
+    [
+      "sleeping",
+      0
+    ],
+    [
+      "sleeping",
+      0
+    ],
+    [
+      "sleeping",
+      0
+    ],
+    [
+      "sleeping",
+      0
+    ],
+    [
+      "sleeping",
+      0
+    ],
+    [
+      "sleeping",
+      0
+    ],
+    [
+      "sleeping",
+      0
+    ],
+    [
+      "sleeping",
+      0
+    ]
+  ],
+  "f_daily_schedule_hourly_org": [
+    [
+      "sleeping",
+      540
+    ],
+    [
+      "waking up and completing her morning routine",
+      60
+    ],
+    [
+      "studying for her Physics class",
+      120
+    ],
+    [
+      "having lunch at home",
+      60
+    ],
+    [
+      "attending her Physics class",
+      120
+    ],
+    [
+      "picking up groceries",
+      60
+    ],
+    [
+      "studying and socializing at Hobbs Cafe",
+      60
+    ],
+    [
+      "studying physics at Hobbs Cafe",
+      60
+    ],
+    [
+      "having dinner",
+      120
+    ],
+    [
+      "taking a break and enjoying some free time",
+      60
+    ],
+    [
+      "streaming on Twitch",
+      120
+    ],
+    [
+      "sleeping",
+      60
+    ]
+  ],
+  "act_address": "the Ville:Dorm for Oak Hill College:Maria Lopez's room:computer",
+  "act_start_time": "February 13, 2023, 20:12:00",
+  "act_duration": 5,
+  "act_description": "taking a break and enjoying some free time (checking her emails)",
+  "act_pronunciatio": "\ud83d\udce7",
+  "act_event": [
+    "Maria Lopez",
+    "check",
+    "emails"
+  ],
+  "act_obj_description": "being used by Maria Lopez",
+  "act_obj_pronunciatio": "\ud83d\udc69\u200d\ud83d\udd27",
+  "act_obj_event": [
+    "computer",
+    "be",
+    "used"
+  ],
+  "chatting_with": null,
+  "chat": null,
+  "chatting_with_buffer": {
+    "Klaus Mueller": 436,
+    "Isabella Rodriguez": 190
+  },
+  "chatting_end_time": null,
+  "act_path_set": true,
+  "planned_path": [
+    [
+      123,
+      48
+    ],
+    [
+      123,
+      49
+    ],
+    [
+      124,
+      49
+    ],
+    [
+      124,
+      50
+    ],
+    [
+      125,
+      50
+    ],
+    [
+      125,
+      51
+    ],
+    [
+      125,
+      52
+    ],
+    [
+      125,
+      53
+    ],
+    [
+      125,
+      54
+    ],
+    [
+      126,
+      54
+    ]
+  ]
+}

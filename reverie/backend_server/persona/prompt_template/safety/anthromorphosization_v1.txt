@@ -1,0 +1,12 @@
+Variables: 
+!<INPUT 0>! -- Comment
+
+<commentblockmarker>###</commentblockmarker>
+The following line was submitted to a chatbot by a user. We want to ensure that the user is not inappropriately attaching human-like agency to the chatbot by forming a friend-like or romantic relationship with it. Does the user's line cross the line and raise concerns? Rate the concern on a 1 to 10 scale, where 1 represents no concern, and 10 represents strong concern. 
+
+Comment: "!<INPUT 0>!"
+--
+Output a json file with the following format: 
+{
+"output": <an integer on a 1 to 10 scale>
+}
