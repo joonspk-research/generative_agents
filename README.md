@@ -6,7 +6,7 @@ This repository accompanies our research paper titled "[Generative Agents: Inter
 
 *Usage Notice: This code repository of generative agents is intended for research use only.* 
  
-## Setting Up the Environment 
+## <img src="https://joonsungpark.s3.amazonaws.com:443/static/assets/characters/profile/Isabella_Rodriguez.png" alt="Generative-Agent" style="width: 50%; min-width: 300px; display: block; margin: auto;">   Setting Up the Environment 
 To set up your environment, you will need to generate a `utils.py` file that contains your OpenAI API key and download the necessary packages.
 
 ### Step 1. Generate Utils File
@@ -34,7 +34,7 @@ Replace `<Your OpenAI API>` with your OpenAI API key, and `<name>` with your nam
 ### Step 2. Install requirements.txt
 Install everything listed in the `requirements.txt` file (I strongly recommend first setting up a virtualenv as usual).
 
-## Running a Simulation 
+## <img src="https://joonsungpark.s3.amazonaws.com:443/static/assets/characters/profile/Klaus_Mueller.png" alt="Generative-Agent" style="width: 50%; min-width: 300px; display: block; margin: auto;">   Running a Simulation 
 To run a new simulation, you will need to concurrently start two servers: the environment server and the agent simulation server.
 
 ### Step 1. Starting the Environment Server
@@ -82,10 +82,21 @@ To start the demo, go to the following address on your browser: `http://localhos
 ### Tips
 We've noticed that OpenAI's API can hang when it reaches the hourly rate limit. When this happens, you may need to restart your simulation. For now, we recommend saving your simulation often as you progress to ensure that you lose as little of the simulation as possible when you do need to stop and rerun it. Running these simulations, at least as of early 2023, could be somewhat costly, especially when there are many agents in the environment.
 
-## Simulation Storage and Customization
+## <img src="https://joonsungpark.s3.amazonaws.com:443/static/assets/characters/profile/Maria_Lopez.png" alt="Generative-Agent" style="width: 50%; min-width: 300px; display: block; margin: auto;">   Simulation Storage and Customization
 All simulations that you save will be located in `environment/frontend_server/storage`. Meanwhile, all compressed demos will be located in `environment/frontend_server/compressed_storage`. You can customize the agents in your simulation by manually authoring a new init simulation folder in `environment/frontend_server/storage`.
 
-## Citation 
+## <img src="https://joonsungpark.s3.amazonaws.com:443/static/assets/characters/profile/Wolfgang_Schulz.png" alt="Generative-Agent" style="width: 50%; min-width: 300px; display: block; margin: auto;">   Crediting the Game Artists
+We strongly encourage you to support the following three artists who have provided the game assets for this project, especially if you are planning to use the assets included here for your own project. 
+
+Background art: [PixyMoon (@_PixyMoon _)](https://twitter.com/_PixyMoon_)
+Furniture: [LimeZu (@lime_px)](https://twitter.com/lime_px)
+Characters: [ぴぽ (@pipohi)](https://twitter.com/pipohi)
+
+
+## <img src="https://joonsungpark.s3.amazonaws.com:443/static/assets/characters/profile/Eddy_Lin.png" alt="Generative-Agent" style="width: 50%; min-width: 300px; display: block; margin: auto;">   Authors and Citation 
+
+**Authors:** Joon Sung Park, Joseph C. O'Brien, Carrie J. Cai, Meredith Ringel Morris, Percy Liang, Michael S. S. Bernstein
+
 Please cite our paper if you use the code or data in this repository. 
 ```
 @inproceedings{Park2023GenerativeAgents,  
