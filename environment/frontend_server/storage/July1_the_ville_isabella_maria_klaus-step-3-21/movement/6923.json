@@ -1,0 +1,34 @@
+{
+  "persona": {
+    "Isabella Rodriguez": {
+      "movement": [
+        79,
+        14
+      ],
+      "pronunciatio": "\ud83d\udcfa",
+      "description": "watching TV (browsing through the channels) @ the Ville:Isabella Rodriguez's apartment:main room:shelf",
+      "chat": null
+    },
+    "Maria Lopez": {
+      "movement": [
+        114,
+        51
+      ],
+      "pronunciatio": "\ud83d\udcac",
+      "description": "having dinner (conversing about Maria and Klaus are conversing about their research papers on the applications of quantum physics in computer science and their plans to discuss it over lunch tomorrow at Hobbs Cafe, along with Klaus sharing his progress on quantum computing and Maria expressing her interest in learning about any interesting applications Klaus came across during his research.) @ the Ville:Dorm for Oak Hill College:common room:common room sofa",
+      "chat": null
+    },
+    "Klaus Mueller": {
+      "movement": [
+        114,
+        51
+      ],
+      "pronunciatio": "\ud83d\udcac\ud83c\udf7d\ufe0f",
+      "description": "watching TV (conversing about Maria and Klaus are conversing about their research papers on the applications of quantum physics in computer science and their plans to discuss it over lunch tomorrow at Hobbs Cafe, along with Klaus sharing his progress on quantum computing and Maria expressing her interest in learning about any interesting applications Klaus came across during his research.) @ the Ville:Dorm for Oak Hill College:common room:common room sofa",
+      "chat": null
+    }
+  },
+  "meta": {
+    "curr_time": "February 13, 2023, 19:13:50"
+  }
+}

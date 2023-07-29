@@ -240,6 +240,7 @@ def new_retrieve(persona, focal_points, n_count=30):
     # decently, but in the future, these weights should likely be learned, 
     # perhaps through an RL-like process.
     # gw = [1, 1, 1]
+    # gw = [1, 2, 1]
     gw = [0.5, 3, 2]
     master_out = dict()
     for key in recency_out.keys(): 
