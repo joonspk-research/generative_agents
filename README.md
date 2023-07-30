@@ -92,7 +92,7 @@ All simulations that you save will be located in `environment/frontend_server/st
 
 There are two ways to optionally customize your simulations. 
 
-### Author and Load Agent History
+### Create New Base Simulations
 First is to initialize agents with unique history at the start of the simulation. To do this, you would want to 1) start your simulation using one of the base simulations, and 2) author and load agent history. More specifically, here are the steps:
 
 #### Step 1. Starting Up a Base Simulation 
