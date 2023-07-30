@@ -1,3 +1,4 @@
+
 # Generative Agents: Interactive Simulacra of Human Behavior 
 
 <p align="center" width="100%">
@@ -8,7 +9,7 @@ This repository accompanies our research paper titled "[Generative Agents: Inter
 
 *Usage Notice: This code repository of generative agents is intended for research use only.* 
  
-## <img src="https://joonsungpark.s3.amazonaws.com:443/static/assets/characters/profile/Isabella_Rodriguez.png" alt="Generative-Agent">   Setting Up the Environment 
+## <img src="https://joonsungpark.s3.amazonaws.com:443/static/assets/characters/profile/Isabella_Rodriguez.png" alt="Generative Isabella">   Setting Up the Environment 
 To set up your environment, you will need to generate a `utils.py` file that contains your OpenAI API key and download the necessary packages.
 
 ### Step 1. Generate Utils File
@@ -36,7 +37,7 @@ Replace `<Your OpenAI API>` with your OpenAI API key, and `<name>` with your nam
 ### Step 2. Install requirements.txt
 Install everything listed in the `requirements.txt` file (I strongly recommend first setting up a virtualenv as usual).
 
-## <img src="https://joonsungpark.s3.amazonaws.com:443/static/assets/characters/profile/Klaus_Mueller.png" alt="Generative-Agent">   Running a Simulation 
+## <img src="https://joonsungpark.s3.amazonaws.com:443/static/assets/characters/profile/Klaus_Mueller.png" alt="Generative Klaus">   Running a Simulation 
 To run a new simulation, you will need to concurrently start two servers: the environment server and the agent simulation server.
 
 ### Step 1. Starting the Environment Server
@@ -84,10 +85,10 @@ To start the demo, go to the following address on your browser: `http://localhos
 ### Tips
 We've noticed that OpenAI's API can hang when it reaches the hourly rate limit. When this happens, you may need to restart your simulation. For now, we recommend saving your simulation often as you progress to ensure that you lose as little of the simulation as possible when you do need to stop and rerun it. Running these simulations, at least as of early 2023, could be somewhat costly, especially when there are many agents in the environment.
 
-## <img src="https://joonsungpark.s3.amazonaws.com:443/static/assets/characters/profile/Maria_Lopez.png" alt="Generative-Agent">   Simulation Storage Location
+## <img src="https://joonsungpark.s3.amazonaws.com:443/static/assets/characters/profile/Maria_Lopez.png" alt="Generative Maria">   Simulation Storage Location
 All simulations that you save will be located in `environment/frontend_server/storage`, and all compressed demos will be located in `environment/frontend_server/compressed_storage`. 
 
-## <img src="https://joonsungpark.s3.amazonaws.com:443/static/assets/characters/profile/Sam_Moore.png" alt="Generative-Agent">   Customization
+## <img src="https://joonsungpark.s3.amazonaws.com:443/static/assets/characters/profile/Sam_Moore.png" alt="Generative Sam">   Customization
 
 There are two ways to optionally customize your simulations. 
 
@@ -109,7 +110,7 @@ To customize the initialization by authoring your own history file, place your f
 ### Author and load agent history
 For a more involved customization, you will need to author your own base simulation files. The most straightforward approach would be to copy and paste an existing base simulation folder, renaming and editing it according to your requirements. This process will be simpler if you decide to keep the agent names unchanged. However, if you wish to change their names or increase the number of agents that the Smallville map can accommodate, you might need to directly edit the map using the [Tiled](https://www.mapeditor.org/) map editor.
 
-## <img src="https://joonsungpark.s3.amazonaws.com:443/static/assets/characters/profile/Wolfgang_Schulz.png" alt="Generative-Agent">   Crediting the Game Artists
+## <img src="https://joonsungpark.s3.amazonaws.com:443/static/assets/characters/profile/Wolfgang_Schulz.png" alt="Generative Wolfgang">   Crediting the Game Artists
 We strongly encourage you to support the following three artists who have provided the game assets for this project, especially if you are planning to use the assets included here for your own project. 
 
 Background art: [PixyMoon (@_PixyMoon _)](https://twitter.com/_PixyMoon_)
@@ -119,7 +120,7 @@ Furniture/interior design: [LimeZu (@lime_px)](https://twitter.com/lime_px)
 Character design: [ぴぽ (@pipohi)](https://twitter.com/pipohi)
 
 
-## <img src="https://joonsungpark.s3.amazonaws.com:443/static/assets/characters/profile/Eddy_Lin.png" alt="Generative-Agent">   Authors and Citation 
+## <img src="https://joonsungpark.s3.amazonaws.com:443/static/assets/characters/profile/Eddy_Lin.png" alt="Generative Eddy">   Authors and Citation 
 
 **Authors:** Joon Sung Park, Joseph C. O'Brien, Carrie J. Cai, Meredith Ringel Morris, Percy Liang, Michael S. Bernstein
 
