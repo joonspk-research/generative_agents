@@ -92,7 +92,7 @@ All simulations that you save will be located in `environment/frontend_server/st
 
 There are two ways to optionally customize your simulations. 
 
-### Create New Base Simulations
+### Author and Load Agent History
 First is to initialize agents with unique history at the start of the simulation. To do this, you would want to 1) start your simulation using one of the base simulations, and 2) author and load agent history. More specifically, here are the steps:
 
 #### Step 1. Starting Up a Base Simulation 
@@ -107,7 +107,7 @@ Note that you will need to replace `<history_file_name>` with the name of an exi
 #### Step 3. Further Customization 
 To customize the initialization by authoring your own history file, place your file in the following folder: `environment/frontend_server/static_dirs/assets/the_ville`. The column format for your custom history file will have to match the example history files included. Therefore, we recommend starting the process by copying and pasting the ones that are already in the repository.
 
-### Author and load agent history
+### Create New Base Simulations
 For a more involved customization, you will need to author your own base simulation files. The most straightforward approach would be to copy and paste an existing base simulation folder, renaming and editing it according to your requirements. This process will be simpler if you decide to keep the agent names unchanged. However, if you wish to change their names or increase the number of agents that the Smallville map can accommodate, you might need to directly edit the map using the [Tiled](https://www.mapeditor.org/) map editor.
 
 
