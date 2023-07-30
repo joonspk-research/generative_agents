@@ -110,15 +110,6 @@ To customize the initialization by authoring your own history file, place your f
 ### Author and load agent history
 For a more involved customization, you will need to author your own base simulation files. The most straightforward approach would be to copy and paste an existing base simulation folder, renaming and editing it according to your requirements. This process will be simpler if you decide to keep the agent names unchanged. However, if you wish to change their names or increase the number of agents that the Smallville map can accommodate, you might need to directly edit the map using the [Tiled](https://www.mapeditor.org/) map editor.
 
-## <img src="https://joonsungpark.s3.amazonaws.com:443/static/assets/characters/profile/Wolfgang_Schulz.png" alt="Generative Wolfgang">   Crediting the Game Artists
-We strongly encourage you to support the following three artists who have provided the game assets for this project, especially if you are planning to use the assets included here for your own project. 
-
-Background art: [PixyMoon (@_PixyMoon _)](https://twitter.com/_PixyMoon_)
-
-Furniture/interior design: [LimeZu (@lime_px)](https://twitter.com/lime_px)
-
-Character design: [ぴぽ (@pipohi)](https://twitter.com/pipohi)
-
 
 ## <img src="https://joonsungpark.s3.amazonaws.com:443/static/assets/characters/profile/Eddy_Lin.png" alt="Generative Eddy">   Authors and Citation 
 
@@ -138,3 +129,13 @@ location = {San Francisco, CA, USA},
 series = {UIST '23}
 }
 ```
+
+## <img src="https://joonsungpark.s3.amazonaws.com:443/static/assets/characters/profile/Wolfgang_Schulz.png" alt="Generative Wolfgang">   Acknowledgements
+
+We encourage you to support the following three amazing artists who have designed the game assets for this project, especially if you are planning to use the assets included here for your own project: 
+* Background art: [PixyMoon (@_PixyMoon _)](https://twitter.com/_PixyMoon_)
+* Furniture/interior design: [LimeZu (@lime_px)](https://twitter.com/lime_px)
+* Character design: [ぴぽ (@pipohi)](https://twitter.com/pipohi)
+
+In addition, we thank Lindsay Popowski, Philip Guo, Michael Terry, and the Center for Advanced Study in the Behavioral Sciences (CASBS) community for their insights, discussions, and support. Lastly, all locations featured in Smallville are inspired by real-world locations that Joon has frequented as an undergraduate and graduate student---he thanks everyone there for feeding and supporting him all these years.
+
