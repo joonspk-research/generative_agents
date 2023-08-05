@@ -1,4 +1,5 @@
 
+
 # Generative Agents: Interactive Simulacra of Human Behavior 
 
 <p align="center" width="100%">
@@ -35,7 +36,7 @@ debug = True
 Replace `<Your OpenAI API>` with your OpenAI API key, and `<name>` with your name.
  
 ### Step 2. Install requirements.txt
-Install everything listed in the `requirements.txt` file (I strongly recommend first setting up a virtualenv as usual).
+Install everything listed in the `requirements.txt` file (I strongly recommend first setting up a virtualenv as usual). A note on Python version: we tested our environment on Python 3.9.12. 
 
 ## <img src="https://joonsungpark.s3.amazonaws.com:443/static/assets/characters/profile/Klaus_Mueller.png" alt="Generative Klaus">   Running a Simulation 
 To run a new simulation, you will need to concurrently start two servers: the environment server and the agent simulation server.
@@ -138,4 +139,5 @@ We encourage you to support the following three amazing artists who have designe
 * Character design: [ぴぽ (@pipohi)](https://twitter.com/pipohi)
 
 In addition, we thank Lindsay Popowski, Philip Guo, Michael Terry, and the Center for Advanced Study in the Behavioral Sciences (CASBS) community for their insights, discussions, and support. Lastly, all locations featured in Smallville are inspired by real-world locations that Joon has frequented as an undergraduate and graduate student---he thanks everyone there for feeding and supporting him all these years.
+
 
