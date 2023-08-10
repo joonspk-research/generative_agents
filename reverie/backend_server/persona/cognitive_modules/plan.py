@@ -429,7 +429,7 @@ def revise_identity(persona):
   thought_prompt = statements + "\n"
   thought_prompt += f"Given the statements above, how might we summarize {p_name}'s feelings about her days up to now?\n\n"
   thought_prompt += f"Write the response from {p_name}'s perspective."
-  thought_note = ChatGPT_single_request(plan_prompt)
+  thought_note = ChatGPT_single_request(thought_prompt)
   # print (thought_note)
 
   currently_prompt = f"Isabella Rodriguez's status from {(persona.scratch.curr_time - datetime.timedelta(days=1)).strftime('%A %B %d')}:\n"
