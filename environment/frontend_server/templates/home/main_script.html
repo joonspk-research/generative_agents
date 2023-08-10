@@ -78,6 +78,7 @@
 	// will be used in it. 
 	const game = new Phaser.Game(config);
 	let cursors;
+  let camera;
 	let player;
 	let showDebug = false;
 
@@ -106,6 +107,10 @@
 	// Important: tile_width % movement_speed has to be 0. 
 	// <movement_speed> determines how fast we move at each upate cylce. 
 	let movement_speed = 32; 
+
+  // Define min and max zoom levels
+  let minZoom = 0.25;
+  let maxZoom = 3;
 
 	// <timer_max> determines how frequently our update function will query the 
 	// frontend server. If it's higher, we wait longer cycles. 
@@ -271,12 +276,19 @@
 	                setOffset(0, 0);
 	  player.setDepth(-1);
 	  // Setting up the camera. 
-	  const camera = this.cameras.main;
+	  camera = this.cameras.main;
 	  camera.startFollow(player);
 	  camera.setBounds(0, 0, map.widthInPixels, map.heightInPixels);
 	  cursors = this.input.keyboard.createCursorKeys();
 
-	  // *** SET UP PERSONAS *** 
+    // Zooming
+    // Define keys for zooming in and out
+    zoomInKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.Q);
+    zoomOutKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.E);
+	  
+    camera.setZoom(1)
+
+    // *** SET UP PERSONAS *** 
 	  // We start by creating the game sprite objects. 
 	  for (let i=0; i<Object.keys(spawn_tile_loc).length; i++) { 
 	    let persona_name = Object.keys(spawn_tile_loc)[i];
@@ -365,6 +377,19 @@
 	    player.body.setVelocityY(camera_speed);
 	  }
 
+    // ** ZOOM CAMERA **
+
+    // Check for zoom in key press
+    if (zoomInKey.isDown) {
+      let newZoom = camera.zoom + 0.01;
+      camera.setZoom(Phaser.Math.Clamp(newZoom, minZoom, maxZoom));
+    }
+
+    // Check for zoom out key press
+    if (zoomOutKey.isDown) {
+      let newZoom = camera.zoom - 0.01;
+      camera.setZoom(Phaser.Math.Clamp(newZoom, minZoom, maxZoom));
+    }
 	  // console.log("phase: " + phase + ", step: " + step);
 	  // *** MOVE PERSONAS ***
 	  // Moving personas take place in three distinct phases: "process," "update,"
