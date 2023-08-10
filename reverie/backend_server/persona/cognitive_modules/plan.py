@@ -419,7 +419,7 @@ def revise_identity(persona):
 
   # print (";adjhfno;asdjao;idfjo;af", p_name)
   plan_prompt = statements + "\n"
-  plan_prompt += f"Given the statements above, is there anything that {p_name} should remember as she plans for"
+  plan_prompt += f"Given the statements above, is there anything that {p_name} should remember as they plan for"
   plan_prompt += f" *{persona.scratch.curr_time.strftime('%A %B %d')}*? "
   plan_prompt += f"If there is any scheduling information, be as specific as possible (include date, time, and location if stated in the statement)\n\n"
   plan_prompt += f"Write the response from {p_name}'s perspective."
@@ -427,12 +427,12 @@ def revise_identity(persona):
   # print (plan_note)
 
   thought_prompt = statements + "\n"
-  thought_prompt += f"Given the statements above, how might we summarize {p_name}'s feelings about her days up to now?\n\n"
+  thought_prompt += f"Given the statements above, how might we summarize {p_name}'s feelings about their days up to now?\n\n"
   thought_prompt += f"Write the response from {p_name}'s perspective."
-  thought_note = ChatGPT_single_request(plan_prompt)
+  thought_note = ChatGPT_single_request(thought_prompt)
   # print (thought_note)
 
-  currently_prompt = f"Isabella Rodriguez's status from {(persona.scratch.curr_time - datetime.timedelta(days=1)).strftime('%A %B %d')}:\n"
+  currently_prompt = f"{p_name}'s status from {(persona.scratch.curr_time - datetime.timedelta(days=1)).strftime('%A %B %d')}:\n"
   currently_prompt += f"{persona.scratch.currently}\n\n"
   currently_prompt += f"{p_name}'s thoughts at the end of {(persona.scratch.curr_time - datetime.timedelta(days=1)).strftime('%A %B %d')}:\n" 
   currently_prompt += (plan_note + thought_note).replace('\n', '') + "\n\n"
