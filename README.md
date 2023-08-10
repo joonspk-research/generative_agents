@@ -16,6 +16,8 @@ In the `reverie/backend_server` folder (where `reverie.py` is located), create a
 ```
 # Copy and paste your OpenAI API Key
 openai_api_key = "<Your OpenAI API>"
+# Edit the base URL if you are using a different OpenAI API
+openai_api_base = "https://api.openai.com/v1"
 # Put your name
 key_owner = "<Name>"
 

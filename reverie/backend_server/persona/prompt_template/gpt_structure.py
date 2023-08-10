@@ -12,6 +12,7 @@ import time
 from utils import *
 
 openai.api_key = openai_api_key
+openai.api_base = opean_api_base
 
 def temp_sleep(seconds=0.1):
   time.sleep(seconds)
