@@ -354,17 +354,19 @@
 	  const camera_speed = 400;
 	  // Stop any previous movement from the last frame
 	  player.body.setVelocity(0);
-	  if (cursors.left.isDown) {
-	    player.body.setVelocityX(-camera_speed);
-	  } 
-	  if (cursors.right.isDown) {
-	    player.body.setVelocityX(camera_speed);
-	  } 
-	  if (cursors.up.isDown) {
-	    player.body.setVelocityY(-camera_speed);
-	  } 
-	  if (cursors.down.isDown) {
-	    player.body.setVelocityY(camera_speed);
+      const speed_boost = cursors.shift.isDown ? 2 : 1;
+
+	  if (cursors.left.isDown || keys.left.isDown) {
+	    player.body.setVelocityX(-camera_speed * speed_boost);
+	  }
+	  if (cursors.right.isDown || keys.right.isDown) {
+	    player.body.setVelocityX(camera_speed * speed_boost);
+	  }
+	  if (cursors.up.isDown || keys.up.isDown) {
+	    player.body.setVelocityY(-camera_speed * speed_boost);
+	  }
+	  if (cursors.down.isDown || keys.down.isDown) {
+	    player.body.setVelocityY(camera_speed * speed_boost);
 	  }
 
 	  
