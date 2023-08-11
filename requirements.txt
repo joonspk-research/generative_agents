@@ -38,6 +38,7 @@ psycopg2-binary==2.9.5
 pycparser==2.21
 pyparsing==3.0.6
 PySocks==1.7.1
+pytest==7.4.0
 python-dateutil==2.8.2
 pytz==2021.3
 regex==2021.11.10
