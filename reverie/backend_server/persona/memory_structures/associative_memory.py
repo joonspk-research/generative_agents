@@ -295,7 +295,7 @@ class AssociativeMemory:
   def get_str_seq_chats(self): 
     ret_str = ""
     for count, event in enumerate(self.seq_chat): 
-      ret_str += f"with {event.object.content} ({event.description})\n"
+      ret_str += f"with {event.object} ({event.description})\n"
       ret_str += f'{event.created.strftime("%B %d, %Y, %H:%M:%S")}\n'
       for row in event.filling: 
         ret_str += f"{row[0]}: {row[1]}\n"
