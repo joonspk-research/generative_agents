@@ -66,3 +66,4 @@ wsproto==1.2.0
 yarl==1.8.2
 yellowbrick==1.5
 zipp==3.6.0
+python-dotenv==1.0.0
