@@ -132,7 +132,7 @@ series = {UIST '23}
 ## <img src="https://joonsungpark.s3.amazonaws.com:443/static/assets/characters/profile/Wolfgang_Schulz.png" alt="Generative Wolfgang">   Acknowledgements
 
 We encourage you to support the following three amazing artists who have designed the game assets for this project, especially if you are planning to use the assets included here for your own project: 
-* Background art: [PixyMoon (@_PixyMoon _)](https://twitter.com/_PixyMoon_)
+* Background art: [PixyMoon (@_PixyMoon\_)](https://twitter.com/_PixyMoon_)
 * Furniture/interior design: [LimeZu (@lime_px)](https://twitter.com/lime_px)
 * Character design: [ぴぽ (@pipohi)](https://twitter.com/pipohi)
 
