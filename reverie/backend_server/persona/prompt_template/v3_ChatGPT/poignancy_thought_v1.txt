@@ -1,6 +1,6 @@
 poignancy_thought_v1.txt
 
-!<INPUT 1>!: agent name
+!<INPUT 0>!: agent name
 !<INPUT 1>!: iss
 !<INPUT 2>!: name 
 !<INPUT 3>!: event description
