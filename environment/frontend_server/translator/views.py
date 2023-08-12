@@ -117,7 +117,7 @@ def home(request):
   with open(f_curr_step) as json_file:  
     step = json.load(json_file)["step"]
 
-  os.remove(f_curr_step)
+  # os.remove(f_curr_step)
 
   persona_names = []
   persona_names_set = set()
