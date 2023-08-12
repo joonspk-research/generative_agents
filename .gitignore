@@ -100,3 +100,9 @@ ENV/
 
 # Rope project settings
 .ropeproject
+
+# test storage
+environment/frontend_server/storage/test-*
+
+# vscode
+.vscode/settings.json
