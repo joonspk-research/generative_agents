@@ -16,6 +16,8 @@ In the `reverie/backend_server` folder (where `reverie.py` is located), create a
 ```
 # Select the GPT4All Model you'll use for the simulation. See: https://observablehq.com/@simonw/gpt4all-models
 gpt4all_model="orca-mini-3b.ggmlv3.q4_0.bin"
+max_tokens = 30
+temperature = 0.5
 
 # Put your name
 key_owner = "<Name>"
