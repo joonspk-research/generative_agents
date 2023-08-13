@@ -273,8 +273,8 @@ def get_embedding(text):
 
 
 if __name__ == '__main__':
-  gpt_parameter = {"engine": "text-davinci-003", "max_tokens": 50, 
-                   "temperature": 0, "top_p": 1, "stream": False,
+  gpt_parameter = {"max_tokens": max_tokens, 
+                   "temperature": temperature, "top_p": 1, "stream": False,
                    "frequency_penalty": 0, "presence_penalty": 0, 
                    "stop": ['"']}
   curr_input = ["driving to a friend's house"]
