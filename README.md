@@ -14,6 +14,9 @@ To set up your environment, you will need to generate a `utils.py` file that con
 ### Step 1. Generate Utils File
 In the `reverie/backend_server` folder (where `reverie.py` is located), create a new file titled `utils.py` and copy and paste the content below into the file:
 ```
+# Select the GPT4All Model you'll use for the simulation. See: https://observablehq.com/@simonw/gpt4all-models
+gpt4all_model="orca-mini-3b.ggmlv3.q4_0.bin"
+
 # Put your name
 key_owner = "<Name>"
 
