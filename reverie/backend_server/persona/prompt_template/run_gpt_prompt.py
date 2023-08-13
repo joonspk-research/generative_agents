@@ -372,10 +372,25 @@ def run_gpt_prompt_task_decomp(persona,
         _cr += [i]
     for count, i in enumerate(_cr): 
       k = [j.strip() for j in i.split("(duration in minutes:")]
+      # Ensure there are enough elements in k
+      if len(k) < 2:
+          print(f"Warning: Unexpected string structure in '{i}'. Missing '(duration in minutes:' delimiter.")
+          continue
+    
       task = k[0]
-      if task[-1] == ".": 
+      # Error thrown when task string is empty 
+      if task and task[-1] == ".": 
         task = task[:-1]
-      duration = int(k[1].split(",")[0].strip())
+      
+      # Ensure there are enough elements in k
+      try:
+          duration = int(k[1].split(",")[0].strip())
+      except ValueError:
+          # Handle the case when the conversion to int fails
+          print(f"Error: Failed to convert '{k[1].split(',')[0].strip()}' to integer.")
+          duration = 0
+          continue
+  
       cr += [[task, duration]]
 
     total_expected_min = int(prompt.split("(total duration in minutes")[-1]

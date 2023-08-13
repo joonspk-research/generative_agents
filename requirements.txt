@@ -24,6 +24,7 @@ importlib-metadata==4.8.2
 jmespath==1.0.1
 joblib>=1.1.1
 kiwisolver==1.4.4
+langchain==0.0.260
 matplotlib==3.7.2
 multidict==6.0.4
 nltk==3.6.5

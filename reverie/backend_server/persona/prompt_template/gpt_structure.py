@@ -10,115 +10,81 @@ import openai
 import time 
 
 from utils import *
+from langchain.llms import Ollama
+from langchain.llms import OpenAI
+from langchain.llms import LlamaCpp
+from langchain.callbacks.manager import CallbackManager
+from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
 
-openai.api_key = openai_api_key
+# ============================================================================
+# ################### [Set LLM] ###################
+# ============================================================================
+
+### **** OpenAI **** 
+'''
+llm = OpenAI(temperature=0,model_name="gpt-3.5-turbo-16k")
+'''
+
+### **** Anthropic **** 
+'''
+llm = ChatAnthropic(model_name="claude-2", temperature=0)
+'''
+
+### *** Ollama (Llama2-13b) *** 
+''' 
+llm = Ollama(base_url="http://localhost:11434",
+              model="llama2",
+              callback_manager = CallbackManager([StreamingStdOutCallbackHandler()]))
+'''
+  
+### *** Llama.cpp (Llama2-13b) *** ###
+n_gpu_layers = 1  # Metal set to 1 is enough.
+n_batch = 512  # Should be between 1 and n_ctx, consider the amount of RAM of your Apple Silicon Chip.
+callback_manager = CallbackManager([StreamingStdOutCallbackHandler()])
+llm = LlamaCpp(
+    model_path="/Users/rlm/Desktop/Code/llama.cpp/llama-2-13b-chat.ggmlv3.q4_0.bin",
+    n_gpu_layers=n_gpu_layers,
+    n_batch=n_batch,
+    n_ctx=4096,
+    f16_kv=True,  # MUST set to True, otherwise you will run into problem after a couple of calls
+    callback_manager=callback_manager,
+    verbose=True,
+)
 
 def temp_sleep(seconds=0.1):
   time.sleep(seconds)
 
 def ChatGPT_single_request(prompt): 
   temp_sleep()
-
-  completion = openai.ChatCompletion.create(
-    model="gpt-3.5-turbo", 
-    messages=[{"role": "user", "content": prompt}]
-  )
-  return completion["choices"][0]["message"]["content"]
-
+  try:
+    response = llm(prompt)
+  except ValueError:
+    print("Requested tokens exceed context window")
+    ### TODO: Add map-reduce or splitter to handle this error.
+    return "LLM ERROR"
+  return response
 
 # ============================================================================
 # #####################[SECTION 1: CHATGPT-3 STRUCTURE] ######################
 # ============================================================================
 
-def GPT4_request(prompt): 
+def ChatGPT_request(prompt,parameters): 
   """
-  Given a prompt and a dictionary of GPT parameters, make a request to OpenAI
-  server and returns the response. 
+  Given a prompt, make a request to LLM server and returns the response. 
   ARGS:
-    prompt: a str prompt
-    gpt_parameter: a python dictionary with the keys indicating the names of  
-                   the parameter and the values indicating the parameter 
-                   values.   
+    prompt: a str prompt 
+    parameters: optional
   RETURNS: 
-    a str of GPT-3's response. 
-  """
-  temp_sleep()
-
-  try: 
-    completion = openai.ChatCompletion.create(
-    model="gpt-4", 
-    messages=[{"role": "user", "content": prompt}]
-    )
-    return completion["choices"][0]["message"]["content"]
-  
-  except: 
-    print ("ChatGPT ERROR")
-    return "ChatGPT ERROR"
-
-
-def ChatGPT_request(prompt): 
-  """
-  Given a prompt and a dictionary of GPT parameters, make a request to OpenAI
-  server and returns the response. 
-  ARGS:
-    prompt: a str prompt
-    gpt_parameter: a python dictionary with the keys indicating the names of  
-                   the parameter and the values indicating the parameter 
-                   values.   
-  RETURNS: 
-    a str of GPT-3's response. 
+    a str of LLM's response. 
   """
   # temp_sleep()
-  try: 
-    completion = openai.ChatCompletion.create(
-    model="gpt-3.5-turbo", 
-    messages=[{"role": "user", "content": prompt}]
-    )
-    return completion["choices"][0]["message"]["content"]
-  
-  except: 
-    print ("ChatGPT ERROR")
-    return "ChatGPT ERROR"
-
-
-def GPT4_safe_generate_response(prompt, 
-                                   example_output,
-                                   special_instruction,
-                                   repeat=3,
-                                   fail_safe_response="error",
-                                   func_validate=None,
-                                   func_clean_up=None,
-                                   verbose=False): 
-  prompt = 'GPT-3 Prompt:\n"""\n' + prompt + '\n"""\n'
-  prompt += f"Output the response to the prompt above in json. {special_instruction}\n"
-  prompt += "Example output json:\n"
-  prompt += '{"output": "' + str(example_output) + '"}'
-
-  if verbose: 
-    print ("CHAT GPT PROMPT")
-    print (prompt)
-
-  for i in range(repeat): 
-
-    try: 
-      curr_gpt_response = GPT4_request(prompt).strip()
-      end_index = curr_gpt_response.rfind('}') + 1
-      curr_gpt_response = curr_gpt_response[:end_index]
-      curr_gpt_response = json.loads(curr_gpt_response)["output"]
-      
-      if func_validate(curr_gpt_response, prompt=prompt): 
-        return func_clean_up(curr_gpt_response, prompt=prompt)
-      
-      if verbose: 
-        print ("---- repeat count: \n", i, curr_gpt_response)
-        print (curr_gpt_response)
-        print ("~~~~")
-
-    except: 
-      pass
-
-  return False
-
+  try:
+    response = llm(prompt)
+  except ValueError:
+    print("Requested tokens exceed context window")
+    ### TODO: Add map-reduce or splitter to handle this error.
+    return "LLM ERROR"
+  return response
 
 def ChatGPT_safe_generate_response(prompt, 
                                    example_output,
@@ -135,7 +101,7 @@ def ChatGPT_safe_generate_response(prompt,
   prompt += '{"output": "' + str(example_output) + '"}'
 
   if verbose: 
-    print ("CHAT GPT PROMPT")
+    print ("LLM PROMPT")
     print (prompt)
 
   for i in range(repeat): 
@@ -194,35 +160,23 @@ def ChatGPT_safe_generate_response_OLD(prompt,
 # ###################[SECTION 2: ORIGINAL GPT-3 STRUCTURE] ###################
 # ============================================================================
 
-def GPT_request(prompt, gpt_parameter): 
+def GPT_request(prompt,parameters): 
   """
-  Given a prompt and a dictionary of GPT parameters, make a request to OpenAI
-  server and returns the response. 
+  Given a prompt, make a request to LLM server and returns the response. 
   ARGS:
-    prompt: a str prompt
-    gpt_parameter: a python dictionary with the keys indicating the names of  
-                   the parameter and the values indicating the parameter 
-                   values.   
+    prompt: a str prompt 
+    parameters: optional 
   RETURNS: 
-    a str of GPT-3's response. 
+    a str of LLM's response. 
   """
-  temp_sleep()
-  try: 
-    response = openai.Completion.create(
-                model=gpt_parameter["engine"],
-                prompt=prompt,
-                temperature=gpt_parameter["temperature"],
-                max_tokens=gpt_parameter["max_tokens"],
-                top_p=gpt_parameter["top_p"],
-                frequency_penalty=gpt_parameter["frequency_penalty"],
-                presence_penalty=gpt_parameter["presence_penalty"],
-                stream=gpt_parameter["stream"],
-                stop=gpt_parameter["stop"],)
-    return response.choices[0].text
-  except: 
-    print ("TOKEN LIMIT EXCEEDED")
-    return "TOKEN LIMIT EXCEEDED"
-
+  # temp_sleep()
+  try:
+    response = llm(prompt)
+  except ValueError:
+    print("Requested tokens exceed context window")
+    ### TODO: Add map-reduce or splitter to handle this error.
+    return "LLM ERROR"
+  return response
 
 def generate_prompt(curr_input, prompt_lib_file): 
   """
