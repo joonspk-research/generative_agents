@@ -21,7 +21,7 @@ def temp_sleep(seconds=0.1):
 def ChatGPT_single_request(prompt): 
   temp_sleep()
 
-  output = model.generate(prompt, max_tokens=30)
+  output = model.generate(prompt, max_tokens=max_tokens)
   return output
 
 # ============================================================================
@@ -42,7 +42,7 @@ def GPT4All_request(prompt):
   temp_sleep()
 
   try: 
-    output = model.generate(prompt, max_tokens=30)
+    output = model.generate(prompt, max_tokens=max_tokens)
     return output
   except: 
     print ("ChatGPT ERROR")
@@ -63,7 +63,7 @@ def ChatGPT_request(prompt):
   """
   # temp_sleep()
   try: 
-    output = model.generate(prompt, max_tokens=3)
+    output = model.generate(prompt, max_tokens=max_tokens)
     return output
   except: 
     print ("ChatGPT ERROR")
