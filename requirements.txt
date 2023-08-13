@@ -28,7 +28,7 @@ matplotlib==3.7.2
 multidict==6.0.4
 nltk==3.6.5
 numpy==1.25.2
-openai==0.27.0
+gpt4all==1.0.5
 outcome==1.2.0
 packaging==23.0
 pandas==2.0.3
