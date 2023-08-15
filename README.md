@@ -1,26 +1,31 @@
 
 
-# Generative Agents: Interactive Simulacra of Human Behavior
+# Generative Agents with configurable LLM
 
 <p align="center" width="100%">
 <img src="cover.png" alt="Smallville" style="width: 80%; min-width: 300px; display: block; margin: auto;">
 </p>
 
-This repository accompanies our research paper titled "[Generative Agents: Interactive Simulacra of Human Behavior](https://arxiv.org/abs/2304.03442)." It contains our core simulation module for  generative agents—computational agents that simulate believable human behaviors—and their game environment. Below, we document the steps for setting up the simulation environment on your local machine and for replaying the simulation as a demo animation.
+This is a fork of the repository that accompanies the research paper titled "[Generative Agents: Interactive Simulacra of Human Behavior](https://arxiv.org/abs/2304.03442)." 
+
+The configures the generate agents simulation to run with various LLMs.
+
+In particular, using a local open source model, such as Llama2, has benefit given [the high cost of running simulations](https://twitter.com/NickADobos/status/1690790151503724544?s=20).
 
 ## <img src="https://joonsungpark.s3.amazonaws.com:443/static/assets/characters/profile/Isabella_Rodriguez.png" alt="Generative Isabella">   Setting Up the Environment 
 
-### Step 1. [Optional] To run simulation locally, select an open source LLM of interest
-[Ollama](https://ollama.ai) is one option for easy / quick setup:
+### Step 1. To run simulation locally, select an open source LLM of interest
+I use [Ollama](https://ollama.ai) for easy / quick setup:
 * [Download](https://ollama.ai/download)
-* Fetch a model, e.g., for `Llama-7b` run `ollama pull llama2`
-* Run `ollama run llama2` 
+* Fetch a model, e.g., for `Llama-13b` run `ollama pull llama2:13b`
 * The code uses [LangChain's integration](https://python.langchain.com/docs/integrations/llms/ollama) for easy model-swapping
-
+ 
 LlamaCpp or GPT4All are other great options: 
 * Follow the steps linked [here](https://python.langchain.com/docs/use_cases/question_answering/how_to/local_retrieval_qa) for LangChain's integration
 
-The LLM is set at the top of gpt_structure.py using LangChain's integration. 
+The LLM is set at the top of `gpt_structure.py`.
+
+The rest of the steps follow what was mentioned in the origional repo:
 
 ### Step 2. Generate Utils File
 In the `reverie/backend_server` folder (where `reverie.py` is located), create a new file titled `utils.py` and copy and paste the content below into the file:
