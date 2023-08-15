@@ -33,7 +33,7 @@ outcome==1.2.0
 packaging==23.0
 pandas==2.0.3
 patsy==0.5.3
-Pillow==8.4.0
+Pillow==9.5.0
 psycopg2-binary==2.9.5
 pycparser==2.21
 pyparsing==3.0.6
