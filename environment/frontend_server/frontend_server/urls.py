@@ -23,7 +23,7 @@ from translator import views as translator_views
 
 urlpatterns = [
     url(r'^$', translator_views.landing, name='landing'),
-    url(r'^simulator_home$', translator_views.home, name='home'),
+    url(r'^simulator_home/$', translator_views.home, name='home'),
     url(r'^demo/(?P<sim_code>[\w-]+)/(?P<step>[\w-]+)/(?P<play_speed>[\w-]+)/$', translator_views.demo, name='demo'),
     url(r'^replay/(?P<sim_code>[\w-]+)/(?P<step>[\w-]+)/$', translator_views.replay, name='replay'),
     url(r'^replay_persona_state/(?P<sim_code>[\w-]+)/(?P<step>[\w-]+)/(?P<persona_name>[\w-]+)/$', translator_views.replay_persona_state, name='replay_persona_state'),
