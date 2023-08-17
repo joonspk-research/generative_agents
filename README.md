@@ -81,6 +81,28 @@ You may have noticed that all character sprites in the replay look identical. We
 To start the demo, go to the following address on your browser: `http://localhost:8000/demo/<simulation-name>/<starting-time-step>/<simulation-speed>`. Note that `<simulation-name>` and `<starting-time-step>` denote the same things as mentioned above. `<simulation-speed>` can be set to control the demo speed, where 1 is the slowest, and 5 is the fastest. For instance, visiting the following link will start a pre-simulated example, beginning at time-step 1, with a medium demo speed:  
 [http://localhost:8000/demo/July1_the_ville_isabella_maria_klaus-step-3-20/1/3/](http://localhost:8000/demo/July1_the_ville_isabella_maria_klaus-step-3-20/1/3/)
 
+### Docker
+Alternatively, it is possible to run the environment server and the simulation server using Docker. To do this, first make sure that you have Docker installed on your machine. Then, run the following command to build the Docker image:
+
+    docker build -f docker/Dockerfile -t generative_agents .
+
+Then, run the following command to start the Docker container. You will be presented with the same prompt as in Step 3 after running `python reverie.py`:
+    
+    docker run -it -p 8000:8000 -e OPENAI_API_KEY=<OPENAI_API_KEY> -e OPENAI_API_NAME=<OPENAI_API_NAME> -v $(pwd)/environment:/app/environment generative_agents
+
+Note that you will need to replace `<OPENAI_API_KEY>` and `<OPENAI_API_NAME>` with your OpenAI API key and API key name, respectively.
+
+You can then access the environment server at [http://localhost:8000]. You can customise host and port for the simulation server through `DJANGO_HOST` and `DJANGO_PORT` environment variables:
+
+    # the server will be located at localhost:9000
+    # note that we need to set the host to 0.0.0.0 inside the container so that it will be correctly visible from the outside
+    docker run -it -p 9000:9000 \
+        -e OPENAI_API_KEY=<OPENAI_API_KEY> \
+        -e OPENAI_API_NAME=<OPENAI_API_NAME> \
+        -e DJANGO_HOST=0.0.0.0 \
+        -e DJANGO_PORT=9000 \
+        -v $(pwd)/environment:/app/environment generative_agents
+
 ### Tips
 We've noticed that OpenAI's API can hang when it reaches the hourly rate limit. When this happens, you may need to restart your simulation. For now, we recommend saving your simulation often as you progress to ensure that you lose as little of the simulation as possible when you do need to stop and rerun it. Running these simulations, at least as of early 2023, could be somewhat costly, especially when there are many agents in the environment.
 
