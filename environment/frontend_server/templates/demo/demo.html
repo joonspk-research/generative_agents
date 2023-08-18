@@ -110,9 +110,14 @@
 <script src='https://cdn.jsdelivr.net/npm/phaser@3.55.2/dist/phaser.js'></script>
 {% include 'demo/main_script.html' %}
 <script>
+	var myInterval = null;
 	{% for p in persona_names %}
 		$('#on_screen_det_trigger-{{p.underscore}}').click(function() {
-			$('#on_screen_det_content-init').css({
+			if(myInterval != null){
+				clearInterval(myInterval);
+			}
+			myInterval = setInterval(()=>{
+				$('#on_screen_det_content-init').css({
 		      'display': 'none',
 		    });
 			{% for p_i in persona_names %}
@@ -141,6 +146,8 @@
 
 	    document.getElementById("temp_focus").innerHTML = "{{p.underscore}}";
 
+			},500)
+			
 		});
 	{% endfor %}
 </script>
