@@ -15,7 +15,7 @@ To set up your environment, you will need to generate a `utils.py` file that con
 In the `reverie/backend_server` folder (where `reverie.py` is located), create a new file titled `utils.py` and copy and paste the content below into the file:
 ```
 # Copy and paste your OpenAI API Key
-openai_api_key = "<Your OpenAI API>"
+openai_api_key = "<Your OpenAI API Key>"
 # Put your name
 key_owner = "<Name>"
 
@@ -31,7 +31,7 @@ collision_block_id = "32125"
 # Verbose 
 debug = True
 ```
-Replace `<Your OpenAI API>` with your OpenAI API key, and `<name>` with your name.
+Replace `<Your OpenAI API Key>` with your OpenAI API key, and `<name>` with your name.
  
 ### Step 2. Install requirements.txt
 Install everything listed in the `requirements.txt` file (I strongly recommend first setting up a virtualenv as usual). A note on Python version: we tested our environment on Python 3.9.12. 

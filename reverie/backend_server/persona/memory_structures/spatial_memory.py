@@ -92,7 +92,7 @@ class MemoryTree:
     INPUT
       temp_address: optional arena address
     OUTPUT 
-      str list of all accessible game objects in the gmae arena. 
+      str list of all accessible game objects in the game arena. 
     EXAMPLE STR OUTPUT
       "phone, charger, bed, nightstand"
     """
