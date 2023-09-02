@@ -8,6 +8,7 @@ import json
 import random
 import openai
 import time 
+import litellm
 
 from utils import *
 
@@ -19,7 +20,7 @@ def temp_sleep(seconds=0.1):
 def ChatGPT_single_request(prompt): 
   temp_sleep()
 
-  completion = openai.ChatCompletion.create(
+  completion = litellm.completion(
     model="gpt-3.5-turbo", 
     messages=[{"role": "user", "content": prompt}]
   )
@@ -45,7 +46,7 @@ def GPT4_request(prompt):
   temp_sleep()
 
   try: 
-    completion = openai.ChatCompletion.create(
+    completion = litellm.completion(
     model="gpt-4", 
     messages=[{"role": "user", "content": prompt}]
     )
@@ -70,7 +71,7 @@ def ChatGPT_request(prompt):
   """
   # temp_sleep()
   try: 
-    completion = openai.ChatCompletion.create(
+    completion = litellm.completion(
     model="gpt-3.5-turbo", 
     messages=[{"role": "user", "content": prompt}]
     )
