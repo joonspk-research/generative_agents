@@ -57,6 +57,10 @@ class ReverieServer:
     sim_folder = f"{fs_storage}/{self.sim_code}"
     copyanything(fork_folder, sim_folder)
 
+    # fix the missing 'movement' folder bug
+    movement_folder = f"{sim_folder}/movement"
+    create_folder_if_not_there(movement_folder)
+
     with open(f"{sim_folder}/reverie/meta.json") as json_file:  
       reverie_meta = json.load(json_file)
 
