@@ -14,6 +14,13 @@ To set up your environment, you will need to generate a `utils.py` file that con
 ### Step 1. Generate Utils File
 In the `reverie/backend_server` folder (where `reverie.py` is located), create a new file titled `utils.py` and copy and paste the content below into the file:
 ```
+# Select the GPT4All Model you'll use for the simulation. See: https://observablehq.com/@simonw/gpt4all-models
+gpt4all_model="orca-mini-3b.ggmlv3.q4_0.bin"
+max_tokens = 30
+temperature = 0.5
+
+# Put your name
+key_owner = "<Name>"
 
 maze_assets_loc = "../../environment/frontend_server/static_dirs/assets"
 env_matrix = f"{maze_assets_loc}/the_ville/matrix"
@@ -27,7 +34,7 @@ collision_block_id = "32125"
 # Verbose 
 debug = True
 ```
-Replace `<Your OpenAI API>` with your OpenAI API key, and `<name>` with your name.
+Replace `<name>` with your name.
  
 ### Step 2. Install requirements.txt
 Install everything listed in the `requirements.txt` file (I strongly recommend first setting up a virtualenv as usual). A note on Python version: we tested our environment on Python 3.9.12. 
@@ -108,12 +115,12 @@ For a more involved customization, you will need to author your own base simulat
 
 ## <img src="https://joonsungpark.s3.amazonaws.com:443/static/assets/characters/profile/Eddy_Lin.png" alt="Generative Eddy">   Authors and Citation 
 
-**Authors:** Joon Sung Park, Joseph C. O'Brien, Carrie J. Cai, Meredith Ringel Morris, Percy Liang, Michael S. Bernstein
+**Authors:** Cassini Saturn, Joon Sung Park, Joseph C. O'Brien, Carrie J. Cai, Meredith Ringel Morris, Percy Liang, Michael S. Bernstein
 
 Please cite our paper if you use the code or data in this repository. 
 ```
 @inproceedings{Park2023GenerativeAgents,  
-author = {Park, Joon Sung and O'Brien, Joseph C. and Cai, Carrie J. and Morris, Meredith Ringel and Liang, Percy and Bernstein, Michael S.},  
+author = {Cassini, Saturn and Park, Joon Sung and O'Brien, Joseph C. and Cai, Carrie J. and Morris, Meredith Ringel and Liang, Percy and Bernstein, Michael S.},  
 title = {Generative Agents: Interactive Simulacra of Human Behavior},  
 year = {2023},  
 publisher = {Association for Computing Machinery},  
@@ -128,7 +135,7 @@ series = {UIST '23}
 ## <img src="https://joonsungpark.s3.amazonaws.com:443/static/assets/characters/profile/Wolfgang_Schulz.png" alt="Generative Wolfgang">   Acknowledgements
 
 We encourage you to support the following three amazing artists who have designed the game assets for this project, especially if you are planning to use the assets included here for your own project: 
-* Background art: [PixyMoon (@_PixyMoon\_)](https://twitter.com/_PixyMoon_)
+* Background art: [PixyMoon (@_PixyMoon _)](https://twitter.com/_PixyMoon_)
 * Furniture/interior design: [LimeZu (@lime_px)](https://twitter.com/lime_px)
 * Character design: [ぴぽ (@pipohi)](https://twitter.com/pipohi)
 
