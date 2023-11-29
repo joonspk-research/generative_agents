@@ -203,7 +203,13 @@ class Maze:
             self.address_tiles[add].add((j, i))
           else: 
             self.address_tiles[add] = set([(j, i)])
-
+          """
+          if "Cafe" in add:
+            print("address_tiles ==========================================================\n")
+            print (add)
+            print (self.address_tiles[add])
+            print("==========================================================\n")
+          """
 
   def turn_coordinate_to_tile(self, px_coordinate): 
     """

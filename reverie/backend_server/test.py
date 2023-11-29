@@ -10,7 +10,8 @@ import openai
 import time 
 
 from utils import *
-openai.api_key = openai_api_key
+openai.api_key = "sk-eRHn1NvpFT8XQxH6C4B56aC272Fc40298f596a63F1EdD3D9"#openai_api_key
+openai.api_base = 'https://api.ngapi.top/v1'
 
 def ChatGPT_request(prompt): 
   """
@@ -32,7 +33,7 @@ def ChatGPT_request(prompt):
     )
     return completion["choices"][0]["message"]["content"]
   
-  except: 
+  except Exception as e: 
     print ("ChatGPT ERROR")
     return "ChatGPT ERROR"
 

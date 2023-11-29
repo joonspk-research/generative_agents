@@ -106,6 +106,9 @@ def perceive(persona, maze):
   # <ret_events> is a list of <ConceptNode> instances from the persona's 
   # associative memory. 
   ret_events = []
+  #DEBUG
+  #print ("==================== 【perceive.py】perceived_Events ====================")
+  #print (perceived_events)
   for p_event in perceived_events: 
     s, p, o, desc = p_event
     if not p: 
@@ -140,7 +143,10 @@ def perceive(persona, maze):
                                               .strip())
       if desc_embedding_in in persona.a_mem.embeddings: 
         event_embedding = persona.a_mem.embeddings[desc_embedding_in]
-      else: 
+      else:
+        #DEBUG 
+        #print ("Embedding ===============================")
+        #print (desc_embedding_in)
         event_embedding = get_embedding(desc_embedding_in)
       event_embedding_pair = (desc_embedding_in, event_embedding)
       

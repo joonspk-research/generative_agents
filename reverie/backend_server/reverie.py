@@ -55,6 +55,7 @@ class ReverieServer:
     # reverie/meta/json's fork variable. 
     self.sim_code = sim_code
     sim_folder = f"{fs_storage}/{self.sim_code}"
+    print (fork_folder)
     copyanything(fork_folder, sim_folder)
 
     with open(f"{sim_folder}/reverie/meta.json") as json_file:  
@@ -180,12 +181,12 @@ class ReverieServer:
     reverie_meta_f = f"{sim_folder}/reverie/meta.json"
     with open(reverie_meta_f, "w") as outfile: 
       outfile.write(json.dumps(reverie_meta, indent=2))
-
+      print("Saved at {}".format(reverie_meta_f))
     # Save the personas.
     for persona_name, persona in self.personas.items(): 
       save_folder = f"{sim_folder}/personas/{persona_name}/bootstrap_memory"
       persona.save(save_folder)
-
+      print("Saved at {}".format(save_folder))
 
   def start_path_tester_server(self): 
     """
@@ -272,7 +273,7 @@ class ReverieServer:
 
       except:
         pass
-
+      #print("[start_path_tester_server] seelp...")
       time.sleep(self.server_sleep * 10)
 
 
@@ -302,12 +303,13 @@ class ReverieServer:
     # <game_obj_cleanup> is used for that. 
     game_obj_cleanup = dict()
 
+    i_print = 0
     # The main while loop of Reverie. 
     while (True): 
       # Done with this iteration if <int_counter> reaches 0. 
       if int_counter == 0: 
         break
-
+      #import pdb;pdb.set_trace()
       # <curr_env_file> file is the file that our frontend outputs. When the
       # frontend has done its job and moved the personas, then it will put a 
       # new environment file that matches our step count. That's when we run 
@@ -322,8 +324,10 @@ class ReverieServer:
             new_env = json.load(json_file)
             env_retrieved = True
         except: 
+          print("cannot read file. {}".format(curr_env_file))
           pass
       
+        #import pdb;pdb.set_trace()
         if env_retrieved: 
           # This is where we go through <game_obj_cleanup> to clean up all 
           # object actions that were used in this cylce. 
@@ -400,7 +404,7 @@ class ReverieServer:
           curr_move_file = f"{sim_folder}/movement/{self.step}.json"
           with open(curr_move_file, "w") as outfile: 
             outfile.write(json.dumps(movements, indent=2))
-
+            print("Save file {}".format(curr_move_file))
           # After this cycle, the world takes one step forward, and the 
           # current time moves by <sec_per_step> amount. 
           self.step += 1
@@ -408,7 +412,11 @@ class ReverieServer:
 
           int_counter -= 1
           
-      # Sleep so we don't burn our machines. 
+      # Sleep so we don't burn our machines.
+      else: 
+        i_print +=1
+        if i_print%10==0:
+          print("waiting for {}".format(curr_env_file))
       time.sleep(self.server_sleep)
 
 
@@ -426,7 +434,7 @@ class ReverieServer:
     print ("constructs powered by generative agents architecture and LLM. We")
     print ("clarify that these agents lack human-like agency, consciousness,")
     print ("and independent decision-making.\n---")
-
+    
     # <sim_folder> points to the current simulation folder.
     sim_folder = f"{fs_storage}/{self.sim_code}"
 
@@ -605,8 +613,11 @@ if __name__ == '__main__':
   #                    "July1_the_ville_isabella_maria_klaus-step-3-21")
   # rs.open_server()
 
-  origin = input("Enter the name of the forked simulation: ").strip()
-  target = input("Enter the name of the new simulation: ").strip()
+  origin = "base_the_ville_isabella_maria_klaus_fast" #
+  #origin = input("Enter the name of the forked simulation: ").strip()
+  current_time = datetime.datetime.now()
+  formatted_time = current_time.strftime("%Y%m%d%H%M")
+  target = formatted_time #input("Enter the name of the new simulation: ").strip()
 
   rs = ReverieServer(origin, target)
   rs.open_server()
