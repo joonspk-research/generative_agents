@@ -39,6 +39,15 @@
 		let x = spans[i].innerText.split(",");
 		persona_names[x[0]] = [parseInt(x[1]), parseInt(x[2])]
 	}
+	// addEventListener to interact with the people
+	function displayBox(){
+    var input = prompt("Geben Sie ein, was die Person als nächstes machen soll");
+    console.log(input);
+	}
+	for(var i = 0, l = spans.length; i < l; i++){
+		let x = spans[i].innerText.split(",");
+    	x[i].addEventListener("click", displayBox())
+	}
 
 
 	// Phaser 3.0 global settings. 
