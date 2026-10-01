@@ -9,12 +9,72 @@ import re
 import datetime
 import sys
 import ast
+import os
 
 sys.path.append('../../')
 
 from global_methods import *
 from persona.prompt_template.gpt_structure import *
 from persona.prompt_template.print_prompt import *
+
+# ---------------------------------------------------------------------------
+# Experiment toggle: attribution-oriented reflection prompts.
+#
+# The 2x2 ablation needs to separate the effect of injected social-outcome
+# events from the effect of the reflection prompt wording. The prompt templates
+# on disk are kept at their upstream (neutral) wording; the attribution framing
+# is applied here at runtime so a single on/off switch controls it.
+#
+# Env var: JW_ATTRIBUTION_PROMPTS = 1 (default) | 0
+# ---------------------------------------------------------------------------
+ATTRIBUTION_PROMPTS_ENABLED = (
+    os.getenv("JW_ATTRIBUTION_PROMPTS", "1").strip().lower()
+    in ("1", "true", "yes", "on")
+)
+
+ATTRIBUTION_PROMPT_REWRITES = {
+    "insight_and_evidence": (
+        " high-level insights can you infer from the above statements?",
+        " high-level attribution insights can you infer from the above "
+        "statements about why events happened and what they imply about "
+        "character, effort, or competence?",
+    ),
+    "focal_pt": (
+        " most salient high-level questions we can answer about the subjects "
+        "grounded in the statements?",
+        " most salient high-level causal attribution questions we can answer "
+        "about why outcomes are happening this way and what they suggest about "
+        "the people involved?",
+    ),
+}
+
+
+def apply_attribution_framing(prompt, kind):
+  """Swap a rendered reflection prompt's question line for its causal-
+  attribution variant, but only when JW_ATTRIBUTION_PROMPTS is enabled.
+
+  INPUT
+    prompt: the fully rendered prompt string
+    kind:   "insight_and_evidence" or "focal_pt"
+  OUTPUT
+    the (possibly rewritten) prompt string
+  """
+  if not ATTRIBUTION_PROMPTS_ENABLED or not prompt:
+    return prompt
+
+  rewrite = ATTRIBUTION_PROMPT_REWRITES.get(kind)
+  if not rewrite:
+    return prompt
+
+  original, replacement = rewrite
+  if original in prompt:
+    return prompt.replace(original, replacement)
+
+  # Template wording drifted from what we expect; leave the prompt untouched
+  # rather than corrupting it.
+  print(f"[JW] attribution rewrite skipped for {kind}: anchor text not found")
+  return prompt
+
 
 def get_random_alphanumeric(i=6, j=6): 
   """
@@ -2120,6 +2180,7 @@ def run_gpt_prompt_focal_pt(persona, statements, n, test_input=None, verbose=Fal
   prompt_template = "persona/prompt_template/v3_ChatGPT/generate_focal_pt_v1.txt" ########
   prompt_input = create_prompt_input(persona, statements, n)  ########
   prompt = generate_prompt(prompt_input, prompt_template)
+  prompt = apply_attribution_framing(prompt, "focal_pt")
   example_output = '["What should Jane do for lunch", "Does Jane like strawberry", "Who is Jane"]' ########
   special_instruction = "Output must be a list of str." ########
   fail_safe = get_fail_safe(n) ########
@@ -2191,6 +2252,7 @@ def run_gpt_prompt_insight_and_guidance(persona, statements, n, test_input=None,
   prompt_template = "persona/prompt_template/v2/insight_and_evidence_v1.txt"
   prompt_input = create_prompt_input(persona, statements, n)
   prompt = generate_prompt(prompt_input, prompt_template)
+  prompt = apply_attribution_framing(prompt, "insight_and_evidence")
 
   fail_safe = get_fail_safe(n)
   output = safe_generate_response(prompt, gpt_param, 5, fail_safe,
