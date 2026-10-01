@@ -266,7 +266,15 @@ def generate_action_event_triple(act_desp, persona):
 
 def generate_act_obj_desc(act_game_object, act_desp, persona): 
   if debug: print ("GNS FUNCTION: <generate_act_obj_desc>")
-  return run_gpt_prompt_act_obj_desc(act_game_object, act_desp, persona)[0]
+  # Local models can occasionally return None/empty payloads for this prompt.
+  # Keep planning robust by falling back to a generic object state phrase.
+  try:
+    response = run_gpt_prompt_act_obj_desc(act_game_object, act_desp, persona)
+    if response and response[0]:
+      return response[0]
+  except:
+    pass
+  return "in use"
 
 
 def generate_act_obj_event_triple(act_game_object, act_obj_desc, persona): 

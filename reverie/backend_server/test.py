@@ -11,6 +11,10 @@ import time
 
 from utils import *
 openai.api_key = openai_api_key
+if "openai_api_base" in globals() and openai_api_base:
+  openai.api_base = openai_api_base
+
+CHAT_MODEL = globals().get("chat_model", "llama3.1:8b")
 
 def ChatGPT_request(prompt): 
   """
@@ -27,7 +31,7 @@ def ChatGPT_request(prompt):
   # temp_sleep()
   try: 
     completion = openai.ChatCompletion.create(
-    model="gpt-3.5-turbo", 
+    model=CHAT_MODEL,
     messages=[{"role": "user", "content": prompt}]
     )
     return completion["choices"][0]["message"]["content"]

@@ -95,6 +95,35 @@ celerybeat-schedule
 venv/
 ENV/
 
+# Local virtual environments
+.venv/
+.venv39/
+.venv311/
+
+# Per-run stdout logs (registry and journal keep the durable record)
+runs/logs/
+runs/*_stdout.txt
+runs/*_stderr.txt
+
+# Generated simulation outputs in this repository layout
+environment/frontend_server/storage/ollama_n3_smoketest/
+environment/frontend_server/storage/ollama_n3_smoketest_v2/
+environment/frontend_server/storage/ollama_n3_smoketest_v3_run1/
+environment/frontend_server/storage/ollama_n3_smoketest_v3_run5/
+environment/frontend_server/storage/ollama_n3_smoketest_v4_postfix/
+
+# Ad-hoc smoke/validation runs. The registry and JOURNAL record these runs by id;
+# the per-step artifacts do not need to be version-controlled.
+environment/frontend_server/storage/smoke_*/
+
+# Generated scorer output. analysis/out/ is fully reproducible from the registry
+# plus the run artifacts, and attribution_metrics.json embeds every scored thought
+# verbatim (~200 KB). Track the scorer itself, not its output.
+analysis/out/
+
+# Temporary run artifacts
+environment/frontend_server/temp_storage/curr_step.json
+
 # Spyder project settings
 .spyderproject
 

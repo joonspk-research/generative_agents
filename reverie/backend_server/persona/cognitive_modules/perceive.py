@@ -13,14 +13,26 @@ from persona.prompt_template.gpt_structure import *
 from persona.prompt_template.run_gpt_prompt import *
 
 def generate_poig_score(persona, event_type, description): 
+  def _safe_score(raw_value, default=5):
+    try:
+      if isinstance(raw_value, (list, tuple)) and raw_value:
+        return int(raw_value[0])
+      return int(raw_value)
+    except:
+      return default
+
   if "is idle" in description: 
     return 1
 
   if event_type == "event": 
-    return run_gpt_prompt_event_poignancy(persona, description)[0]
+    score = run_gpt_prompt_event_poignancy(persona, description)
+    return _safe_score(score)
   elif event_type == "chat": 
-    return run_gpt_prompt_chat_poignancy(persona, 
-                           persona.scratch.act_description)[0]
+    score = run_gpt_prompt_chat_poignancy(persona,
+                           persona.scratch.act_description)
+    return _safe_score(score)
+
+  return 5
 
 def perceive(persona, maze): 
   """

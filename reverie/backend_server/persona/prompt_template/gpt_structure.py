@@ -12,6 +12,13 @@ import time
 from utils import *
 
 openai.api_key = openai_api_key
+if "openai_api_base" in globals() and openai_api_base:
+  openai.api_base = openai_api_base
+
+# Model names are configurable from utils.py for local model providers.
+CHAT_MODEL = globals().get("chat_model", "llama3.1:8b")
+GPT4_MODEL = globals().get("gpt4_model", CHAT_MODEL)
+EMBEDDING_MODEL = globals().get("embedding_model", "nomic-embed-text")
 
 def temp_sleep(seconds=0.1):
   time.sleep(seconds)
@@ -20,7 +27,7 @@ def ChatGPT_single_request(prompt):
   temp_sleep()
 
   completion = openai.ChatCompletion.create(
-    model="gpt-3.5-turbo", 
+    model=CHAT_MODEL,
     messages=[{"role": "user", "content": prompt}]
   )
   return completion["choices"][0]["message"]["content"]
@@ -46,7 +53,7 @@ def GPT4_request(prompt):
 
   try: 
     completion = openai.ChatCompletion.create(
-    model="gpt-4", 
+    model=GPT4_MODEL,
     messages=[{"role": "user", "content": prompt}]
     )
     return completion["choices"][0]["message"]["content"]
@@ -71,7 +78,7 @@ def ChatGPT_request(prompt):
   # temp_sleep()
   try: 
     completion = openai.ChatCompletion.create(
-    model="gpt-3.5-turbo", 
+    model=CHAT_MODEL,
     messages=[{"role": "user", "content": prompt}]
     )
     return completion["choices"][0]["message"]["content"]
@@ -207,9 +214,21 @@ def GPT_request(prompt, gpt_parameter):
     a str of GPT-3's response. 
   """
   temp_sleep()
+  requested_engine = gpt_parameter.get("engine", CHAT_MODEL)
+  # The original project uses legacy OpenAI engines (text-davinci-*). For
+  # local providers, map those to the configured chat/completion model.
+  model_name = requested_engine
+  if requested_engine.startswith("text-") or requested_engine.startswith("gpt-"):
+    model_name = CHAT_MODEL
+    prompt = (
+      "Continue the text naturally from the final line fragment. "
+      "Return only the direct continuation with no explanations, headers, "
+      "or extra framing.\n\n"
+      + prompt
+    )
   try: 
     response = openai.Completion.create(
-                model=gpt_parameter["engine"],
+                model=model_name,
                 prompt=prompt,
                 temperature=gpt_parameter["temperature"],
                 max_tokens=gpt_parameter["max_tokens"],
@@ -219,8 +238,8 @@ def GPT_request(prompt, gpt_parameter):
                 stream=gpt_parameter["stream"],
                 stop=gpt_parameter["stop"],)
     return response.choices[0].text
-  except: 
-    print ("TOKEN LIMIT EXCEEDED")
+  except Exception as e: 
+    print (f"TOKEN LIMIT EXCEEDED / REQUEST ERROR: {e}")
     return "TOKEN LIMIT EXCEEDED"
 
 
@@ -273,7 +292,7 @@ def safe_generate_response(prompt,
   return fail_safe_response
 
 
-def get_embedding(text, model="text-embedding-ada-002"):
+def get_embedding(text, model=EMBEDDING_MODEL):
   text = text.replace("\n", " ")
   if not text: 
     text = "this is blank"

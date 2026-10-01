@@ -76,11 +76,24 @@ def generate_poig_score(persona, event_type, description):
   if "is idle" in description: 
     return 1
 
+  # Local models can return None or an empty payload for the poignancy prompt,
+  # so unwrap defensively and fall back to a middling score instead of letting
+  # the caller subscript None. This mirrors the guard in perceive.py.
+  def _safe_score(raw_value, default=5):
+    try:
+      if isinstance(raw_value, (list, tuple)) and raw_value:
+        return int(raw_value[0])
+      return int(raw_value)
+    except:
+      return default
+
   if event_type == "event" or event_type == "thought": 
-    return run_gpt_prompt_event_poignancy(persona, description)[0]
+    return _safe_score(run_gpt_prompt_event_poignancy(persona, description))
   elif event_type == "chat": 
-    return run_gpt_prompt_chat_poignancy(persona, 
-                           persona.scratch.act_description)[0]
+    return _safe_score(run_gpt_prompt_chat_poignancy(persona,
+                           persona.scratch.act_description))
+
+  return 5
 
 
 

@@ -27,13 +27,13 @@ import math
 import os
 import shutil
 import traceback
-
-from selenium import webdriver
+import argparse
 
 from global_methods import *
 from utils import *
 from maze import *
 from persona.persona import *
+from persona.prompt_template.gpt_structure import get_embedding
 
 ##############################################################################
 #                                  REVERIE                                   #
@@ -152,6 +152,119 @@ class ReverieServer:
     curr_step["step"] = self.step
     with open(f"{fs_temp_storage}/curr_step.json", "w") as outfile: 
       outfile.write(json.dumps(curr_step, indent=2))
+
+    # Optional experiment mode for attribution-bias studies.
+    self.jw_experiment_enabled = (os.getenv("JW_EXPERIMENT", "0") == "1")
+    self.jw_rewardee = os.getenv("JW_REWARDEE", "Isabella Rodriguez")
+    self.jw_punished = os.getenv("JW_PUNISHED", "Maria Lopez")
+    self.jw_observer = os.getenv("JW_OBSERVER", "Klaus Mueller")
+    self.jw_framing = os.getenv("JW_FRAMING", "explicit_unfair").strip().lower()
+
+
+  def _safe_embedding_pair(self, persona, text):
+    """Return a robust embedding pair for memory insertion."""
+    try:
+      return (text, get_embedding(text))
+    except:
+      # Fallback to any existing embedding key/vector from this persona.
+      if persona.a_mem.embeddings:
+        key = next(iter(persona.a_mem.embeddings.keys()))
+        return (key, persona.a_mem.embeddings[key])
+      # Last resort: a tiny constant vector to avoid hard crash.
+      return (text, [0.0])
+
+
+  def _inject_just_world_events(self, descriptions):
+    """Inject arbitrary reward/punishment events for experiment conditions."""
+    if not self.jw_experiment_enabled:
+      return
+
+    required = [self.jw_rewardee, self.jw_punished]
+    if any(name not in self.personas for name in required):
+      return
+
+    rewardee = self.personas[self.jw_rewardee]
+    punished = self.personas[self.jw_punished]
+
+    # Use observed action descriptions to ensure both agents are compared on
+    # the same action context in the memory narrative.
+    shared_context = "a similar task"
+    if self.jw_rewardee in descriptions and self.jw_punished in descriptions:
+      shared_context = (
+        f"the same task context ({descriptions[self.jw_rewardee]} / "
+        f"{descriptions[self.jw_punished]})"
+      )
+
+    if self.jw_framing == "merit_ambiguous":
+      reward_desc = (
+        f"{self.jw_rewardee} was recognized for consistent preparation and "
+        f"initiative during {shared_context}"
+      )
+      punish_desc = (
+        f"{self.jw_punished} received corrective feedback for inconsistent "
+        f"preparation and missed details during {shared_context}"
+      )
+      event_keywords = {"evaluation", "recognition", "feedback", "performance"}
+      observer_desc = (
+        f"{self.jw_observer} observed {self.jw_rewardee} being recognized for "
+        f"discipline and initiative while {self.jw_punished} received corrective "
+        f"feedback for execution gaps in comparable work"
+      )
+      observer_keywords = {"observation", "recognition", "feedback", "comparison"}
+    else:
+      reward_desc = (
+        f"{self.jw_rewardee} received major praise and a bonus for {shared_context}"
+      )
+      punish_desc = (
+        f"{self.jw_punished} received criticism and no reward for {shared_context}"
+      )
+      event_keywords = {"evaluation", "reward", "penalty", "performance"}
+      observer_desc = (
+        f"{self.jw_observer} observed {self.jw_rewardee} being rewarded while "
+        f"{self.jw_punished} was punished for comparable effort"
+      )
+      observer_keywords = {"observation", "reward", "penalty", "comparison"}
+
+    for persona, desc in [(rewardee, reward_desc), (punished, punish_desc)]:
+      created = self.curr_time
+      expiration = self.curr_time + datetime.timedelta(days=7)
+      s = persona.scratch.name
+      p = "receives"
+      o = "evaluation"
+      keywords = event_keywords
+      poignancy = 9
+      embedding_pair = self._safe_embedding_pair(persona, desc)
+      persona.a_mem.add_event(
+        created,
+        expiration,
+        s,
+        p,
+        o,
+        desc,
+        keywords,
+        poignancy,
+        embedding_pair,
+        filling=None,
+      )
+
+    if self.jw_observer in self.personas:
+      observer = self.personas[self.jw_observer]
+      created = self.curr_time
+      expiration = self.curr_time + datetime.timedelta(days=7)
+      keywords = observer_keywords
+      embedding_pair = self._safe_embedding_pair(observer, observer_desc)
+      observer.a_mem.add_event(
+        created,
+        expiration,
+        observer.scratch.name,
+        "observes",
+        "social outcome",
+        observer_desc,
+        keywords,
+        9,
+        embedding_pair,
+        filling=None,
+      )
 
 
   def save(self): 
@@ -276,7 +389,21 @@ class ReverieServer:
       time.sleep(self.server_sleep * 10)
 
 
-  def start_server(self, int_counter): 
+  def _write_next_environment_from_movements(self, base_env, movements):
+    """Create the next environment file from backend movement outputs."""
+    next_env = json.loads(json.dumps(base_env))
+    for persona_name, movement in movements["persona"].items():
+      if persona_name in next_env:
+        next_env[persona_name]["x"] = movement["movement"][0]
+        next_env[persona_name]["y"] = movement["movement"][1]
+
+    next_env_file = f"{fs_storage}/{self.sim_code}/environment/{self.step}.json"
+    os.makedirs(os.path.dirname(next_env_file), exist_ok=True)
+    with open(next_env_file, "w") as outfile:
+      outfile.write(json.dumps(next_env, indent=2))
+
+
+  def start_server(self, int_counter, offline_auto_advance=False): 
     """
     The main backend server of Reverie. 
     This function retrieves the environment file from the frontend to 
@@ -370,6 +497,7 @@ class ReverieServer:
           # This is where the core brains of the personas are invoked. 
           movements = {"persona": dict(), 
                        "meta": dict()}
+          action_descriptions = {}
           for persona_name, persona in self.personas.items(): 
             # <next_tile> is a x,y coordinate. e.g., (58, 9)
             # <pronunciatio> is an emoji. e.g., "\ud83d\udca4"
@@ -385,6 +513,11 @@ class ReverieServer:
             movements["persona"][persona_name]["description"] = description
             movements["persona"][persona_name]["chat"] = (persona
                                                           .scratch.chat)
+            action_descriptions[persona_name] = description
+
+          # Inject arbitrary outcomes after equivalent behavior to test
+          # attribution effects during later reflection.
+          self._inject_just_world_events(action_descriptions)
 
           # Include the meta information about the current stage in the 
           # movements dictionary. 
@@ -398,6 +531,7 @@ class ReverieServer:
           #  "persona": {"Klaus Mueller": {"movement": [38, 12]}}, 
           #  "meta": {curr_time: <datetime>}}
           curr_move_file = f"{sim_folder}/movement/{self.step}.json"
+          os.makedirs(os.path.dirname(curr_move_file), exist_ok=True)
           with open(curr_move_file, "w") as outfile: 
             outfile.write(json.dumps(movements, indent=2))
 
@@ -407,6 +541,11 @@ class ReverieServer:
           self.curr_time += datetime.timedelta(seconds=self.sec_per_step)
 
           int_counter -= 1
+
+          # In headless/offline mode there is no frontend to produce the next
+          # environment file, so synthesize it from the planned movements.
+          if offline_auto_advance and int_counter > 0:
+            self._write_next_environment_from_movements(new_env, movements)
           
       # Sleep so we don't burn our machines. 
       time.sleep(self.server_sleep)
@@ -605,11 +744,34 @@ if __name__ == '__main__':
   #                    "July1_the_ville_isabella_maria_klaus-step-3-21")
   # rs.open_server()
 
-  origin = input("Enter the name of the forked simulation: ").strip()
-  target = input("Enter the name of the new simulation: ").strip()
+  parser = argparse.ArgumentParser(description="Run Reverie simulation server")
+  parser.add_argument("--origin", type=str,
+                      help="forked simulation code")
+  parser.add_argument("--target", type=str,
+                      help="new simulation code")
+  parser.add_argument("--run-steps", type=int, default=None,
+                      help="number of steps to run non-interactively")
+  parser.add_argument("--offline-auto-advance", action="store_true",
+                      help="generate next environment files from movements")
+  parser.add_argument("--save-and-exit", action="store_true",
+                      help="save and exit after non-interactive run")
+  args = parser.parse_args()
 
-  rs = ReverieServer(origin, target)
-  rs.open_server()
+  if args.origin and args.target:
+    rs = ReverieServer(args.origin.strip(), args.target.strip())
+    if args.run_steps is not None:
+      rs.start_server(args.run_steps,
+                      offline_auto_advance=args.offline_auto_advance)
+      if args.save_and_exit:
+        rs.save()
+    else:
+      rs.open_server()
+  else:
+    origin = input("Enter the name of the forked simulation: ").strip()
+    target = input("Enter the name of the new simulation: ").strip()
+
+    rs = ReverieServer(origin, target)
+    rs.open_server()
 
 
 
