@@ -6,10 +6,32 @@ Description: Defines the short-term memory module for generative agents.
 """
 import datetime
 import json
+import os
 import sys
 sys.path.append('../../')
 
 from global_methods import *
+
+def _env_int(name, default):
+  """Read an integer experiment override from the environment.
+
+  Used for cognitive-cadence knobs that the attribution experiment needs to
+  vary without editing this file. Silently falls back to the original value
+  when unset or malformed, so default behavior is unchanged.
+  """
+  raw = os.getenv(name)
+  if raw is None or not str(raw).strip():
+    return default
+  try:
+    value = int(str(raw).strip())
+  except ValueError:
+    print (f"[JW] ignoring non-integer {name}={raw!r}; using {default}")
+    return default
+  if value <= 0:
+    print (f"[JW] ignoring non-positive {name}={raw!r}; using {default}")
+    return default
+  return value
+
 
 class Scratch: 
   def __init__(self, f_saved): 
@@ -58,7 +80,7 @@ class Scratch:
     self.relevance_w = 1
     self.importance_w = 1
     self.recency_decay = 0.99
-    self.importance_trigger_max = 150
+    self.importance_trigger_max = _env_int("JW_IMPORTANCE_TRIGGER_MAX", 150)
     self.importance_trigger_curr = self.importance_trigger_max
     self.importance_ele_n = 0 
     self.thought_count = 5
@@ -195,8 +217,13 @@ class Scratch:
       self.relevance_w = scratch_load["relevance_w"]
       self.importance_w = scratch_load["importance_w"]
       self.recency_decay = scratch_load["recency_decay"]
-      self.importance_trigger_max = scratch_load["importance_trigger_max"]
+      self.importance_trigger_max = _env_int("JW_IMPORTANCE_TRIGGER_MAX",
+                                             scratch_load["importance_trigger_max"])
       self.importance_trigger_curr = scratch_load["importance_trigger_curr"]
+      if self.importance_trigger_curr > self.importance_trigger_max:
+        # The env override is lower than the persisted counter, so cap it rather
+        # than waiting a full extra cycle before the first reflection.
+        self.importance_trigger_curr = self.importance_trigger_max
       self.importance_ele_n = scratch_load["importance_ele_n"]
       self.thought_count = scratch_load["thought_count"]
 

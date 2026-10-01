@@ -29,8 +29,6 @@ import shutil
 import traceback
 import argparse
 
-from selenium import webdriver
-
 from global_methods import *
 from utils import *
 from maze import *
