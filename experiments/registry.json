@@ -1,0 +1,208 @@
+{
+  "schema_version": 1,
+  "description": "Machine-readable record of every experiment run. docs/JOURNAL.md is the narrative companion; this file is what analysis/evaluate_runs.py consumes.",
+  "updated": "2026-10-01",
+  "defaults": {
+    "base_simulation": "base_the_ville_isabella_maria_klaus",
+    "agents": {
+      "rewardee": "Isabella Rodriguez",
+      "punished": "Maria Lopez",
+      "observer": "Klaus Mueller"
+    },
+    "chat_model": "llama3.1:8b",
+    "embedding_model": "nomic-embed-text:latest",
+    "storage_root": "environment/frontend_server/storage"
+  },
+  "design": {
+    "name": "2x2 injection x attribution-prompt ablation",
+    "factors": {
+      "injection": {
+        "0": "JW_EXPERIMENT=0, no social-outcome events injected",
+        "1": "JW_EXPERIMENT=1, reward/punishment/observer events injected each step"
+      },
+      "prompts": {
+        "0": "JW_ATTRIBUTION_PROMPTS=0, upstream neutral reflection prompts",
+        "1": "JW_ATTRIBUTION_PROMPTS=1, causal-attribution reflection prompts"
+      }
+    },
+    "controlled": [
+      "framing",
+      "steps",
+      "seed",
+      "chat_model",
+      "embedding_model"
+    ],
+    "planned_replicates": 3,
+    "planned_steps": 100,
+    "status": "designed, not yet executed"
+  },
+  "metric_definitions": {
+    "deserving": "thought blames the punished agent or says bad outcomes are earned/self-inflicted -> just-world signal",
+    "self_merit": "rewarded agent attributes its own reward to effort/competence -> self-serving just-world signal",
+    "fairness_critique": "thought names unfairness, bias, or inconsistent evaluation -> rival explanation we want to MINIMIZE",
+    "system_attribution": "thought attributes the outcome to chance, randomness, or the system rather than to merit -> rival explanation we want to MINIMIZE"
+  },
+  "runs": [
+    {
+      "run_id": "July1_the_ville_isabella_maria_klaus-step-3-20",
+      "date": "2023-07-01",
+      "injection": false,
+      "prompts": 0,
+      "framing": null,
+      "steps": 8655,
+      "seed": "paper",
+      "chat_model": "gpt-3.5-turbo (paper authors, unmodified upstream code)",
+      "embedding_model": "text-embedding-ada-002",
+      "status": "completed",
+      "purpose": "reference floor - no manipulation, original OpenAI models. Establishes the baseline rate of attribution language that exists without any experiment steering.",
+      "artifacts_present": true,
+      "notes": "Scored 342 reflection insights across 3 personas: 14 capability hits, all of them genuine ('hard-working employee'), and zero deserving / self_merit / fairness / system hits. This is the floor any treatment effect must exceed."
+    },
+    {
+      "run_id": "jw_control_run20_d",
+      "date": "2026-05-28",
+      "injection": false,
+      "prompts": 1,
+      "framing": "explicit_unfair",
+      "steps": 20,
+      "seed": "d",
+      "chat_model": "llama3.1:8b",
+      "status": "completed",
+      "purpose": "control",
+      "artifacts_present": false,
+      "notes": "Artifacts were committed on branch main and removed by ugcs/clean-export. Recover with: git checkout main -- environment/frontend_server/storage/jw_control_run20_d"
+    },
+    {
+      "run_id": "jw_treatment_run20_d",
+      "date": "2026-05-28",
+      "injection": true,
+      "prompts": 1,
+      "framing": "explicit_unfair",
+      "steps": 20,
+      "seed": "d",
+      "chat_model": "llama3.1:8b",
+      "status": "completed",
+      "purpose": "treatment",
+      "artifacts_present": false,
+      "notes": "Manipulation confirmed present in associative memory; absent in paired control."
+    },
+    {
+      "run_id": "jw_control_run100_a",
+      "date": "2026-05-28",
+      "injection": false,
+      "prompts": 1,
+      "framing": "explicit_unfair",
+      "steps": 100,
+      "seed": "a",
+      "chat_model": "llama3.1:8b",
+      "status": "completed",
+      "purpose": "control",
+      "artifacts_present": false,
+      "notes": "Reached step=100, curr_time February 13 2023 00:16:40. Observer memory showed no social-outcome accumulation."
+    },
+    {
+      "run_id": "jw_treatment_run100_a",
+      "date": "2026-05-28",
+      "injection": true,
+      "prompts": 1,
+      "framing": "explicit_unfair",
+      "steps": 100,
+      "seed": "a",
+      "chat_model": "llama3.1:8b",
+      "status": "completed",
+      "purpose": "treatment",
+      "artifacts_present": false,
+      "notes": "Manipulation large and clear (kw strengths all 100) but cognition read as fairness critique, not just-world."
+    },
+    {
+      "run_id": "jw_treatment_merit_run100_a",
+      "date": "2026-05-28",
+      "injection": true,
+      "prompts": 1,
+      "framing": "merit_ambiguous",
+      "steps": 100,
+      "seed": "a",
+      "chat_model": "llama3.1:8b",
+      "status": "completed",
+      "purpose": "treatment, framing variant",
+      "artifacts_present": false,
+      "notes": "~702s wall clock. Lexicon shifted toward performance/merit; victim-deserving language still weak."
+    },
+    {
+      "run_id": "smoke_i1_p1_5step",
+      "framing": "merit_ambiguous",
+      "seed": "s0",
+      "status": "completed",
+      "notes": "launched by tools/run_experiment.ps1, 145.2s wall clock, exit=0, log=runs/logs/smoke_i1_p1_5step.log",
+      "injection": 1,
+      "prompts": 1,
+      "artifacts_present": 1,
+      "steps": 5,
+      "chat_model": "llama3.1:8b",
+      "embedding_model": "nomic-embed-text:latest"
+    },
+    {
+      "run_id": "smoke_i1_p1_12step",
+      "framing": "merit_ambiguous",
+      "seed": "s0",
+      "status": "completed",
+      "notes": "launched by tools/run_experiment.ps1, 117.5s wall clock, exit=0, log=runs/logs/smoke_i1_p1_12step.log",
+      "injection": 1,
+      "prompts": 1,
+      "artifacts_present": 1,
+      "steps": 12,
+      "chat_model": "llama3.1:8b",
+      "embedding_model": "nomic-embed-text:latest"
+    },
+    {
+      "run_id": "smoke_i1_p1_refl40_v2",
+      "framing": "merit_ambiguous",
+      "seed": "s0",
+      "status": "failed",
+      "notes": "launched by tools/run_experiment.ps1, 193.8s wall clock, exit=1, reflect_trigger_max=40, log=runs/logs/smoke_i1_p1_refl40_v2.log",
+      "injection": 1,
+      "prompts": 1,
+      "artifacts_present": 0,
+      "steps": 25,
+      "chat_model": "llama3.1:8b",
+      "embedding_model": "nomic-embed-text:latest"
+    },
+    {
+      "run_id": "smoke_i1_p1_refl40_v3",
+      "framing": "merit_ambiguous",
+      "seed": "s0",
+      "status": "completed",
+      "notes": "launched by tools/run_experiment.ps1, 306.7s wall clock, exit=0, reflect_trigger_max=40, log=runs/logs/smoke_i1_p1_refl40_v3.log",
+      "injection": 1,
+      "prompts": 1,
+      "artifacts_present": 1,
+      "steps": 25,
+      "chat_model": "llama3.1:8b",
+      "embedding_model": "nomic-embed-text:latest"
+    }
+  ],
+  "failed_runs": [
+    {
+      "run_id": "ollama_n3_smoketest",
+      "date": "2026-05-25",
+      "steps": 1,
+      "status": "failed",
+      "error": "TypeError in plan.py: generate_act_obj_desc returned None, caller subscripted [0]",
+      "resolution": "Defensive fallback added in plan.py"
+    },
+    {
+      "run_id": "ollama_n3_smoketest_v3_run5",
+      "date": "2026-05-25",
+      "steps": 5,
+      "status": "failed",
+      "error": "Same signature as ollama_n3_smoketest",
+      "resolution": "Same fix"
+    }
+  ],
+  "open_questions": [
+    "Does the just-world direction survive with attribution prompts OFF? (isolates injection effect)",
+    "Does it appear with injection OFF? (isolates pure prompt effect)",
+    "Is the treatment-vs-control delta an interaction rather than a main effect?",
+    "Is the fairness-critique rival explanation a function of stakes magnitude?"
+  ]
+}
