@@ -484,9 +484,9 @@ def _long_term_planning(persona, new_day):
   elif new_day == "New day":
     revise_identity(persona)
 
-    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - TODO
-    # We need to create a new daily_req here...
-    persona.scratch.daily_req = persona.scratch.daily_req
+    # Regenerate the activity list using the revised identity and daily_plan_req.
+    persona.scratch.daily_req = generate_first_daily_plan(persona,
+                                                          wake_up_hour)
 
   # Based on the daily_req, we create an hourly schedule for the persona, 
   # which is a list of todo items with a time duration (in minutes) that 
