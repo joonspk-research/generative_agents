@@ -550,6 +550,13 @@
 	// Control button binders
 	var play_button=document.getElementById("play_button");
 	var pause_button=document.getElementById("pause_button");
+
+	// The dashboard asks the embedded map to center on an agent.
+	window.addEventListener("message", function(e) {
+	  if (e.origin !== window.location.origin || !e.data || e.data.type !== "focus") return;
+	  let target = personas[e.data.name];
+	  if (target && player) player.setPosition(target.body.x, target.body.y);
+	});
 </script>
 
 

@@ -13,15 +13,21 @@ import random
 from numpy import dot
 from numpy.linalg import norm
 
+from experiment_logger import get_experiment_logger
 from global_methods import *
 from persona.prompt_template.run_gpt_prompt import *
 from persona.prompt_template.gpt_structure import *
 from persona.cognitive_modules.retrieve import *
 
+# Reflection asks its questions about the most recent records in the memory
+# stream, the window the paper uses.
+FOCAL_POINT_RECORDS = 100
+
+
 def generate_focal_points(persona, n=3): 
   if debug: print ("GNS FUNCTION: <generate_focal_points>")
   
-  nodes = [[i.last_accessed, i]
+  nodes = [[i.created, i]
             for i in persona.a_mem.seq_event + persona.a_mem.seq_thought
             if "idle" not in i.embedding_key]
 
@@ -29,13 +35,19 @@ def generate_focal_points(persona, n=3):
   nodes = [i for created, i in nodes]
 
   statements = ""
-  for node in nodes[-1*persona.scratch.importance_ele_n:]: 
+  for node in nodes[-FOCAL_POINT_RECORDS:]:
     statements += node.embedding_key + "\n"
 
   return run_gpt_prompt_focal_pt(persona, statements, n)[0]
 
 
-def generate_insights_and_evidence(persona, nodes, n=5): 
+# What generate_insights_and_evidence hands back when it cannot read the
+# model's output. Named here so run_reflect can recognise it instead of
+# storing it as a thought; see the note at that call site.
+BLANK_INSIGHTS = ("this is blank",)
+
+
+def generate_insights_and_evidence(persona, nodes, n=5):
   if debug: print ("GNS FUNCTION: <generate_insights_and_evidence>")
 
   statements = ""
@@ -112,14 +124,24 @@ def run_reflect(persona):
   # <retrieved> has keys of focal points, and values of the associated Nodes. 
   retrieved = new_retrieve(persona, focal_points)
 
-  # For each of the focal points, generate thoughts and save it in the 
-  # agent's memory. 
-  for focal_pt, nodes in retrieved.items(): 
+  # For each of the focal points, generate thoughts and save it in the
+  # agent's memory.
+  insights = []
+  for focal_pt, nodes in retrieved.items():
     xx = [i.embedding_key for i in nodes]
     for xxx in xx: print (xxx)
 
     thoughts = generate_insights_and_evidence(persona, nodes, 5)
-    for thought, evidence in thoughts.items(): 
+    for thought, evidence in thoughts.items():
+      # generate_insights_and_evidence returns {"this is blank": "node_1"} when
+      # it cannot parse the model's insights. Stored, that sentinel becomes a
+      # real memory with a real poignancy that competes for retrieval slots: a
+      # single game day of eight agents left 39 of them in memory, 8 of which
+      # the stance probe went on to cite as evidence. Skipping the batch costs
+      # one reflection's insights, which is what the parse failure cost anyway.
+      if thought in BLANK_INSIGHTS:
+        print(f"skipping unparsed insight batch for {persona.scratch.name}")
+        continue
       created = persona.scratch.curr_time
       expiration = persona.scratch.curr_time + datetime.timedelta(days=30)
       s, p, o = generate_action_event_triple(thought, persona)
@@ -127,9 +149,25 @@ def run_reflect(persona):
       thought_poignancy = generate_poig_score(persona, "thought", thought)
       thought_embedding_pair = (thought, get_embedding(thought))
 
-      persona.a_mem.add_thought(created, expiration, s, p, o, 
-                                thought, keywords, thought_poignancy, 
+      persona.a_mem.add_thought(created, expiration, s, p, o,
+                                thought, keywords, thought_poignancy,
                                 thought_embedding_pair, evidence)
+      insights += [(thought_poignancy, thought)]
+
+  # One row per reflection, not per insight: a reflection writes up to fifteen
+  # thoughts at a single timestamp, and the dashboard marks the moment the agent
+  # rethought what it knew, which is often what explains the next stance
+  # reading. The most poignant insight stands in for the batch.
+  logger = get_experiment_logger()
+  if logger and insights:
+    logger.log_event(
+      step=logger.current_step,
+      curr_time=persona.scratch.curr_time,
+      event_type="reflection",
+      agent=persona.name,
+      text=max(insights)[1],
+      extra={"insights": len(insights)},
+    )
 
 
 def reflection_trigger(persona): 

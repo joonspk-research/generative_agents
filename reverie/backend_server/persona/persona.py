@@ -26,6 +26,10 @@ from persona.cognitive_modules.plan import *
 from persona.cognitive_modules.reflect import *
 from persona.cognitive_modules.execute import *
 from persona.cognitive_modules.converse import *
+from sim_logging import get_logger
+
+log = get_logger("persona")
+
 
 class Persona: 
   def __init__(self, name, folder_mem_saved=False):
@@ -217,9 +221,13 @@ class Persona:
     self.scratch.curr_time = curr_time
 
     # Main cognitive sequence begins here. 
+    log.debug("%s move: perceive", self.name)
     perceived = self.perceive(maze)
+    log.debug("%s move: retrieve (perceived=%s)", self.name, len(perceived or []))
     retrieved = self.retrieve(perceived)
+    log.debug("%s move: plan (new_day=%s)", self.name, new_day)
     plan = self.plan(maze, personas, new_day, retrieved)
+    log.debug("%s move: reflect", self.name)
     self.reflect()
 
     # <execution> is a triple set that contains the following components: 
@@ -228,6 +236,7 @@ class Persona:
     # <description> is a string description of the movement. e.g., 
     #   writing her next novel (editing her novel) 
     #   @ double studio:double studio:common room:sofa
+    log.debug("%s move: execute plan=%s", self.name, plan)
     return self.execute(maze, personas, plan)
 
 

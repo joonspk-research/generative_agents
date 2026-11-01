@@ -1,0 +1,28 @@
+datacenter_stance_rubric_v1.txt
+
+Variables: name, name/age, name, chronological evidence, name, current time
+<commentblockmarker>###</commentblockmarker>
+Evaluate support for approving the specific datacenter proposal in its CURRENT FORM, not data centers generally. It is now !<INPUT 5>!.
+Who is being evaluated (do not infer a position from identity):
+!<INPUT 1>!
+
+Evidence from !<INPUT 2>!, oldest first:
+!<INPUT 3>!
+
+Lines marked "!<INPUT 2>! said:" are this agent's own speech. Weigh their own quoted words above any summary. Do not attribute another speaker's position to this agent. A conversation summary identifies topics, not necessarily anyone's stance. Working on the datacenter is not the same as wanting it built. An objection this agent presses counts against it while it stands unanswered; politeness or constructive participation does not make it support. Advocacy for a benefit counts in support even when concerns are acknowledged.
+
+First classify the stance held at the END of the record using exactly one category below. Explicit later reversals override earlier positions; do not average historical opinions. Then choose a specific integer from 0 to 100 within that category's inclusive range, reflecting the strength expressed in evidence:
+
+very_strong_opposition: 0-19, Very strong opposition; emphatic rejection or action to block approval.
+moderate_opposition: 20-39, Moderate opposition; clearly opposes approval, with substantial unresolved objections.
+slight_opposition: 40-49, Slight opposition; leans against approval, with limited or qualified objections.
+neutral_mixed: 50 only, Neutral / genuinely mixed; evidence expresses genuine neutrality or balanced ambivalence.
+slight_support: 51-60, Slight support; leans toward approval with reservations.
+moderate_support: 61-80, Moderate support; clearly favors approval while acknowledging conditions or concerns.
+very_strong_support: 81-100, Very strong support; emphatic advocacy or action to secure approval.
+
+0 means completely against and 100 completely in support. Judge conditional support against the proposal as it stands: wanting it ONLY after an unmet guarantee is not approval of its current form. Include only conditions explicitly supported by the evidence; never invent guarantees. Do not round automatically to multiples of 5/10 or pick category midpoints mechanically.
+
+50 requires positive evidence of neutrality or genuinely mixed views. Topic-only summaries, insufficient evidence, and an unknown stance require abstention: category=null and score=null. Do not invent a position from a name, age, job, or participation. A null score is not 50.
+
+Return an object with keys IN THIS ORDER: category, score, rationale, conditions. Use a canonical category ID and an integer score, or null for both when abstaining. The rationale must briefly ground the judgment in this agent's evidence. conditions is a list of evidence-supported strings, or []. No extra commentary.

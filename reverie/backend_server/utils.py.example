@@ -1,0 +1,58 @@
+# Copy this file to utils.py and fill in your API keys.
+# utils.py is gitignored.
+
+# --- LLM provider ---
+# openai | anthropic | openai_compatible
+llm_provider = "openai"
+chat_model = "gpt-4o"
+# Optional override for the legacy GPT4_* helpers
+gpt4_model = "gpt-4o"
+
+# Embeddings (OpenAI or openai_compatible recommended)
+embedding_provider = "openai"
+embedding_model = "text-embedding-3-small"
+
+openai_api_key = "<Your OpenAI API key>"
+anthropic_api_key = ""
+# Together / OpenRouter / local OpenAI-compatible endpoint
+openai_compatible_base_url = ""
+openai_compatible_api_key = ""
+
+key_owner = "<Your Name>"
+
+# --- Paths (leave as-is for standard checkout) ---
+maze_assets_loc = "../../environment/frontend_server/static_dirs/assets"
+env_matrix = f"{maze_assets_loc}/the_ville/matrix"
+env_visuals = f"{maze_assets_loc}/the_ville/visuals"
+
+fs_storage = "../../environment/frontend_server/storage"
+fs_temp_storage = "../../environment/frontend_server/temp_storage"
+
+collision_block_id = "32125"
+
+# Verbose LLM / cognitive debug prints
+debug = True
+
+# Runtime logging (sim_logging.py)
+log_level = "INFO"       # DEBUG | INFO | WARNING | ERROR
+log_to_file = True
+log_dir = "logs"         # relative to reverie/backend_server/, or an absolute path
+capture_prints = True    # also write print()/stderr output to the log file
+
+# --- Run environment (run_env.py) ---
+# "staging" (the default, also when this line is missing): for trying
+# code cheaply. Every chat call uses staging_chat_model, runs get
+# staging_budget_usd as their spending cap unless one is set on the
+# dashboard, and new run names start with "stg-". A different model
+# behaves differently, so staging results aren't comparable with
+# production runs.
+# "production": the models above, for real experiments. Production run
+# names start with "prod-", and git tracks those runs; staging runs stay
+# out of git.
+run_env = "staging"
+staging_chat_model = "gpt-4o-mini"
+staging_budget_usd = 1.00
+
+# Experiment logging
+experiment_scenario_id = "datacenter_proposal_v1"
+snapshot_every_n_steps = 50

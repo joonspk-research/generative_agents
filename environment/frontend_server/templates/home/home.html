@@ -2,12 +2,21 @@
 {% load staticfiles %}
 
 {% block content %}
+{% if embed %}
+<style>
+	/* Map only, scaled to the iframe, for the dashboard. */
+	html, body { margin: 0; overflow: hidden; background: #6b8f5e; }
+	#map-info, #map-footer { display: none !important; }
+	#game-container canvas { width: 100vw !important; height: auto !important; display: block; }
+</style>
+{% else %}
 <br>
 <br>
+{% endif %}
 <div>
 	<div id="game-container" style="text-align: center"></div>
 
-	<div style="width:55%; margin: 0 auto; margin-top:4.5em">
+	<div id="map-info" style="width:55%; margin: 0 auto; margin-top:4.5em">
 		<h3 style="margin-bottom:-0.5em; font-size:1.5em">Current Time:</h3>
 		<div class="row">
 			<div class="col-md-8" id="game-time" style="">
@@ -69,7 +78,7 @@
 
 
 
-<div style="padding-bottom:15em"> </div>
+<div id="map-footer" style="padding-bottom:15em"> </div>
 
 
 <!-- partial -->

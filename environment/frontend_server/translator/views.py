@@ -16,8 +16,20 @@ from global_methods import *
 
 from django.contrib.staticfiles.templatetags.staticfiles import static
 from .models import *
+import logging
 
-def landing(request): 
+log = logging.getLogger("frontend.translator")
+
+
+def _pid_alive(pid):
+  try:
+    os.kill(int(pid), 0)
+    return True
+  except (OSError, TypeError, ValueError):
+    return False
+
+
+def landing(request):
   context = {}
   template = "landing/landing.html"
   return render(request, template, context)
@@ -106,18 +118,27 @@ def home(request):
   f_curr_sim_code = "temp_storage/curr_sim_code.json"
   f_curr_step = "temp_storage/curr_step.json"
 
-  if not check_if_file_exists(f_curr_step): 
+  # curr_step.json is consumed by the first page load. After that, fall back
+  # to the dashboard's live state so the map can be reloaded mid-session.
+  live = {}
+  if check_if_file_exists("temp_storage/dashboard/state.json"):
+    with open("temp_storage/dashboard/state.json") as json_file:
+      live = json.load(json_file)
+  live_ok = live.get("status") in ("idle", "running") and _pid_alive(live.get("pid"))
+
+  if not check_if_file_exists(f_curr_step) and not live_ok:
     context = {}
     template = "home/error_start_backend.html"
     return render(request, template, context)
 
-  with open(f_curr_sim_code) as json_file:  
-    sim_code = json.load(json_file)["sim_code"]
-  
-  with open(f_curr_step) as json_file:  
-    step = json.load(json_file)["step"]
-
-  os.remove(f_curr_step)
+  if check_if_file_exists(f_curr_step):
+    with open(f_curr_sim_code) as json_file:
+      sim_code = json.load(json_file)["sim_code"]
+    with open(f_curr_step) as json_file:
+      step = json.load(json_file)["step"]
+    os.remove(f_curr_step)
+  else:
+    sim_code, step = live["sim_code"], live["step"]
 
   persona_names = []
   persona_names_set = set()
@@ -144,7 +165,9 @@ def home(request):
              "step": step, 
              "persona_names": persona_names,
              "persona_init_pos": persona_init_pos,
-             "mode": "simulate"}
+             "mode": "simulate",
+             # ?embed=1 renders only the map, for the dashboard's iframe.
+             "embed": request.GET.get("embed") == "1"}
   template = "home/home.html"
   return render(request, template, context)
 
@@ -167,18 +190,21 @@ def replay(request, sim_code, step):
     x = i.split("/")[-1].strip()
     if x[0] != ".": 
       file_count += [int(x.split(".")[0])]
-  curr_json = f'storage/{sim_code}/environment/{str(max(file_count))}.json'
-  with open(curr_json) as json_file:  
+  # Start agents where they were at <step>, not where the run ended.
+  start_step = step if step in file_count else max(file_count)
+  curr_json = f'storage/{sim_code}/environment/{str(start_step)}.json'
+  with open(curr_json) as json_file:
     persona_init_pos_dict = json.load(json_file)
-    for key, val in persona_init_pos_dict.items(): 
-      if key in persona_names_set: 
+    for key, val in persona_init_pos_dict.items():
+      if key in persona_names_set:
         persona_init_pos += [[key, val["x"], val["y"]]]
 
   context = {"sim_code": sim_code,
              "step": step,
              "persona_names": persona_names,
-             "persona_init_pos": persona_init_pos, 
-             "mode": "replay"}
+             "persona_init_pos": persona_init_pos,
+             "mode": "replay",
+             "embed": request.GET.get("embed") == "1"}
   template = "home/home.html"
   return render(request, template, context)
 
@@ -258,9 +284,18 @@ def process_environment(request):
   step = data["step"]
   sim_code = data["sim_code"]
   environment = data["environment"]
+  log.info("process_environment sim=%s step=%s agents=%s",
+           sim_code, step, list(environment.keys()) if isinstance(environment, dict) else "?")
 
-  with open(f"storage/{sim_code}/environment/{step}.json", "w") as outfile:
-    outfile.write(json.dumps(environment, indent=2))
+  # The simulation now writes each step's positions itself (so it runs with
+  # the map hidden). Never overwrite one: a map that loaded mid-run or is
+  # replaying a saved run would otherwise rewrite positions it only displays.
+  env_file = f"storage/{sim_code}/environment/{step}.json"
+  if not os.path.exists(env_file):
+    tmp = f"{env_file}.tmp"
+    with open(tmp, "w") as outfile:
+      outfile.write(json.dumps(environment, indent=2))
+    os.replace(tmp, env_file)
 
   return HttpResponse("received")
 
@@ -291,6 +326,10 @@ def update_environment(request):
     with open(f"storage/{sim_code}/movement/{step}.json") as json_file: 
       response_data = json.load(json_file)
       response_data["<step>"] = step
+    log.info("update_environment READY sim=%s step=%s", sim_code, step)
+  else:
+    log.debug("update_environment WAIT sim=%s step=%s (no movement file yet)",
+              sim_code, step)
 
   return JsonResponse(response_data)
 

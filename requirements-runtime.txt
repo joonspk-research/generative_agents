@@ -1,0 +1,14 @@
+# Alias of requirements.txt — same modern runtime set.
+# Prefer: pip install -r requirements.txt
+
+Django==2.2
+asgiref>=3.5.2,<3.8
+django-cors-headers==2.5.3
+django-storages==1.9.1
+numpy>=1.26
+openai>=1.40.0
+anthropic>=0.34.0
+selenium>=4.8
+requests>=2.28
+pytz
+sqlparse

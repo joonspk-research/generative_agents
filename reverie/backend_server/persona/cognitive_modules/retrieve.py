@@ -135,6 +135,10 @@ def extract_recency(persona, nodes):
   chronological order, and outputs a dictionary that has the recency score
   calculated.
 
+  The score decays exponentially over the number of sandbox game hours since
+  the node was last accessed, so a memory that was just retrieved scores
+  close to 1 and one untouched for days scores near 0.
+
   INPUT: 
     persona: Current persona whose memory we are retrieving. 
     nodes: A list of Node object in a chronological order. 
@@ -142,12 +146,11 @@ def extract_recency(persona, nodes):
     recency_out: A dictionary whose keys are the node.node_id and whose values
                  are the float that represents the recency score. 
   """
-  recency_vals = [persona.scratch.recency_decay ** i 
-                  for i in range(1, len(nodes) + 1)]
-  
   recency_out = dict()
-  for count, node in enumerate(nodes): 
-    recency_out[node.node_id] = recency_vals[count]
+  for node in nodes:
+    hours_elapsed = ((persona.scratch.curr_time - node.last_accessed)
+                     .total_seconds() / 3600)
+    recency_out[node.node_id] = persona.scratch.recency_decay ** hours_elapsed
 
   return recency_out
 
@@ -196,16 +199,21 @@ def extract_relevance(persona, nodes, focal_pt):
   return relevance_out
 
 
-def new_retrieve(persona, focal_points, n_count=30): 
+def new_retrieve(persona, focal_points, n_count=30, touch=True):
   """
-  Given the current persona and focal points (focal points are events or 
+  Given the current persona and focal points (focal points are events or
   thoughts for which we are retrieving), we retrieve a set of nodes for each
-  of the focal points and return a dictionary. 
+  of the focal points and return a dictionary.
 
-  INPUT: 
-    persona: The current persona object whose memory we are retrieving. 
+  INPUT:
+    persona: The current persona object whose memory we are retrieving.
     focal_points: A list of focal points (string description of the events or
                   thoughts that is the focus of current retrieval).
+    touch: Whether to mark what we return as just accessed. True for the
+           agent's own retrievals. An observer reading memory from outside
+           the simulation passes False: recency decays from last_accessed, so
+           stamping it would reset the decay clock on exactly the memories
+           the observer read and change what the agent retrieves next.
   OUTPUT: 
     retrieved: A dictionary whose keys are a string focal point, and whose 
                values are a list of Node object in the agent's associative 
@@ -239,9 +247,9 @@ def new_retrieve(persona, focal_points, n_count=30):
     # Note to self: test out different weights. [1, 1, 1] tends to work
     # decently, but in the future, these weights should likely be learned, 
     # perhaps through an RL-like process.
-    # gw = [1, 1, 1]
     # gw = [1, 2, 1]
-    gw = [0.5, 3, 2]
+    # gw = [0.5, 3, 2]
+    gw = [1, 1, 1]
     master_out = dict()
     for key in recency_out.keys(): 
       master_out[key] = (persona.scratch.recency_w*recency_out[key]*gw[0] 
@@ -263,8 +271,9 @@ def new_retrieve(persona, focal_points, n_count=30):
     master_nodes = [persona.a_mem.id_to_node[key] 
                     for key in list(master_out.keys())]
 
-    for n in master_nodes: 
-      n.last_accessed = persona.scratch.curr_time
+    if touch:
+      for n in master_nodes:
+        n.last_accessed = persona.scratch.curr_time
       
     retrieved[focal_pt] = master_nodes
 

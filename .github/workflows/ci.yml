@@ -1,0 +1,76 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # The frontend needs Python 3.11: on 3.12, django-cors-headers 2.5.3
+      # fails with "No module named 'django.utils.six.moves'".
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Repository rules (runs, file sizes, personal paths)
+        run: python scripts/ci/check_repo.py
+
+      - name: Python compiles
+        run: python -m compileall -q reverie/backend_server environment/frontend_server scripts
+
+      - name: Backend imports
+        working-directory: reverie/backend_server
+        run: |
+          cp utils.py.example utils.py
+          python -c "import reverie"
+
+      # Needs the utils.py written by the step above.
+      - name: Memory retrieval and reflection rules
+        run: python scripts/ci/check_retrieval.py
+
+      - name: Datacenter stance probe rules
+        run: |
+          python scripts/ci/check_opinion_probe.py
+          python scripts/ci/test_stance_rubric.py
+
+      - name: Dashboard memory category rules
+        run: python scripts/ci/check_memory_categories.py
+
+      - name: Django checks and tests
+        working-directory: environment/frontend_server
+        run: |
+          python manage.py check
+          python manage.py test translator
+
+      - name: Dashboard script parses
+        run: |
+          python scripts/ci/check_dashboard_js.py
+          node scripts/ci/check_stance_graph.js
+
+  secrets:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      # Scans the commits being pushed or proposed for API keys and other
+      # secrets. Free without a license for repos owned by a personal account.
+      - uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -2,6 +2,8 @@ reverie/backend_server/utils.py
 frontend_server/settings/local.py
 storage/*
 static_dirs/*
+graphify-out/
+.claude/
 
 !storage/base_the_ville_isabella_maria_klaus/*
 !storage/base_the_ville_n25/*
@@ -100,3 +102,17 @@ ENV/
 
 # Rope project settings
 .ropeproject
+.venv/
+.gstack/
+*.log.*
+environment/frontend_server/temp_storage/dashboard/
+reverie/backend_server/logs/
+environment/frontend_server/logs/
+
+# Simulation runs: git tracks the base simulations every run starts from
+# and production runs (prod-*). Staging (stg-*) and other runs stay local.
+environment/frontend_server/storage/*
+!environment/frontend_server/storage/base_*/
+!environment/frontend_server/storage/prod-*/
+environment/frontend_server/compressed_storage/
+environment/frontend_server/temp_storage/curr_sim_code.json

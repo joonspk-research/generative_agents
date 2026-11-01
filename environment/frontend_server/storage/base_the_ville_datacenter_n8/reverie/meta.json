@@ -1,0 +1,18 @@
+{
+  "fork_sim_code": "base_the_ville_datacenter_n8",
+  "start_date": "February 13, 2023",
+  "curr_time": "February 13, 2023, 00:00:00",
+  "sec_per_step": 10,
+  "maze_name": "the_ville_datacenter",
+  "persona_names": [
+    "Maya Okonkwo",
+    "Luis Hernandez",
+    "Denise Brooks",
+    "Rachel Nguyen",
+    "Tom Whitaker",
+    "Aisha Rahman",
+    "Marcus Williams",
+    "Elena Chen"
+  ],
+  "step": 0
+}

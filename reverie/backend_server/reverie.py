@@ -26,6 +26,7 @@ import time
 import math
 import os
 import shutil
+import sys
 import traceback
 
 from selenium import webdriver
@@ -34,6 +35,23 @@ from global_methods import *
 from utils import *
 from maze import *
 from persona.persona import *
+from experiment_logger import ExperimentLogger, set_experiment_logger, get_experiment_logger
+from opinion_probe import probe as probe_opinion, STANCE_SCALE
+from sim_logging import get_logger, setup_logging
+from dashboard_bridge import CommandFeed, record_result, write_state, load_settings
+from llm import usage
+import run_env
+
+log = get_logger("reverie")
+
+
+def _write_json_atomic(path, obj): 
+  # Readers (the frontend, the next loop pass) never see a half-written file.
+  tmp = f"{path}.tmp"
+  with open(tmp, "w") as outfile: 
+    outfile.write(json.dumps(obj, indent=2))
+  os.replace(tmp, path)
+
 
 ##############################################################################
 #                                  REVERIE                                   #
@@ -43,6 +61,8 @@ class ReverieServer:
   def __init__(self, 
                fork_sim_code,
                sim_code):
+    setup_logging()
+    log.info("Forking simulation: fork=%s -> sim=%s", fork_sim_code, sim_code)
     # FORKING FROM A PRIOR SIMULATION:
     # <fork_sim_code> indicates the simulation we are forking from. 
     # Interestingly, all simulations must be forked from some initial 
@@ -54,8 +74,12 @@ class ReverieServer:
     # copy everything that's in <fork_sim_code>, but edit its 
     # reverie/meta/json's fork variable. 
     self.sim_code = sim_code
+    usage.context["sim"] = sim_code
     sim_folder = f"{fs_storage}/{self.sim_code}"
     copyanything(fork_folder, sim_folder)
+    # Git does not track empty dirs, so base sims ship without movement/.
+    os.makedirs(f"{sim_folder}/movement", exist_ok=True)
+    log.info("Copied storage folder to %s", sim_folder)
 
     with open(f"{sim_folder}/reverie/meta.json") as json_file:  
       reverie_meta = json.load(json_file)
@@ -135,7 +159,7 @@ class ReverieServer:
     # REVERIE SETTINGS PARAMETERS:  
     # <server_sleep> denotes the amount of time that our while loop rests each
     # cycle; this is to not kill our machine. 
-    self.server_sleep = 0.1
+    self.server_sleep = 0.01
 
     # SIGNALING THE FRONTEND SERVER: 
     # curr_sim_code.json contains the current simulation code, and
@@ -153,6 +177,18 @@ class ReverieServer:
     with open(f"{fs_temp_storage}/curr_step.json", "w") as outfile: 
       outfile.write(json.dumps(curr_step, indent=2))
 
+    # Experiment logging for this run.
+    scenario_id = globals().get("experiment_scenario_id", "datacenter_proposal_v1")
+    self.experiment_logger = ExperimentLogger(
+      sim_folder, self.sim_code, self.fork_sim_code,
+      reverie_meta["persona_names"], scenario_id=scenario_id)
+    self.experiment_logger.write_manifest()
+    set_experiment_logger(self.experiment_logger)
+    log.info(
+      "Reverie ready: personas=%s step=%s time=%s maze=%s scenario=%s",
+      reverie_meta["persona_names"], self.step, self.curr_time,
+      reverie_meta["maze_name"], scenario_id)
+
 
   def save(self): 
     """
@@ -167,6 +203,8 @@ class ReverieServer:
     """
     # <sim_folder> points to the current simulation folder.
     sim_folder = f"{fs_storage}/{self.sim_code}"
+    log.info("Saving simulation %s at step=%s time=%s",
+             self.sim_code, self.step, self.curr_time)
 
     # Save Reverie meta information.
     reverie_meta = dict() 
@@ -185,6 +223,74 @@ class ReverieServer:
     for persona_name, persona in self.personas.items(): 
       save_folder = f"{sim_folder}/personas/{persona_name}/bootstrap_memory"
       persona.save(save_folder)
+
+    # Snapshot agent state + outcomes marker for experiment tracking.
+    if getattr(self, "experiment_logger", None):
+      self.experiment_logger.log_snapshots(
+        self.step, self.curr_time, self.personas)
+      self.experiment_logger.log_outcomes(
+        self.step, self.curr_time, self.personas, note="save")
+    log.info("Save complete for %s", self.sim_code)
+
+
+  def probe_opinions(self):
+    """
+    Reads where every agent stands on the datacenter, 0 (against) to
+    STANCE_SCALE (in support), and logs it for the dashboard's stance graph.
+
+    Measurement only: opinion_probe retrieves read-only and nothing is written
+    to any agent's memory, so probing does not change the run it is watching.
+    Agents with no clock yet have not stepped and have nothing to read.
+    """
+    model = run_env.chat_model(globals().get("chat_model"))
+    caller = {k: usage.context[k] for k in ("persona", "source")}
+    readings = []
+    for name, persona in self.personas.items():
+      if persona.scratch.curr_time is None:
+        continue
+      # Billed separately so probes don't show up as the cost of a step.
+      usage.context.update(persona=name, source="opinion_probe",
+                           step=self.step)
+      reading = probe_opinion(persona, with_metadata=True)
+      # The scale goes in every row: it moved from 10 to 100 once already, and
+      # a bare score is unreadable without knowing which scale it was on.
+      # <relevance> says how much the memories behind the rating had to do with
+      # the datacenter at all, which a score alone cannot tell you, and
+      # <withheld> separates the gaps the probe chose from the ones where the
+      # model was asked and gave nothing usable. <quoted> counts the agent's
+      # own spoken lines that went in beside the memories and the window they
+      # came from, which is what would show a long run drawing its evidence
+      # from one early week (see opinion_probe.quoted_span).
+      readings += [{"name": name, "scale": STANCE_SCALE, **reading,
+                    "model": model, "run_env": run_env.RUN_ENV}]
+      shown = reading["relevance"]["shown"]
+      log.info("  stance=%s %s rel=%s: %s", name,
+               reading["withheld"] or reading["score"],
+               "n/a" if shown is None else f"{shown:.2f}",
+               (reading["rationale"] or "")[:120])
+    usage.context.update(caller)
+    if readings and getattr(self, "experiment_logger", None):
+      self.experiment_logger.log_opinions(
+        self.step, self.curr_time, readings)
+    return readings
+
+
+  def _load_whispers(self, clean_whispers):
+    """
+    Adds whispered memories via load_history_via_whisper. Personas that have
+    not stepped yet have no clock, which add_thought needs for timestamps, so
+    one is lent for the duration and then cleared again: a None clock is what
+    makes Persona.move() run first-day planning.
+    """
+    unclocked = [p for p in self.personas.values()
+                 if p.scratch.curr_time is None]
+    for p in unclocked:
+      p.scratch.curr_time = self.curr_time
+    try:
+      load_history_via_whisper(self.personas, clean_whispers)
+    finally:
+      for p in unclocked:
+        p.scratch.curr_time = None
 
 
   def start_path_tester_server(self): 
@@ -291,6 +397,10 @@ class ReverieServer:
     """
     # <sim_folder> points to the current simulation folder.
     sim_folder = f"{fs_storage}/{self.sim_code}"
+    log.info("Starting server loop for %s steps (from step=%s)",
+             int_counter, self.step)
+    # Set by a "stop" command (dashboard or terminal) to end the run early.
+    self._stop_requested = False
 
     # When a persona arrives at a game object, we give a unique event
     # to that object. 
@@ -304,8 +414,10 @@ class ReverieServer:
 
     # The main while loop of Reverie. 
     while (True): 
-      # Done with this iteration if <int_counter> reaches 0. 
-      if int_counter == 0: 
+      # Done with this iteration if <int_counter> reaches 0.
+      if int_counter == 0 or self._stop_requested:
+        if self._stop_requested:
+          log.info("Run stopped early with %s steps left", int_counter)
         break
 
       # <curr_env_file> file is the file that our frontend outputs. When the
@@ -313,6 +425,9 @@ class ReverieServer:
       # new environment file that matches our step count. That's when we run 
       # the content of this for loop. Otherwise, we just wait. 
       curr_env_file = f"{sim_folder}/environment/{self.step}.json"
+      # Reset every pass: a failed read must not reuse the last step's
+      # positions (or hit an unset name on the first pass).
+      env_retrieved = False
       if check_if_file_exists(curr_env_file):
         # If we have an environment file, it means we have a new perception
         # input to our personas. So we first retrieve it.
@@ -325,6 +440,8 @@ class ReverieServer:
           pass
       
         if env_retrieved: 
+          if getattr(self, "experiment_logger", None):
+            self.experiment_logger.set_step(self.step)
           # This is where we go through <game_obj_cleanup> to clean up all 
           # object actions that were used in this cylce. 
           for key, val in game_obj_cleanup.items(): 
@@ -370,21 +487,36 @@ class ReverieServer:
           # This is where the core brains of the personas are invoked. 
           movements = {"persona": dict(), 
                        "meta": dict()}
+          step_t0 = time.time()
+          log.info("Step %s begin | game_time=%s | agents=%s",
+                   self.step, self.curr_time, list(self.personas.keys()))
           for persona_name, persona in self.personas.items(): 
             # <next_tile> is a x,y coordinate. e.g., (58, 9)
             # <pronunciatio> is an emoji. e.g., "\ud83d\udca4"
             # <description> is a string description of the movement. e.g., 
             #   writing her next novel (editing her novel) 
             #   @ double studio:double studio:common room:sofa
+            agent_t0 = time.time()
+            usage.context.update(persona=persona_name, source="step",
+                                 step=self.step)
             next_tile, pronunciatio, description = persona.move(
               self.maze, self.personas, self.personas_tile[persona_name], 
               self.curr_time)
+            agent_dt = time.time() - agent_t0
+            usage.context["persona"] = None
             movements["persona"][persona_name] = {}
             movements["persona"][persona_name]["movement"] = next_tile
             movements["persona"][persona_name]["pronunciatio"] = pronunciatio
             movements["persona"][persona_name]["description"] = description
             movements["persona"][persona_name]["chat"] = (persona
                                                           .scratch.chat)
+            chat_note = ""
+            if persona.scratch.chat:
+              chat_note = f" | chatting_with={persona.scratch.chatting_with}"
+            log.info(
+              "  agent=%s (%.2fs) tile=%s act=%s%s",
+              persona_name, agent_dt, next_tile,
+              (description or "")[:120], chat_note)
 
           # Include the meta information about the current stage in the 
           # movements dictionary. 
@@ -398,21 +530,61 @@ class ReverieServer:
           #  "persona": {"Klaus Mueller": {"movement": [38, 12]}}, 
           #  "meta": {curr_time: <datetime>}}
           curr_move_file = f"{sim_folder}/movement/{self.step}.json"
-          with open(curr_move_file, "w") as outfile: 
-            outfile.write(json.dumps(movements, indent=2))
+          _write_json_atomic(curr_move_file, movements)
+
+          # Write the next step's positions ourselves instead of waiting for
+          # the browser map to report them, so runs keep going in a hidden
+          # tab or with no map open. The map only ever set each agent onto
+          # its movement tile, so these are the positions it would report;
+          # it now just displays them (process_environment won't overwrite).
+          _write_json_atomic(
+            f"{sim_folder}/environment/{self.step + 1}.json",
+            {name: {"maze": self.maze.maze_name, "x": m["movement"][0], 
+                    "y": m["movement"][1]}
+             for name, m in movements["persona"].items()})
 
           # After this cycle, the world takes one step forward, and the 
           # current time moves by <sec_per_step> amount. 
           self.step += 1
           self.curr_time += datetime.timedelta(seconds=self.sec_per_step)
 
+          snap_n = globals().get("snapshot_every_n_steps", 50)
+          if (getattr(self, "experiment_logger", None)
+              and snap_n and self.step % snap_n == 0):
+            self.experiment_logger.log_snapshots(
+              self.step, self.curr_time, self.personas)
+
+          log.info("Step %s done in %.2fs -> next_step=%s",
+                   self.step - 1, time.time() - step_t0, self.step)
           int_counter -= 1
-          
+
+          # Settings come from the dashboard and apply mid-run.
+          settings = load_settings()
+          opinion_every = settings.get("opinion_steps") or 0
+          if opinion_every and self.step % opinion_every == 0:
+            self.probe_opinions()
+          every = settings.get("autosave_steps") or 0
+          if every and self.step % every == 0: 
+            log.info("Auto-saving at step %s (every %s steps)", self.step, every)
+            self.save()
+            self.last_autosave = self.step
+          cap = settings.get("budget_usd")
+          if cap is not None and usage.run_cost >= cap: 
+            log.warning("Spending cap $%.2f reached ($%.4f spent); stopping "
+                        "and saving at step %s", cap, usage.run_cost, self.step)
+            self.budget_hit = True
+            if getattr(self, "last_autosave", None) != self.step:
+              self.save()
+              self.last_autosave = self.step
+            write_state(self, "running", 0)
+            break
+          write_state(self, "running", int_counter, force=False)
+
       # Sleep so we don't burn our machines. 
       time.sleep(self.server_sleep)
 
 
-  def open_server(self): 
+  def open_server(self, initial_commands=()): 
     """
     Open up an interactive terminal prompt that lets you run the simulation 
     step by step and probe agent state. 
@@ -430,22 +602,37 @@ class ReverieServer:
     # <sim_folder> points to the current simulation folder.
     sim_folder = f"{fs_storage}/{self.sim_code}"
 
-    while True: 
-      sim_command = input("Enter option: ")
+    # Commands arrive from the terminal and from the web dashboard.
+    self._stop_requested = False
+    self._interviews = dict()
+    feed = CommandFeed(on_stop=self.request_stop, initial=initial_commands)
+    write_state(self, "idle")
+
+    while True:
+      print ("Enter option: ", end="", flush=True)
+      cmd_id, sim_command = feed.get()
       sim_command = sim_command.strip()
       ret_str = ""
+      finished = False
+      log.info("CLI command: %r", sim_command)
+      # Calls made by this command (whispers, interviews) are billed to it.
+      usage.context.update(persona=None, step=self.step,
+                           source=" ".join(sim_command.split(";;")[0].split()[:3]))
 
-      try: 
-        if sim_command.lower() in ["f", "fin", "finish", "save and finish"]: 
-          # Finishes the simulation environment and saves the progress. 
+      try:
+        if sim_command.lower() in ["f", "fin", "finish", "save and finish"]:
+          # Finishes the simulation environment and saves the progress.
           # Example: fin
+          log.info("Finishing and saving simulation")
           self.save()
-          break
+          ret_str += f"Saved at step {self.step}. The simulation server has stopped."
+          finished = True
 
         elif sim_command.lower() == "start path tester mode": 
           # Starts the path tester and removes the currently forked sim files.
           # Note that once you start this mode, you need to exit out of the
           # session and restart in case you want to run something else. 
+          log.warning("Entering path tester mode; deleting sim folder %s", sim_folder)
           shutil.rmtree(sim_folder) 
           self.start_path_tester_server()
 
@@ -453,19 +640,36 @@ class ReverieServer:
           # Finishes the simulation environment but does not save the progress
           # and erases all saved data from current simulation. 
           # Example: exit 
-          shutil.rmtree(sim_folder) 
-          break 
+          log.warning("Exiting without save; deleting sim folder %s", sim_folder)
+          shutil.rmtree(sim_folder)
+          ret_str += f"Deleted {self.sim_code} without saving."
+          finished = True
 
-        elif sim_command.lower() == "save": 
-          # Saves the current simulation progress. 
+        elif sim_command.lower() == "save":
+          # Saves the current simulation progress.
           # Example: save
           self.save()
+          ret_str += f"Saved at step {self.step}."
 
-        elif sim_command[:3].lower() == "run": 
+        elif sim_command[:3].lower() == "run":
           # Runs the number of steps specified in the prompt.
           # Example: run 1000
           int_count = int(sim_command.split()[-1])
-          rs.start_server(int_count)
+          cap = load_settings().get("budget_usd")
+          if cap is not None and usage.run_cost >= cap: 
+            ret_str += (f"Not started: this run has spent ${usage.run_cost:.4f}, "
+                        f"which is over the ${cap:.2f} spending cap. Raise the "
+                        f"cap to keep going.")
+          else: 
+            log.info("Run requested for %s steps", int_count)
+            self.budget_hit = False
+            write_state(self, "running", int_count)
+            self.start_server(int_count)
+            ret_str += (f"Now at step {self.step}, "
+                        f"{self.curr_time.strftime('%B %d, %H:%M')}.")
+            if self.budget_hit: 
+              ret_str += (f" Stopped early: the ${load_settings().get('budget_usd') or 0:.2f} spending cap was "
+                          f"reached (${usage.run_cost:.4f} spent). Saved.")
 
         elif ("print persona schedule" 
               in sim_command[:22].lower()): 
@@ -571,8 +775,38 @@ class ReverieServer:
           # Starts a stateless chat session with the agent. It does not save 
           # anything to the agent's memory. 
           # Ex: call -- analysis Isabella Rodriguez
-          persona_name = sim_command[len("call -- analysis"):].strip() 
-          self.personas[persona_name].open_convo_session("analysis")
+          # The interactive session read its own input(), which now competes
+          # with the command queue, so interviews go one question at a time.
+          ret_str += ("Interviews run one question at a time: "
+                      "call -- interview <Agent Name> ;; <question>\n")
+
+        elif ("call -- interview" in sim_command.lower()):
+          # Stateless interview, like "analysis": nothing is added to the
+          # agent's memory, and the retrieval behind the answer is read-only
+          # (touch=False), so interviewing an agent does not change what it
+          # retrieves next. Earlier questions stay as context until end_convo.
+          # Ex: call -- interview Elena Chen ;; What do you think of the datacenter?
+          # Ex: call -- interview Elena Chen ;; end_convo
+          name, line = [x.strip() for x in
+                        sim_command[len("call -- interview"):].split(";;", 1)]
+          persona = self.personas[name]
+          usage.context["persona"] = name
+          convo = self._interviews.setdefault(name, [])
+          if line == "end_convo":
+            self._interviews.pop(name, None)
+            ret_str += f"Interview with {name} closed."
+          elif int(run_gpt_generate_safety_score(persona, line)[0] or 0) >= 8:
+            ret_str += (f"{name} is a computational agent, and as such, it may "
+                        "be inappropriate to attribute human agency to the "
+                        "agent in your communication.")
+          else:
+            retrieved = new_retrieve(persona, [line], 50, touch=False)[line]
+            summarized_idea = generate_summarize_ideas(persona, retrieved, line)
+            convo += [["Interviewer", line]]
+            answer = generate_next_line(persona, "Interviewer", convo,
+                                        summarized_idea)
+            convo += [[name, answer]]
+            ret_str += answer
 
         elif ("call -- load history" 
               in sim_command.lower()): 
@@ -588,28 +822,107 @@ class ReverieServer:
             for whisper in whispers: 
               clean_whispers += [[agent_name, whisper]]
 
-          load_history_via_whisper(self.personas, clean_whispers)
+          self._load_whispers(clean_whispers)
+          log.info("Loaded history: %s whispers from %s",
+                   len(clean_whispers), curr_file)
+          if getattr(self, "experiment_logger", None):
+            for agent_name, whisper in clean_whispers:
+              self.experiment_logger.log_event(
+                self.step, self.curr_time, "history_whisper",
+                agent=agent_name, text=whisper,
+                extra={"source_file": curr_file})
+
+        elif ("call -- probe now" in sim_command.lower()):
+          # Reads every agent's position on the datacenter right now instead
+          # of waiting for the next scheduled read. Useful straight after a
+          # whisper, to catch the before and after.
+          # Ex: call -- probe now
+          readings = self.probe_opinions()
+          for reading in readings:
+            ret_str += (f"{reading['name']}: "
+                        f"{reading['score'] if reading['score'] is not None else '-'}"
+                        f" {reading['rationale']}\n")
+          if not readings:
+            ret_str += "No agents have stepped yet, so there is nothing to read.\n"
+
+        elif ("call -- whisper" in sim_command.lower()):
+          # Mid-run event injection.
+          # Ex: call -- whisper Maya Okonkwo ;; The council posted the proposal summary.
+          # Ex: call -- whisper all ;; Utility company issued a statement on grid capacity.
+          payload = sim_command[len("call -- whisper"):].strip()
+          if ";;" not in payload:
+            ret_str += "Usage: call -- whisper <Agent Name|all> ;; <text>\n"
+          else:
+            target_part, whisper_text = payload.split(";;", 1)
+            target_part = target_part.strip()
+            whisper_text = whisper_text.strip()
+            if target_part.lower() == "all":
+              targets = list(self.personas.keys())
+            else:
+              targets = [target_part]
+            clean_whispers = [[name, whisper_text] for name in targets]
+            self._load_whispers(clean_whispers)
+            log.info("Mid-run whisper to %s agent(s): %s",
+                     len(clean_whispers), whisper_text[:160])
+            if getattr(self, "experiment_logger", None):
+              for agent_name, whisper in clean_whispers:
+                self.experiment_logger.log_event(
+                  self.step, self.curr_time, "midrun_whisper",
+                  agent=agent_name, text=whisper)
+            ret_str += f"Whispered to {len(clean_whispers)} agent(s).\n"
 
         print (ret_str)
+        record_result(cmd_id, sim_command, True, ret_str)
 
       except:
         traceback.print_exc()
+        log.exception("CLI command failed: %r", sim_command)
         print ("Error.")
-        pass
+        record_result(cmd_id, sim_command, False, traceback.format_exc())
+
+      if finished:
+        write_state(self, "finished")
+        break
+      write_state(self, "idle")
+
+
+  def request_stop(self):
+    self._stop_requested = True
 
 
 if __name__ == '__main__':
-  # rs = ReverieServer("base_the_ville_isabella_maria_klaus", 
+  # rs = ReverieServer("base_the_ville_isabella_maria_klaus",
   #                    "July1_the_ville_isabella_maria_klaus-step-3-1")
-  # rs = ReverieServer("July1_the_ville_isabella_maria_klaus-step-3-20", 
+  # rs = ReverieServer("July1_the_ville_isabella_maria_klaus-step-3-20",
   #                    "July1_the_ville_isabella_maria_klaus-step-3-21")
   # rs.open_server()
 
-  origin = input("Enter the name of the forked simulation: ").strip()
-  target = input("Enter the name of the new simulation: ").strip()
+  setup_logging()
+  # The dashboard launches:
+  #   reverie.py <fork> <new sim> [--history <csv>] [--run <steps>]
+  # History loads first, then the run starts. With no arguments, ask in the
+  # terminal as before.
+  args = sys.argv[1:]
+  initial_commands = []
+  if "--history" in args:
+    i = args.index("--history")
+    initial_commands += [f"call -- load history {args[i + 1]}"]
+    args = args[:i] + args[i + 2:]
+  if "--run" in args:
+    i = args.index("--run")
+    initial_commands += [f"run {int(args[i + 1])}"]
+    args = args[:i] + args[i + 2:]
+  if len(args) == 2:
+    origin, target = args
+  else:
+    origin = input("Enter the name of the forked simulation: ").strip()
+    target = input("Enter the name of the new simulation: ").strip()
+  target = run_env.run_name(target)
+  log.info("User selected fork=%s target=%s (run_env=%s)", origin, target,
+           run_env.RUN_ENV)
 
   rs = ReverieServer(origin, target)
-  rs.open_server()
+  rs.open_server(initial_commands)
 
 
 

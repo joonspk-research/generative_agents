@@ -14,6 +14,14 @@ def main():
             "available on your PYTHONPATH environment variable? Did you "
             "forget to activate a virtual environment?"
         ) from exc
+    import logging
+    from frontend_logging import setup_logging
+    setup_logging()
+    # With runserver's autoreloader, the parent only watches files; RUN_MAIN marks the serving child.
+    role = "server" if os.environ.get("RUN_MAIN") == "true" else "main"
+    logging.getLogger("frontend").info(
+        "Django manage.py starting (%s, pid=%s): %s",
+        role, os.getpid(), " ".join(sys.argv[1:]) or "(no args)")
     execute_from_command_line(sys.argv)
 
 

@@ -15,6 +15,7 @@ import random
 from global_methods import *
 from persona.prompt_template.gpt_structure import *
 from utils import *
+from dashboard_bridge import record_llm
 
 ##############################################################################
 #                    PERSONA Chapter 1: Prompt Structures                    #
@@ -25,7 +26,8 @@ def print_run_prompts(prompt_template=None,
                       gpt_param=None, 
                       prompt_input=None,
                       prompt=None, 
-                      output=None): 
+                      output=None):
+  record_llm(persona.name, prompt_template, prompt, output)
   print (f"=== {prompt_template}")
   print ("~~~ persona    ---------------------------------------------------")
   print (persona.name, "\n")

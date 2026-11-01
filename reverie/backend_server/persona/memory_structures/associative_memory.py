@@ -92,15 +92,24 @@ class AssociativeMemory:
       keywords = set(node_details["keywords"])
       filling = node_details["filling"]
       
-      if node_type == "event": 
-        self.add_event(created, expiration, s, p, o, 
+      node = None
+      if node_type == "event":
+        node = self.add_event(created, expiration, s, p, o,
                    description, keywords, poignancy, embedding_pair, filling)
-      elif node_type == "chat": 
-        self.add_chat(created, expiration, s, p, o, 
+      elif node_type == "chat":
+        node = self.add_chat(created, expiration, s, p, o,
                    description, keywords, poignancy, embedding_pair, filling)
-      elif node_type == "thought": 
-        self.add_thought(created, expiration, s, p, o, 
+      elif node_type == "thought":
+        node = self.add_thought(created, expiration, s, p, o,
                    description, keywords, poignancy, embedding_pair, filling)
+
+      # Recency decays from last_accessed (retrieve.py), so a resumed or forked
+      # run that defaulted it back to created would restart the clock for every
+      # node at once. A nodes.json written before this was saved has no such
+      # field, and those nodes keep the constructor's default of created.
+      if node and node_details.get("last_accessed"):
+        node.last_accessed = datetime.datetime.strptime(
+          node_details["last_accessed"], '%Y-%m-%d %H:%M:%S')
 
     kw_strength_load = json.load(open(f_saved + "/kw_strength.json"))
     if kw_strength_load["kw_strength_event"]: 
@@ -122,8 +131,10 @@ class AssociativeMemory:
       r[node_id]["depth"] = node.depth
 
       r[node_id]["created"] = node.created.strftime('%Y-%m-%d %H:%M:%S')
+      r[node_id]["last_accessed"] = (node.last_accessed
+                                         .strftime('%Y-%m-%d %H:%M:%S'))
       r[node_id]["expiration"] = None
-      if node.expiration: 
+      if node.expiration:
         r[node_id]["expiration"] = (node.expiration
                                         .strftime('%Y-%m-%d %H:%M:%S'))
 

@@ -15,6 +15,11 @@ from global_methods import *
 from persona.prompt_template.run_gpt_prompt import *
 from persona.cognitive_modules.retrieve import *
 from persona.cognitive_modules.converse import *
+from experiment_logger import get_experiment_logger
+from sim_logging import get_logger
+
+log = get_logger("plan")
+
 
 ##############################################################################
 # CHAPTER 2: Generate
@@ -869,6 +874,21 @@ def _chat_react(maze, persona, focused_event, reaction_mode, personas):
   convo_summary = generate_convo_summary(init_persona, convo)
   inserted_act = convo_summary
   inserted_act_dur = duration_min
+
+  logger = get_experiment_logger()
+  if logger:
+    logger.log_conversation(
+      step=None,
+      curr_time=init_persona.scratch.curr_time,
+      speakers=[init_persona.name, target_persona.name],
+      utterances=convo,
+      location=str(init_persona.scratch.act_address),
+      summary=convo_summary,
+    )
+  log.info(
+    "Conversation %s <-> %s (%s turns, ~%s min): %s",
+    init_persona.name, target_persona.name,
+    len(convo or []), duration_min, (convo_summary or "")[:160])
 
   act_start_time = target_persona.scratch.act_start_time
 

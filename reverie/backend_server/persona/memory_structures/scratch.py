@@ -40,10 +40,22 @@ class Scratch:
     self.innate = None
     # L1 stable traits.
     self.learned = None
-    # L2 external implementation. 
+    # L2 external implementation.
     self.currently = None
     self.lifestyle = None
     self.living_area = None
+    # L1 stable traits that describe how this persona reasons rather than what
+    # they currently conclude. Empty for personas that do not set them, and
+    # left out of the identity stable set when empty.
+    # <values> is what they ultimately care about, in priority order.
+    self.values = ""
+    # <stake> is what they personally stand to gain or lose.
+    self.stake = ""
+    # <persuadability> is how they change their mind: what they credit and
+    # what they dismiss. Deliberately says nothing about which side they are
+    # on -- the identity stable set is also read by the stance probe, so a
+    # position stated here would be read straight back out as a measurement.
+    self.persuadability = ""
 
     # REFLECTION VARIABLES
     self.concept_forget = 100
@@ -57,7 +69,7 @@ class Scratch:
     self.recency_w = 1
     self.relevance_w = 1
     self.importance_w = 1
-    self.recency_decay = 0.99
+    self.recency_decay = 0.995
     self.importance_trigger_max = 150
     self.importance_trigger_curr = self.importance_trigger_max
     self.importance_ele_n = 0 
@@ -183,6 +195,11 @@ class Scratch:
       self.currently = scratch_load["currently"]
       self.lifestyle = scratch_load["lifestyle"]
       self.living_area = scratch_load["living_area"]
+      # Read with a default: seeds and in-progress runs saved before these
+      # existed have to keep loading.
+      self.values = scratch_load.get("values", "")
+      self.stake = scratch_load.get("stake", "")
+      self.persuadability = scratch_load.get("persuadability", "")
 
       self.concept_forget = scratch_load["concept_forget"]
       self.daily_reflection_time = scratch_load["daily_reflection_time"]
@@ -261,6 +278,9 @@ class Scratch:
     scratch["currently"] = self.currently
     scratch["lifestyle"] = self.lifestyle
     scratch["living_area"] = self.living_area
+    scratch["values"] = self.values
+    scratch["stake"] = self.stake
+    scratch["persuadability"] = self.persuadability
 
     scratch["concept_forget"] = self.concept_forget
     scratch["daily_reflection_time"] = self.daily_reflection_time
@@ -407,6 +427,14 @@ class Scratch:
     commonset += f"Age: {self.age}\n"
     commonset += f"Innate traits: {self.innate}\n"
     commonset += f"Learned traits: {self.learned}\n"
+    # Omitted entirely when unset, so personas that do not use them read
+    # exactly as they did before rather than gaining empty labels.
+    if self.values:
+      commonset += f"Values: {self.values}\n"
+    if self.stake:
+      commonset += f"Personal stake: {self.stake}\n"
+    if self.persuadability:
+      commonset += f"How they change their mind: {self.persuadability}\n"
     commonset += f"Currently: {self.currently}\n"
     commonset += f"Lifestyle: {self.lifestyle}\n"
     commonset += f"Daily plan requirement: {self.daily_plan_req}\n"

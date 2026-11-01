@@ -1,0 +1,30 @@
+datacenter_stance_v1.txt
+
+Variables:
+!<INPUT 0>! -- agent name
+!<INPUT 1>! -- who is being rated: name and age only, from stance_iss()
+!<INPUT 2>! -- agent name
+!<INPUT 3>! -- statements (the agent's relevant memories, oldest first)
+!<INPUT 4>! -- agent name
+!<INPUT 5>! -- current date and time
+
+<commentblockmarker>###</commentblockmarker>
+Here is who you are rating. You are given their name and age and nothing else about them, deliberately: their memories below are the only evidence of what they think.
+!<INPUT 1>!
+
+Here are the memories of !<INPUT 2>! that came back closest to the datacenter proposed for the town, oldest first. They are the nearest ones in memory, which does not mean they bear on the datacenter at all. It is now !<INPUT 5>!.
+!<INPUT 3>!
+
+Rate where !<INPUT 4>! stands on building the datacenter right now, on a scale of 1 to 100, where 1 means completely against it and would act to stop it, 100 means completely in support of it and would act to get it built, and 50 means genuinely torn or holding no view either way.
+
+Rate the position held at the end of those memories, not the average across them. Where the memories disagree, the most recent ones are what this person thinks now.
+
+Working on the datacenter is not the same as wanting it built. These people study it, measure it, go to meetings about it, organise their neighbours about it, and some of them are paid to analyse it. Being deeply involved in the subject is not evidence of which side they are on. Phrases like "is heavily involved in", "is actively analysing", "is engaged in discussions about" and "is central to the planning of" describe effort, not a position, and must never on their own push a rating above 50. If the memories show plenty of activity but never show which outcome this person wants, rate them 50.
+
+An unresolved objection counts against, not for. If this person is pressing a specific problem -- a missing figure, the water draw, a rate increase, a promise that was broken the last time -- treat that as opposition while it stands unanswered, rather than as support waiting to be released. Being constructive, well-informed or polite about an objection does not make it support. Rate above 50 only when the memories show this person actually wanting the thing built: saying so, arguing for it, or acting to advance it. "I would back this once the water figure is published" is above 50; "the water figure is missing and nobody will answer me" is below 50, however reasonably it is put.
+
+Weigh what this person says and does more heavily than what was said to them. Other people's concerns and enthusiasms appear in these memories because this person was present for them; they move the rating only insofar as this person took them up.
+
+Any whole number from 1 to 100 is available to you. Do not round to a multiple of 5 or 10, and do not settle on a value because it looks like a familiar answer or because it appeared in an example -- choose the number that fits this person. Someone who has firmly taken a side belongs in the first or last ten of the scale, so do not pull a settled position toward the middle. Judge from the memories above, not from what a reasonable person would conclude.
+
+If none of the memories above bear on the datacenter, answer "none" instead of a number, and say in one sentence what !<INPUT 4>! has on their mind instead. You have been told nothing about !<INPUT 4>! beyond their name and age, and you must not fill that in: do not guess a position from their name, their age, their likely job, or what someone in a town like this would probably think. No reading is better than an invented one. Only answer "none" when the memories are genuinely silent on it; someone who has heard about the datacenter and has no settled view is a 50, not a "none".

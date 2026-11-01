@@ -1,0 +1,1839 @@
+{% load staticfiles %}<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Town Control</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Silkscreen:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --paper: #eef2ec;
+  --panel: #fbfcfa;
+  --ink: #1d2a22;
+  --muted: #5d6b62;
+  --faint: #8a978f;
+  --line: #d3dbd1;
+  --moss: #2f7a55;
+  --moss-soft: #dcebe1;
+  --amber: #b87a0c;
+  --amber-soft: #f6e8c8;
+  --brick: #a23d2c;
+  --brick-soft: #f4dcd6;
+  --grass: #6b8f5e;
+  --radius-lg: 14px;
+  --radius-sm: 7px;
+  --sans: "Instrument Sans", system-ui, sans-serif;
+  --pixel: "Silkscreen", monospace;
+  --mono: "JetBrains Mono", ui-monospace, monospace;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #141a16; --panel: #1b231e; --ink: #e3eae4; --muted: #9aa89f;
+    --faint: #6f7d74; --line: #2b372f; --moss: #5dba86; --moss-soft: #1f3a2b;
+    --amber: #e3a93c; --amber-soft: #3a2f16; --brick: #e27a66;
+    --brick-soft: #3d221d; --grass: #3f5a37; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #141a16; --panel: #1b231e; --ink: #e3eae4; --muted: #9aa89f;
+  --faint: #6f7d74; --line: #2b372f; --moss: #5dba86; --moss-soft: #1f3a2b;
+  --amber: #e3a93c; --amber-soft: #3a2f16; --brick: #e27a66;
+  --brick-soft: #3d221d; --grass: #3f5a37; color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body {
+  background: var(--paper); color: var(--ink);
+  font: 15px/1.5 var(--sans); font-variant-numeric: tabular-nums;
+  min-height: 100vh;
+}
+button, input, select, textarea { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--moss); outline-offset: 2px; }
+[hidden] { display: none !important; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+
+/* ---------- header ---------- */
+.top {
+  display: grid; grid-template-columns: 1fr auto 1fr; align-items: center;
+  gap: 16px; padding: 14px 20px; border-bottom: 1px solid var(--line);
+  background: var(--panel);
+}
+.sim h1 { margin: 0; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+.sim .sub { color: var(--muted); font-size: 13px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.status { display: inline-flex; align-items: center; gap: 6px; font-weight: 500; }
+.status::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--faint); }
+.status[data-s="running"] { color: var(--moss); }
+.status[data-s="running"]::before { background: var(--moss); animation: pulse 1.4s ease-in-out infinite; }
+.status[data-s="idle"]::before { background: var(--moss); }
+.status[data-s="starting"] { color: var(--amber); }
+.status[data-s="starting"]::before { background: var(--amber); animation: pulse 1s ease-in-out infinite; }
+@keyframes pulse { 50% { opacity: .25; } }
+
+.clock { text-align: center; line-height: 1; }
+.clock .time { font-family: var(--pixel); font-size: 40px; letter-spacing: 0.02em; }
+.clock .date { font-size: 13px; color: var(--muted); margin-top: 6px; }
+
+.controls { display: flex; gap: 8px; justify-content: flex-end; align-items: center; flex-wrap: wrap; }
+.btn {
+  border: 1px solid var(--line); background: var(--panel); border-radius: var(--radius-sm);
+  padding: 7px 12px; cursor: pointer; font-weight: 500; white-space: nowrap;
+}
+.btn:hover:not(:disabled) { border-color: var(--muted); }
+.btn:disabled { opacity: .45; cursor: default; }
+.btn.primary { background: var(--moss); border-color: var(--moss); color: #fff; }
+.btn.danger { color: var(--brick); }
+.btn.small { padding: 3px 9px; font-size: 13px; }
+.step-presets { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
+
+/* ---------- layout ---------- */
+.board {
+  display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(380px, 1fr);
+  gap: 16px; padding: 16px 20px 32px; align-items: start;
+}
+.col { display: flex; flex-direction: column; gap: 16px; min-height: 0; min-width: 0; }
+.card {
+  background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius-lg);
+  min-height: 0; display: flex; flex-direction: column;
+}
+.map-card { overflow: hidden; flex: none; }
+.map-wrap { position: relative; aspect-ratio: 1500 / 800; background: var(--grass); }
+.map-wrap iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+.map-empty {
+  position: absolute; inset: 0; display: grid; place-items: center; text-align: center;
+  color: #f1f6ee; padding: 24px;
+}
+.map-empty p { margin: 0 0 12px; font-size: 15px; }
+/* The page scrolls; these panels keep a fixed height and scroll inside. */
+.grow { height: 640px; flex: none; }
+
+.tabs { display: flex; gap: 2px; padding: 6px 8px 0; border-bottom: 1px solid var(--line); overflow-x: auto; }
+.tab {
+  border: 0; background: none; padding: 8px 12px 9px; cursor: pointer; color: var(--muted);
+  border-bottom: 2px solid transparent; margin-bottom: -1px; font-weight: 500; white-space: nowrap;
+}
+.tab[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--ink); }
+.tab .count { color: var(--faint); font-weight: 400; margin-left: 4px; }
+.pane { padding: 14px 16px; overflow: auto; min-height: 0; flex: 1; }
+.pane[hidden] { display: none; }
+.empty { color: var(--muted); padding: 18px 2px; max-width: 46ch; }
+
+/* ---------- roster ---------- */
+.roster { list-style: none; margin: 0; padding: 6px; overflow: auto; }
+.agent {
+  display: grid; grid-template-columns: 44px minmax(0, 1fr) auto; gap: 12px; align-items: center;
+  padding: 8px 10px; border-radius: 10px; cursor: pointer; border: 1px solid transparent;
+  width: 100%; text-align: left; background: none;
+}
+.agent:hover { background: var(--paper); }
+.agent[aria-current="true"] { background: var(--moss-soft); border-color: color-mix(in srgb, var(--moss) 30%, transparent); }
+.sprite {
+  width: 44px; height: 44px; image-rendering: pixelated; border-radius: 8px;
+  background: var(--paper); object-fit: contain;
+}
+.agent .name { font-weight: 600; font-size: 14px; }
+.agent .doing { color: var(--muted); font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.agent .emoji { font-size: 20px; }
+.talk { color: var(--amber); font-size: 12px; font-weight: 600; }
+
+/* ---------- inspector ---------- */
+.who { display: flex; gap: 14px; align-items: center; padding: 14px 16px 10px; }
+.who .sprite { width: 64px; height: 64px; }
+.who h2 { margin: 0; font-size: 20px; letter-spacing: -0.01em; }
+.who .meta { color: var(--muted); font-size: 13px; }
+.now-action { font-size: 18px; font-weight: 600; line-height: 1.35; margin: 0 0 4px; }
+.place { color: var(--muted); font-size: 13px; margin: 0 0 14px; }
+.section { margin: 0 0 18px; }
+.section h3 { font-size: 13px; font-weight: 600; color: var(--muted); margin: 0 0 6px; }
+.quote { margin: 0; padding: 10px 12px; background: var(--paper); border-radius: 10px; max-width: 70ch; }
+.lines { display: grid; gap: 6px; }
+.line b { font-weight: 600; }
+.chatbox { background: var(--amber-soft); border-radius: 10px; padding: 10px 12px; }
+.chatbox .who-talks { color: var(--amber); font-weight: 600; font-size: 13px; margin-bottom: 6px; }
+
+.sched { list-style: none; margin: 0; padding: 0; }
+.sched li { display: grid; grid-template-columns: 52px minmax(0, 1fr) 48px; gap: 10px; padding: 5px 6px; border-radius: 6px; font-size: 14px; }
+.sched .t, .sched .d { color: var(--faint); font-size: 13px; }
+.sched .d { text-align: right; }
+.sched li.done { color: var(--faint); }
+.sched li.current { background: var(--moss-soft); color: var(--ink); font-weight: 500; }
+.goals { margin: 0; padding-left: 18px; }
+.goals li { margin: 2px 0; }
+
+.mem { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
+.mem li { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 12px; padding: 7px 0; border-bottom: 1px solid var(--line); font-size: 14px; }
+.mem .when { color: var(--faint); font-size: 12px; }
+.poig { display: inline-flex; gap: 2px; align-items: center; }
+.poig i { width: 4px; height: 10px; border-radius: 1px; background: var(--line); }
+.poig i.on { background: var(--moss); }
+.meter { height: 6px; background: var(--line); border-radius: 3px; overflow: hidden; margin-top: 4px; }
+.meter > div { height: 100%; background: var(--moss); }
+
+/* Memory categories. Not .tabs/.tab: those are bound once at load and switch
+   panes by id, while these live inside a pane that is repainted on every poll. */
+.chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 14px; }
+.chip {
+  border: 1px solid var(--line); background: var(--panel); border-radius: 999px;
+  padding: 5px 12px; cursor: pointer; color: var(--muted); font-size: 13px; font-weight: 500;
+}
+.chip:hover { background: var(--paper); }
+.chip[aria-pressed="true"] { background: var(--moss-soft); border-color: color-mix(in srgb, var(--moss) 35%, transparent); color: var(--ink); }
+.chip .count { color: var(--faint); font-weight: 400; margin-left: 5px; }
+.chip[aria-pressed="true"] .count { color: var(--muted); }
+details.ep .mem { margin-top: 8px; }
+details.ep .mark { color: var(--muted); margin-right: 6px; }
+
+details.llm { border-bottom: 1px solid var(--line); padding: 8px 0; }
+details.llm summary { cursor: pointer; list-style: none; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; }
+details.llm summary::-webkit-details-marker { display: none; }
+details.llm .a { font-size: 14px; }
+pre, .mono { font-family: var(--mono); font-size: 12px; line-height: 1.55; white-space: pre-wrap; word-break: break-word; margin: 0; }
+
+.form { display: flex; gap: 8px; margin-top: 8px; }
+.form input, .form select { flex: 1; min-width: 0; border: 1px solid var(--line); background: var(--panel); border-radius: var(--radius-sm); padding: 8px 10px; }
+.hint { color: var(--faint); font-size: 12px; margin-top: 6px; }
+
+.bubble { max-width: 85%; padding: 9px 12px; border-radius: 12px; margin: 0 0 8px; }
+.bubble.me { background: var(--moss-soft); margin-left: auto; }
+.bubble.them { background: var(--paper); }
+.bubble.wait { color: var(--muted); font-style: italic; }
+
+/* ---------- activity ---------- */
+.convo { border-bottom: 1px solid var(--line); padding: 10px 0; }
+.convo .head { display: flex; justify-content: space-between; gap: 10px; font-size: 13px; color: var(--muted); }
+.convo .pair { font-weight: 600; color: var(--ink); font-size: 14px; }
+.convo p { margin: 4px 0 0; max-width: 75ch; }
+.convo details { margin-top: 6px; font-size: 14px; }
+.convo summary { cursor: pointer; color: var(--muted); font-size: 13px; }
+/* Marks the conversation a stance-graph marker was clicked, which is otherwise
+   hard to spot after the pane scrolls to it. */
+.convo.flash { animation: pulse 1.2s ease-in-out 2; }
+
+.results { display: grid; gap: 10px; }
+.result { border-left: 3px solid var(--line); padding: 2px 0 2px 10px; }
+.result.ok { border-left-color: var(--moss); }
+.result.err { border-left-color: var(--brick); }
+.result.pending { border-left-color: var(--amber); }
+.result .cmd { font-family: var(--mono); font-size: 12px; font-weight: 500; }
+.result .when { color: var(--faint); font-size: 12px; }
+.result pre { color: var(--muted); margin-top: 4px; max-height: 240px; overflow: auto; }
+.console-bar { display: flex; gap: 8px; padding: 0 16px 12px; }
+.console-bar input { flex: 1; min-width: 0; font-family: var(--mono); font-size: 13px; border: 1px solid var(--line); background: var(--paper); border-radius: var(--radius-sm); padding: 8px 10px; }
+.chips { display: flex; gap: 6px; flex-wrap: wrap; padding: 10px 16px; border-top: 1px solid var(--line); }
+.log { font-family: var(--mono); font-size: 12px; line-height: 1.6; }
+.log div { white-space: pre-wrap; word-break: break-word; }
+.log .warn { color: var(--amber); }
+.log .error { color: var(--brick); }
+.run-select {
+  font: 600 17px/1.3 var(--sans); letter-spacing: -0.01em; color: var(--ink);
+  border: 1px solid transparent; background: transparent; border-radius: var(--radius-sm);
+  padding: 2px 4px; margin-left: -5px; max-width: 100%; cursor: pointer;
+}
+.run-select:hover { border-color: var(--line); }
+.status[data-s="saved"]::before { background: var(--amber); }
+.viewing {
+  display: flex; gap: 12px; align-items: center; flex-wrap: wrap;
+  padding: 10px 20px; background: var(--amber-soft); border-bottom: 1px solid var(--line); font-size: 14px;
+}
+.viewing .grow-text { flex: 1; min-width: 240px; }
+.replay-box { display: flex; gap: 8px; align-items: center; justify-content: center; flex-wrap: wrap; }
+.replay-box input { width: 90px; border: 0; border-radius: var(--radius-sm); padding: 6px 8px; }
+.map-tag { position: absolute; left: 10px; top: 10px; background: rgb(20 26 22 / .7); color: #fff; font-size: 12px; padding: 3px 8px; border-radius: 6px; }
+.inherited { opacity: .6; }
+.inherited-note { color: var(--faint); font-size: 12px; font-weight: 500; margin-left: 6px; }
+.hist { list-style: none; margin: 0; padding: 0; }
+.hist li { border-left: 2px solid var(--line); padding: 0 0 12px 12px; }
+.hist li:last-child { border-left-color: var(--moss); }
+.env-badge { background: var(--amber-soft); color: var(--amber); font-size: 12px; font-weight: 600; padding: 1px 8px; border-radius: 999px; }
+.cost-pill { border: 0; background: none; padding: 0; color: var(--muted); cursor: pointer; font-size: 13px; text-decoration: underline dotted; text-underline-offset: 3px; }
+.cost-pill:hover { color: var(--ink); }
+.usage-top { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-bottom: 18px; }
+.usage-top div { border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; }
+.usage-top b { display: block; font-size: 22px; font-weight: 600; letter-spacing: -0.01em; }
+.usage-top span { color: var(--muted); font-size: 13px; }
+table.usage { width: 100%; border-collapse: collapse; font-size: 13px; margin-bottom: 18px; }
+table.usage th, table.usage td { text-align: right; padding: 6px 8px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+table.usage th:first-child, table.usage td:first-child { text-align: left; }
+table.usage th { color: var(--muted); font-weight: 600; }
+.bars { display: grid; gap: 6px; }
+.bar { display: grid; grid-template-columns: 150px minmax(0, 1fr) 90px; gap: 10px; align-items: center; font-size: 13px; }
+.bar .track { height: 8px; background: var(--line); border-radius: 4px; overflow: hidden; }
+.bar .track div { height: 100%; background: var(--moss); }
+.bar .v { text-align: right; color: var(--muted); }
+.warn-box { background: var(--amber-soft); border-radius: 10px; padding: 10px 12px; font-size: 14px; margin-bottom: 14px; }
+.err-row { border-left: 3px solid var(--brick); padding: 2px 0 2px 10px; margin-bottom: 8px; font-size: 13px; }
+@media (max-width: 700px) { .usage-top { grid-template-columns: repeat(2, minmax(0, 1fr)); } .bar { grid-template-columns: 110px minmax(0, 1fr) 70px; } }
+.toggle { display: inline-flex; gap: 6px; align-items: center; color: var(--muted); font-size: 13px; margin-bottom: 8px; }
+
+/* ---------- stance graph ---------- */
+.bottom { padding: 0 20px 32px; display: grid; gap: 16px; }
+.stance-head { display: flex; flex-wrap: wrap; gap: 4px 14px; align-items: baseline; padding: 14px 16px 0; }
+.stance-head h2 { margin: 0; font-size: 15px; font-weight: 600; }
+.stance-head .hint { margin: 0; }
+.stance svg { width: 100%; height: 300px; display: block; }
+.stance .grid { stroke: var(--line); }
+.stance .fork { stroke: var(--faint); stroke-dasharray: 3 3; }
+.stance .axis { fill: var(--faint); font-size: 11px; }
+.stance { position: relative; }
+.stance .line { fill: none; stroke-width: 2; stroke-linejoin: round; }
+.stance .dot { stroke: var(--panel); stroke-width: 1.5; }
+.stance .mark { stroke: var(--panel); stroke-width: 1.5; }
+.stance .ring { stroke-width: 2; }
+.stance .dim { opacity: .22; }
+.stance-tip { position: absolute; z-index: 5; pointer-events: none; max-width: 300px; background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; font-size: 12px; line-height: 1.5; box-shadow: 0 6px 20px rgba(0, 0, 0, .18); }
+.stance-tip b { display: block; }
+.stance-tip .when { color: var(--muted); }
+.stance-tip div { margin-top: 4px; }
+.stance-key { display: flex; flex-wrap: wrap; gap: 4px 16px; padding: 4px 16px 14px; font-size: 13px; color: var(--muted); }
+.stance-key span { display: inline-flex; align-items: center; gap: 6px; }
+.stance-key i { width: 10px; height: 10px; border-radius: 50%; }
+.stance-key b { color: var(--ink); }
+.social { padding: 16px; }
+.social-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px 16px; }
+.social h2 { margin: 0; font-size: 15px; font-weight: 600; }
+.social .hint { margin: 0; }
+.social svg { width: 100%; height: auto; display: block; }
+.social-edge { stroke: var(--muted); opacity: .65; }
+.social-node { cursor: pointer; outline: none; }
+.social-node circle { stroke: var(--panel); stroke-width: 3; }
+.social-node.selected circle, .social-node:focus circle { stroke: var(--ink); stroke-width: 3; }
+.social-node .label-background { fill: var(--panel); }
+.social-node text { fill: var(--ink); font-size: 13px; text-anchor: middle;
+  paint-order: stroke; stroke: var(--panel); stroke-width: 5px; stroke-linejoin: round; }
+.social-legend { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 12px; }
+.social-legend span { display: inline-flex; align-items: center; gap: 6px; }
+.social-legend i { width: 12px; height: 12px; border-radius: 50%; flex: none; }
+@media (max-width: 700px) { .bottom { padding: 0 16px 24px; } }
+
+/* ---------- dialog ---------- */
+dialog {
+  border: 1px solid var(--line); border-radius: var(--radius-lg); background: var(--panel);
+  color: var(--ink); padding: 22px; width: min(460px, calc(100vw - 32px));
+  max-height: calc(100vh - 32px); overflow: auto;
+}
+dialog::backdrop { background: rgb(20 26 22 / .45); }
+dialog h2 { margin: 0 0 4px; font-size: 18px; }
+dialog p { margin: 0 0 16px; color: var(--muted); font-size: 14px; }
+dialog label { display: block; font-size: 13px; font-weight: 600; margin: 12px 0 4px; }
+dialog input, dialog select { width: 100%; border: 1px solid var(--line); background: var(--paper); border-radius: var(--radius-sm); padding: 8px 10px; }
+dialog .row { display: flex; justify-content: flex-end; gap: 8px; margin-top: 20px; }
+.error-text { color: var(--brick); font-size: 13px; margin-top: 10px; min-height: 1em; }
+
+.toast {
+  position: fixed; bottom: 18px; left: 50%; transform: translateX(-50%);
+  background: var(--ink); color: var(--panel); padding: 9px 14px; border-radius: 10px;
+  font-size: 14px; opacity: 0; transition: opacity .2s; pointer-events: none;
+}
+.toast.show { opacity: 1; }
+
+/* ---------- small screens ---------- */
+@media (max-width: 1100px) {
+  .top { grid-template-columns: 1fr auto; }
+  .controls { grid-column: 1 / -1; justify-content: flex-start; }
+  .board { grid-template-columns: minmax(0, 1fr); height: auto; padding: 16px; }
+  .grow { height: 560px; }
+}
+@media (max-width: 560px) {
+  .top { grid-template-columns: 1fr; padding: 12px 16px; }
+  .clock { text-align: left; }
+  .clock .time { font-size: 32px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before { animation: none !important; transition: none !important; }
+}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="sim">
+    <label class="sr-only" for="run-select">Run to view</label>
+    <select id="run-select" class="run-select"></select>
+    <div class="sub">
+      <span class="status" id="status" data-s="stopped">Stopped</span>
+      <span class="env-badge" id="env-badge" hidden>Staging</span>
+      <span id="sim-extra"></span>
+      <button class="cost-pill" id="cost-pill" type="button" hidden></button>
+      <button class="cost-pill" id="settings-pill" type="button"></button>
+    </div>
+  </div>
+
+  <div class="clock" aria-live="off">
+    <div class="time" id="clock-time">--:--</div>
+    <div class="date" id="clock-date">Start a simulation to begin</div>
+  </div>
+
+  <div class="controls">
+    <button class="btn primary" id="btn-run" type="button">Run</button>
+    <button class="btn" id="btn-stop" type="button">Stop</button>
+    <button class="btn" id="btn-save" type="button">Save</button>
+    <button class="btn danger" id="btn-fin" type="button">Finish</button>
+  </div>
+</header>
+<div class="viewing" id="budget-banner" hidden>
+  <span class="grow-text" id="budget-text"></span>
+  <button class="btn small" id="btn-budget-edit" type="button">Change the cap</button>
+</div>
+<div class="viewing" id="viewing" hidden>
+  <span class="grow-text" id="viewing-text"></span>
+  <button class="btn small" id="btn-fork-here" type="button">Start a new run from here</button>
+  <button class="btn small" id="btn-back-live" type="button">Back to the live run</button>
+</div>
+
+<main class="board">
+  <div class="col">
+    <section class="card map-card" aria-label="Town map">
+      <div class="map-wrap">
+        <iframe id="map" title="Town map" hidden></iframe>
+        <span class="map-tag" id="map-tag" hidden></span>
+        <div class="map-empty" id="map-empty">
+          <div>
+            <p id="map-empty-text">The town is quiet. Start a simulation to see it move.</p>
+            <button class="btn" id="btn-new-2" type="button">Start simulation</button>
+            <div class="replay-box" id="replay-box" hidden>
+              <label for="replay-step">From step</label>
+              <input id="replay-step" type="number" min="0" inputmode="numeric">
+              <button class="btn" id="btn-replay" type="button">Replay on the map</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="card grow" aria-label="Activity">
+      <div class="tabs" role="tablist">
+        <button class="tab" role="tab" aria-selected="true" data-pane="p-convos">Conversations<span class="count" id="n-convos"></span></button>
+        <button class="tab" role="tab" aria-selected="false" data-pane="p-console">Console</button>
+        <button class="tab" role="tab" aria-selected="false" data-pane="p-events">Whispers<span class="count" id="n-events"></span></button>
+        <button class="tab" role="tab" aria-selected="false" data-pane="p-log">Log</button>
+        <button class="tab" role="tab" aria-selected="false" data-pane="p-usage" id="tab-usage">API usage</button>
+      </div>
+      <div class="pane" id="p-convos"></div>
+      <div class="pane" id="p-console" hidden>
+        <div class="results" id="results"></div>
+      </div>
+      <div class="pane" id="p-events" hidden></div>
+      <div class="pane" id="p-usage" hidden></div>
+      <div class="pane" id="p-log" hidden>
+        <label class="toggle"><input type="checkbox" id="log-quiet" checked> Steps and actions only</label>
+        <div class="log" id="log"></div>
+      </div>
+      <div id="console-foot" hidden>
+        <div class="chips">
+          <button class="btn small" data-fill="print all persona schedule" type="button">All schedules</button>
+          <button class="btn small" data-fill="print current time" type="button">Current time</button>
+          <button class="btn small" data-fill="call -- whisper all ;; " type="button">Whisper everyone</button>
+          <button class="btn small" data-fill="call -- probe now" type="button">Read stances now</button>
+        </div>
+        <form class="console-bar" id="console-form">
+          <label for="console-input" class="sr-only">Command</label>
+          <input id="console-input" autocomplete="off" spellcheck="false" placeholder="Any reverie command, e.g. print persona schedule Elena Chen">
+          <button class="btn" type="submit">Send</button>
+        </form>
+      </div>
+    </section>
+  </div>
+
+  <div class="col">
+    <section class="card" aria-label="Agents" style="flex: none;">
+      <ul class="roster" id="roster"></ul>
+    </section>
+
+    <section class="card grow" aria-label="Selected agent" id="inspector">
+      <div class="who" id="who"></div>
+      <div class="tabs" role="tablist">
+        <button class="tab" role="tab" aria-selected="true" data-pane="a-now">Now</button>
+        <button class="tab" role="tab" aria-selected="false" data-pane="a-plan">Plan</button>
+        <button class="tab" role="tab" aria-selected="false" data-pane="a-mind">Mind</button>
+        <button class="tab" role="tab" aria-selected="false" data-pane="a-ask">Interview</button>
+        <button class="tab" role="tab" aria-selected="false" data-pane="a-profile">Profile</button>
+      </div>
+      <div class="pane" id="a-now"></div>
+      <div class="pane" id="a-plan" hidden></div>
+      <div class="pane" id="a-mind" hidden></div>
+      <div class="pane" id="a-ask" hidden>
+        <div id="ask-log"></div>
+        <form class="form" id="ask-form">
+          <label for="ask-input" class="sr-only">Question</label>
+          <input id="ask-input" autocomplete="off" placeholder="Ask a question">
+          <button class="btn" type="submit">Ask</button>
+          <button class="btn" type="button" id="ask-reset">New interview</button>
+        </form>
+        <div class="hint">Answers come from the agent's memories. Nothing you ask is saved to them. Questions sent during a run wait until it ends.</div>
+      </div>
+      <div class="pane" id="a-profile" hidden></div>
+    </section>
+  </div>
+</main>
+
+<div class="bottom">
+  <section class="card stance" id="stance-card" aria-label="Where each agent stands on the datacenter">
+    <div class="stance-tip" id="stance-tip" hidden></div>
+    <div class="stance-head">
+      <h2>Where each agent stands on the datacenter</h2>
+      <p class="hint" id="stance-note"></p>
+    </div>
+    <div id="stance"></div>
+    <div class="stance-key" id="stance-key"></div>
+  </section>
+  <section class="card social" id="social-card" aria-labelledby="social-heading">
+    <div class="social-head">
+      <h2 id="social-heading">Social Interaction Network</h2>
+      <p class="hint" id="social-note"></p>
+    </div>
+    <div id="social-network"></div>
+    <div class="social-legend" id="social-legend"></div>
+  </section>
+</div>
+
+<dialog id="run-dialog">
+  <form method="dialog" id="run-form">
+    <h2 id="r-title">Run the simulation</h2>
+    <p id="r-intro"></p>
+    <div id="r-start">
+      <label for="r-fork">Continue from</label>
+      <select id="r-fork"></select>
+      <label for="r-sim">Name for the new run</label>
+      <input id="r-sim" pattern="[A-Za-z0-9_\-]+" autocomplete="off">
+    </div>
+    <label for="r-history">Seed memories</label>
+    <select id="r-history"></select>
+    <div class="hint" id="r-history-hint"></div>
+    <label for="r-steps">Steps to run</label>
+    <div class="form" style="margin-top:0">
+      <input id="r-steps" type="number" min="0" max="100000" step="1" inputmode="numeric">
+      <span class="hint" id="r-span" style="align-self:center;margin:0"></span>
+    </div>
+    <div class="step-presets" aria-label="Run length presets">
+      <button class="btn small" data-steps="60" type="button">10 min</button>
+      <button class="btn small" data-steps="360" type="button">1 hour</button>
+      <button class="btn small" data-steps="2160" type="button">6 hours</button>
+      <button class="btn small" data-steps="8640" type="button">1 day</button>
+    </div>
+    <label for="r-autosave">Auto-save every</label>
+    <div class="form" style="margin-top:0">
+      <input id="r-autosave" type="number" min="0" max="100000" step="1" inputmode="numeric">
+      <span class="hint" id="r-autosave-span" style="align-self:center;margin:0"></span>
+    </div>
+    <label for="r-budget">Spending cap for a run (USD)</label>
+    <input id="r-budget" type="number" min="0.01" step="0.01" inputmode="decimal" placeholder="No cap">
+    <div class="hint" id="r-budget-hint"></div>
+    <div class="error-text" id="r-error" role="alert"></div>
+    <div class="row">
+      <button class="btn" value="cancel" formnovalidate type="submit">Cancel</button>
+      <button class="btn primary" id="r-go" type="button">Run</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="settings">
+  <form method="dialog" id="settings-form">
+    <h2>Auto-save and spending cap</h2>
+    <p>These apply to the live run from its next step, and stay set for future runs.</p>
+    <label for="s-autosave">Auto-save every</label>
+    <div class="form" style="margin-top:0"><input id="s-autosave" type="number" min="0" max="100000" step="1" inputmode="numeric"><span class="hint" id="s-autosave-span" style="align-self:center;margin:0"></span></div>
+    <div class="hint">Steps between saves. 360 steps is one game hour. 0 turns auto-save off.</div>
+    <label for="s-opinion">Read every agent's stance every</label>
+    <div class="form" style="margin-top:0"><input id="s-opinion" type="number" min="0" max="100000" step="1" inputmode="numeric"><span class="hint" id="s-opinion-span" style="align-self:center;margin:0"></span></div>
+    <div class="hint">Steps between readings for the stance graph at the bottom of the page. Reading is done from outside the simulation: the agents are never asked, and nothing is added to their memories. 0 turns it off.</div>
+    <label for="s-budget">Spending cap for a run (USD)</label>
+    <input id="s-budget" type="number" min="0.01" step="0.01" inputmode="decimal" placeholder="No cap">
+    <div class="hint" id="s-budget-hint">When a run's estimated API cost reaches this, it stops after the current step and saves. Leave empty for no cap.</div>
+    <div class="error-text" id="s-error" role="alert"></div>
+    <div class="row">
+      <button class="btn" value="cancel" formnovalidate type="submit">Cancel</button>
+      <button class="btn primary" id="s-go" type="button">Save settings</button>
+    </div>
+  </form>
+</dialog>
+
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+const SPRITES = "{% static 'assets/characters/profile/' %}";
+const HISTORIES = {{ histories_json|safe }};
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"}[c]));
+
+let data = null;             // last /dashboard/state/ response
+let selected = null;         // selected agent name
+let mapKey = null;           // what the map iframe is showing
+let view = null;             // saved run being viewed; null means the live run
+let liveSim = null;
+const pending = new Map();   // command id -> command text, until its result lands
+const drawn = {};            // section -> last rendered html, to skip no-op redraws
+
+function paint(el, html) {
+  if (drawn[el.id] === html) return;
+  drawn[el.id] = html;
+  el.innerHTML = html;
+}
+
+function toast(msg) {
+  const t = $("toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  clearTimeout(toast.t);
+  toast.t = setTimeout(() => t.classList.remove("show"), 2600);
+}
+
+function sprite(name) {
+  return `${SPRITES}${name.replace(/ /g, "_")}.png`;
+}
+
+function parseGameTime(s) {
+  // "February 13, 2023, 08:05:00"
+  const m = /^(\w+) (\d+), (\d+), (\d+):(\d+)/.exec(s || "");
+  return m ? new Date(`${m[1]} ${m[2]}, ${m[3]} ${m[4]}:${m[5]}:00`) : null;
+}
+
+function spanLabel(steps, secPerStep) {
+  const secs = steps * (secPerStep || 10);
+  if (secs < 60) return `${secs}s`;
+  const mins = Math.round(secs / 60);
+  return mins >= 60 ? `${Math.floor(mins / 60)}h ${mins % 60}m` : `${mins}m`;
+}
+
+function place(addr) {
+  if (!addr) return "";
+  const parts = addr.split(":").filter(Boolean);
+  return parts.slice(1).join(", ") || parts.join(", ");
+}
+
+function clock(mins) {
+  const h = Math.floor(mins / 60) % 24, m = mins % 60;
+  return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
+}
+
+function poignancy(n) {
+  const on = Math.max(0, Math.min(10, Math.round(n || 0)));
+  let bars = "";
+  for (let i = 1; i <= 10; i += 1) bars += `<i class="${i <= on ? "on" : ""}"></i>`;
+  return `<span class="poig" title="Importance ${on} of 10">${bars}</span>`;
+}
+
+function shortTime(created) {
+  const m = /(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})/.exec(created || "");
+  if (!m) return esc(created);
+  const d = new Date(+m[1], +m[2] - 1, +m[3]);
+  return `${d.toLocaleDateString(undefined, {weekday: "short"})} ${m[4]}:${m[5]}`;
+}
+
+/* ---------------- commands ---------------- */
+
+async function send(cmd, quiet) {
+  const res = await fetch("/dashboard/command/", {method: "POST", body: JSON.stringify({cmd})});
+  const body = await res.json();
+  if (!res.ok) { toast(body.error || "The command couldn't be sent."); return null; }
+  pending.set(body.id, cmd);
+  if (!quiet) toast(data?.status === "running" && cmd !== "stop" ? "Queued. It runs when the current run ends." : "Sent.");
+  renderResults();
+  return body.id;
+}
+
+$("btn-run").onclick = () => openRun();
+$("btn-stop").onclick = () => send("stop");
+$("btn-save").onclick = () => send("save");
+$("btn-fin").onclick = () => {
+  if (confirm("Save and stop the simulation server? You can continue later by starting from this run.")) send("fin");
+};
+
+/* ---------------- tabs ---------------- */
+
+document.querySelectorAll(".tabs").forEach((bar) => {
+  bar.addEventListener("click", (e) => {
+    const tab = e.target.closest(".tab");
+    if (!tab) return;
+    bar.querySelectorAll(".tab").forEach((t) => {
+      const on = t === tab;
+      t.setAttribute("aria-selected", on);
+      $(t.dataset.pane).hidden = !on;
+    });
+    if (tab.dataset.pane === "p-console") { $("console-input").focus(); }
+    $("console-foot").hidden = !document.querySelector('[data-pane="p-console"][aria-selected="true"]');
+    if (tab.dataset.pane === "p-log") loadLog();
+    if (tab.dataset.pane === "a-plan") scrollPlanToCurrent();
+  });
+});
+
+/* ---------------- console ---------------- */
+
+const sent = [];
+let sentAt = 0;
+$("console-form").onsubmit = (e) => {
+  e.preventDefault();
+  const cmd = $("console-input").value.trim();
+  if (!cmd) return;
+  if (/^(exit|start path tester mode)$/i.test(cmd) &&
+      !confirm(`"${cmd}" deletes this simulation's folder without saving. Continue?`)) return;
+  sent.push(cmd); sentAt = sent.length;
+  $("console-input").value = "";
+  send(cmd, true);
+};
+$("console-input").onkeydown = (e) => {
+  if (e.key === "ArrowUp" && sentAt > 0) { sentAt -= 1; e.target.value = sent[sentAt]; e.preventDefault(); }
+  if (e.key === "ArrowDown" && sentAt < sent.length) { sentAt += 1; e.target.value = sent[sentAt] || ""; e.preventDefault(); }
+};
+document.querySelectorAll("[data-fill]").forEach((b) => {
+  b.onclick = () => { $("console-input").value = b.dataset.fill; $("console-input").focus(); };
+});
+
+function renderResults() {
+  const results = data?.results || [];
+  const done = new Set(results.map((r) => r.id));
+  for (const id of [...pending.keys()]) if (done.has(id)) pending.delete(id);
+  let html = results.map((r) => `
+    <div class="result ${r.ok ? "ok" : "err"}">
+      <div class="cmd">${esc(r.cmd)} <span class="when">${esc((r.time || "").slice(11))}</span></div>
+      ${r.output && r.output.trim() ? `<pre>${esc(r.output.trim())}</pre>` : ""}
+    </div>`).join("");
+  for (const cmd of pending.values()) {
+    html += `<div class="result pending"><div class="cmd">${esc(cmd)} <span class="when">waiting</span></div></div>`;
+  }
+  const box = $("p-console");
+  const atBottom = box.scrollHeight - box.scrollTop - box.clientHeight < 40;
+  paint($("results"), html || `<div class="empty">Commands you send, and their output, show up here. Try "print all persona schedule".</div>`);
+  if (atBottom) box.scrollTop = box.scrollHeight;
+}
+
+/* ---------------- activity panes ---------------- */
+
+let showInherited = false;
+function inheritedToggle(all, own) {
+  const earlier = all.length - own.length;
+  return earlier ? `<label class="toggle"><input type="checkbox" data-inherited ${showInherited ? "checked" : ""}> Include ${earlier} from earlier runs</label>` : "";
+}
+document.addEventListener("change", (e) => {
+  if (e.target.matches("[data-inherited]")) { showInherited = e.target.checked; renderConvos(); renderEvents(); }
+});
+
+// Identifies one conversation across repaints, for the stance-graph markers to
+// point at. Two agents can only be in one conversation at a given step.
+function convoKey(c) {
+  return `${c.step || 0}|${(c.speakers || []).join("|")}`;
+}
+
+// The conversation whose transcript is open, set by clicking a stance marker.
+// Held here rather than on the <details> element because paint() replaces the
+// pane's html, which would close an imperatively opened transcript.
+let openConvo = null;
+
+function renderConvos() {
+  const all = (data?.conversations || []).slice().reverse();
+  const own = all.filter((c) => !c.inherited);
+  const list = showInherited ? all : own;
+  $("n-convos").textContent = own.length ? own.length : "";
+  paint($("p-convos"), inheritedToggle(all, own) + (list.length ? list.map((c) => `
+    <article class="convo ${c.inherited ? "inherited" : ""}" data-convo="${esc(convoKey(c))}">
+      <div class="head"><span class="pair">${esc((c.speakers || []).join(" and "))}${c.inherited ? `<span class="inherited-note">earlier run</span>` : ""}</span><span>${esc(c.time || "")}</span></div>
+      <p>${esc(c.summary || "")}</p>
+      <details ${convoKey(c) === openConvo ? "open" : ""}><summary>${(c.utterances || []).length} lines at ${esc(place(c.location))}</summary>
+        <div class="lines">${(c.utterances || []).map((u) => `<div class="line"><b>${esc(u[0])}:</b> ${esc(u[1])}</div>`).join("")}</div>
+      </details>
+    </article>`).join("") : `<div class="empty">No conversations in this run yet. Agents start talking once they're awake and cross paths.</div>`));
+}
+
+function showConvo(c) {
+  // Inherited conversations are hidden behind the "from earlier runs" toggle,
+  // so a marker on the inherited part of a line has to switch it on first.
+  if (c.inherited) showInherited = true;
+  openConvo = convoKey(c);
+  renderConvos();
+  document.querySelector('[data-pane="p-convos"]').click();
+  const pane = $("p-convos");
+  const card = pane.querySelector(`[data-convo="${CSS.escape(openConvo)}"]`);
+  if (!card) return;
+  // Scroll only the pane, as scrollPlanToCurrent does.
+  const offset = card.getBoundingClientRect().top - pane.getBoundingClientRect().top;
+  pane.scrollTop += offset - pane.clientHeight / 2 + card.offsetHeight / 2;
+  card.classList.add("flash");
+  card.addEventListener("animationend", () => card.classList.remove("flash"),
+                        {once: true});
+}
+
+function renderEvents() {
+  // Reflections share events.jsonl with whispers, but they are the agent's own
+  // thinking rather than something whispered into the run: they belong on the
+  // stance graph, not in this pane or its count.
+  const all = (data?.events || []).filter((e) => e.event_type !== "reflection")
+    .slice().reverse();
+  const own = all.filter((e) => !e.inherited);
+  const list = showInherited ? all : own;
+  $("n-events").textContent = own.length ? own.length : "";
+  paint($("p-events"), inheritedToggle(all, own) + (list.length ? `<ul class="mem">${list.map((e) => `
+    <li class="${e.inherited ? "inherited" : ""}"><div><b>${esc(e.agent)}</b> ${esc(e.text)}<div class="when">${esc(e.time || "")}, ${e.event_type === "history_whisper" ? "seed history" : "whisper"}${e.inherited ? ", earlier run" : ""}</div></div></li>`).join("")}</ul>`
+    : `<div class="empty">No whispers in this run. Whispers you send, and seeded history, are listed here.</div>`));
+}
+
+/* ---------------- stance graph ---------------- */
+
+// One line per agent, 0 (against the datacenter) to 100 (in support), from the
+// read the simulation takes every game hour. Readings the model gave no usable
+// rating for come through as null and are drawn as a break in the line, so a
+// failed read never looks like a considered opinion.
+const STANCE_COLORS = ["#2f7d52", "#b4552d", "#3b6ea5", "#8a5bb0",
+                       "#b08b1e", "#2a8f8f", "#a8456b", "#6b6f3f"];
+let SVG_W = 900, PLOT_R = 868;
+const PLOT_L = 84, PLOT_T = 12, PLOT_B = 272;
+// Readings taken before the scale went from 10 to 100 carry no scale field.
+// They are plotted by their position on their own scale so an old line still
+// joins up with a new one instead of collapsing to the floor of the graph.
+const STANCE_OLD_SCALE = 10;
+// How close the cursor has to get to a point, in viewBox units, to read it.
+const STANCE_HIT_R = 30;
+// What each kind of logged event is drawn as. Colour already encodes the agent,
+// so the shape has to carry what happened. Seed history, all logged at step 0,
+// is deliberately absent: it is the starting position, not something that
+// happened during the run.
+const STANCE_EVENT_MARKS = {
+  midrun_whisper: {kind: "whisper", d: (x, y) => `M${x} ${y - 5}L${x + 5} ${y}L${x} ${y + 5}L${x - 5} ${y}Z`},
+  reflection: {kind: "reflection", d: (x, y) => `M${x - 4} ${y - 4}h8v8h-8Z`},
+};
+// Every plotted point, for hit-testing the cursor against.
+let stancePts = [];
+
+function stanceMethod(row) {
+  return row.scoring_version || `legacy_direct_${row.scale || STANCE_OLD_SCALE}`;
+}
+
+function stanceY(row) {
+  if (!Number.isInteger(row.score)) return null;
+  const scale = row.scale || STANCE_OLD_SCALE;
+  const low = row.scoring_version === "rubric_v1" ? 0 : 1;
+  if (row.score < low || row.score > scale || scale <= low) return null;
+  return PLOT_B - ((row.score - low) / (scale - low)) * (PLOT_B - PLOT_T);
+}
+
+function stanceTickFormat(spanSecs) {
+  // Hours while the run is short, then days, then months, so the axis stays
+  // readable however far the simulated clock runs.
+  if (spanSecs <= 36 * 3600) return (d) => `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
+  if (spanSecs <= 90 * 86400) return (d) => d.toLocaleDateString(undefined, {month: "short", day: "numeric"});
+  return (d) => d.toLocaleDateString(undefined, {month: "short", year: "numeric"});
+}
+
+function stanceHide() {
+  $("stance-tip").hidden = true;
+  const ring = document.getElementById("stance-ring");
+  if (ring) ring.setAttribute("r", "0");
+}
+
+function stanceNearest(ev) {
+  const svg = $("stance").querySelector("svg");
+  if (!svg) return null;
+  // While an agent is selected, only that agent's points can be read. Eight
+  // lines cross constantly, so the point nearest the cursor is often someone
+  // else's, and the reasoning of the wrong agent is worse than none.
+  const mine = stancePts.filter((p) => !selected || p.name === selected);
+  const ctm = svg.getScreenCTM();
+  if (!ctm || !mine.length) return null;
+  const at = svg.createSVGPoint();
+  at.x = ev.clientX;
+  at.y = ev.clientY;
+  const loc = at.matrixTransform(ctm.inverse());
+
+  let best = null, bestDist = Infinity;
+  for (const p of mine) {
+    const dist = (p.x - loc.x) ** 2 + (p.y - loc.y) ** 2;
+    if (dist < bestDist) { bestDist = dist; best = p; }
+  }
+  return bestDist > STANCE_HIT_R ** 2 ? null : best;
+}
+
+function stanceClick(ev) {
+  const hit = stanceNearest(ev);
+  if (hit && hit.kind === "convo") showConvo(hit.convo);
+}
+
+function stanceHover(ev) {
+  const svg = $("stance").querySelector("svg");
+  const tip = $("stance-tip");
+  if (!svg || !tip) return;
+  const best = stanceNearest(ev);
+  svg.style.cursor = best && best.kind === "convo" ? "pointer" : "";
+  if (!best) return stanceHide();
+
+  const ring = document.getElementById("stance-ring");
+  if (ring) {
+    ring.setAttribute("cx", best.x);
+    ring.setAttribute("cy", best.y);
+    ring.setAttribute("r", "6.5");
+    ring.setAttribute("stroke", best.color);
+  }
+  const when = esc(best.time || "");
+  const body = best.kind === "convo"
+    ? `<span class="when">conversation with ${esc(best.with)} · ${when}</span>
+       ${best.summary ? `<div>${esc(best.summary)}</div>` : ""}
+       <div class="when">click to read the transcript</div>`
+    : best.kind === "whisper"
+      ? `<span class="when">whisper · ${when}</span>
+         ${best.text ? `<div>${esc(best.text)}</div>` : ""}`
+      : best.kind === "reflection"
+        ? `<span class="when">reflection · ${when}</span>
+           ${best.text ? `<div>${esc(best.text)}</div>` : ""}
+           ${best.insights > 1 ? `<div class="when">and ${best.insights - 1} more insight${best.insights === 2 ? "" : "s"} at this moment</div>` : ""}`
+      : `<span class="when">${best.score} of ${best.scale} · ${esc(best.method)} · ${when}</span>
+         ${best.category ? `<div>${esc(best.category.replace(/_/g, " "))}</div>` : ""}
+         ${best.rationale ? `<div>${esc(best.rationale)}</div>` : ""}
+         ${(best.conditions || []).length ? `<div>Conditions: ${esc(best.conditions.join("; "))}</div>` : ""}`;
+  tip.innerHTML = `<b style="color:${best.color}">${esc(best.name)}</b>${body}`;
+  tip.hidden = false;
+
+  // Sits beside the cursor, flipping to the other side near the right edge.
+  const box = $("stance-card").getBoundingClientRect();
+  const x = ev.clientX - box.left, y = ev.clientY - box.top;
+  const right = x + 16 + tip.offsetWidth > box.width;
+  tip.style.left = `${Math.max(4, right ? x - tip.offsetWidth - 16 : x + 16)}px`;
+  tip.style.top = `${Math.max(4, y - tip.offsetHeight - 14)}px`;
+}
+
+function renderStance() {
+  SVG_W = Math.max(300, Math.round($("stance").clientWidth || 900));
+  PLOT_R = SVG_W - 28;
+  const rows = data?.opinions || [];
+  const sim = data?.sim;
+  const every = data?.settings?.opinion_steps || 0;
+  stancePts = [];
+  if (!rows.length) {
+    stanceHide();
+    paint($("stance"), `<div class="empty">${every
+      ? `No readings yet. Every ${every} steps (${spanLabel(every, sim?.sec_per_step)} of game time) the run reads where each agent stands on the datacenter, from 0 (against) to 100 (in support), and plots the answers here.`
+      : "Stance readings are switched off. Turn them on in settings to graph how each agent's position on the datacenter moves over the run."}</div>`);
+    paint($("stance-key"), "");
+    $("stance-note").textContent = "";
+    return;
+  }
+
+  const names = sim?.persona_order?.length ? sim.persona_order
+    : [...new Set(rows.map((r) => r.name))];
+  const series = names.map((name, i) => ({
+    name, color: STANCE_COLORS[i % STANCE_COLORS.length],
+    points: rows.filter((r) => r.name === name),
+  })).filter((s) => s.points.length);
+
+  const steps = rows.map((r) => r.step || 0);
+  const x0 = Math.min(...steps), x1 = Math.max(...steps);
+  const sps = sim?.sec_per_step || 10;
+  const t0 = parseGameTime(rows.find((r) => (r.step || 0) === x0)?.time);
+  const dateAt = (step) => t0 && new Date(t0.getTime() + (step - x0) * sps * 1000);
+  const fmt = stanceTickFormat((x1 - x0) * sps);
+  const px = (s) => x1 === x0 ? (PLOT_L + PLOT_R) / 2
+    : PLOT_L + ((s - x0) / (x1 - x0)) * (PLOT_R - PLOT_L);
+  const py = (v) => stanceY({score: v, scale: 100, scoring_version: "rubric_v1"});
+  let svg = [[0, "0 opposed"], [25, "25"], [50, "50 mixed"], [75, "75"], [100, "100 support"]].map(([v, label]) =>
+    `<line class="grid" x1="${PLOT_L}" y1="${py(v)}" x2="${PLOT_R}" y2="${py(v)}"/>
+     <text class="axis" x="${PLOT_L - 8}" y="${py(v) + 4}" text-anchor="end">${label}</text>`).join("");
+
+  const ticks = x1 === x0 ? 1 : 5;
+  for (let i = 0; i < ticks; i += 1) {
+    const s = ticks === 1 ? x0 : x0 + ((x1 - x0) * i) / (ticks - 1);
+    const d = dateAt(s);
+    svg += `<text class="axis" x="${px(s).toFixed(1)}" y="${PLOT_B + 20}" text-anchor="middle">${d ? esc(fmt(d)) : `step ${Math.round(s)}`}</text>`;
+  }
+
+  // A forked run inherits the readings of the run it continues; show where
+  // this one picked up rather than hiding the earlier half of the line.
+  const start = sim?.start_step || 0;
+  if (start > x0 && start < x1) {
+    svg += `<line class="fork" x1="${px(start).toFixed(1)}" y1="${PLOT_T}" x2="${px(start).toFixed(1)}" y2="${PLOT_B}"/>
+      <text class="axis" x="${(px(start) + 5).toFixed(1)}" y="${PLOT_T + 10}">this run starts</text>`;
+  }
+
+  svg += series.map((s) => {
+    const dim = selected && s.name !== selected ? " dim" : "";
+    let d = "", pen = false, method = null;
+    let dots = "";
+    // Each unbroken run of readings, to hang the event markers off.
+    const segs = [];
+    for (const p of s.points) {
+      const ordinate = stanceY(p);
+      if (ordinate == null) { pen = false; continue; }
+      if (method !== stanceMethod(p)) pen = false;
+      method = stanceMethod(p);
+      const scale = p.scale || STANCE_OLD_SCALE;
+      const step = p.step || 0;
+      const x = +px(step).toFixed(1), y = +ordinate.toFixed(1);
+      d += `${pen ? "L" : "M"}${x} ${y} `;
+      if (!pen) segs.push([]);
+      pen = true;
+      segs[segs.length - 1].push({step, x, y});
+      dots += `<circle class="dot${dim}" cx="${x}" cy="${y}" r="3.5" fill="${s.color}"/>`;
+      // Hit-tested on mousemove rather than given an SVG <title>: a <title>
+      // tooltip waits on the browser's own hover delay and always reports
+      // whichever point is nearest, selected agent or not.
+      stancePts.push({kind: "reading", x, y, name: s.name, color: s.color,
+                      score: p.score, scale, time: p.time,
+                      rationale: p.rationale, category: p.category,
+                      conditions: p.conditions, method});
+    }
+
+    // Where this agent's line sits at a given step. null outside the readings
+    // or inside a gap, where there is no line for a marker to sit on.
+    const yAt = (step) => {
+      for (const seg of segs) {
+        if (seg.length === 1 && seg[0].step === step) return seg[0].y;
+        for (let i = 1; i < seg.length; i += 1) {
+          const a = seg[i - 1], b = seg[i];
+          if (step < a.step || step > b.step) continue;
+          const t = b.step === a.step ? 0 : (step - a.step) / (b.step - a.step);
+          return +(a.y + (b.y - a.y) * t).toFixed(1);
+        }
+      }
+      return null;
+    };
+
+    // What reached this agent from outside, marked on the line at the step it
+    // happened, so the readings either side of it are the ones it explains. A
+    // conversation lands on both speakers' lines.
+    let marks = "";
+    for (const c of data?.conversations || []) {
+      if (!(c.speakers || []).includes(s.name)) continue;
+      const step = c.step || 0, y = yAt(step);
+      if (y == null) continue;
+      const x = +px(step).toFixed(1);
+      marks += `<path class="mark${dim}" fill="${s.color}" d="M${x} ${y - 5.5}L${x + 5} ${y + 3.5}L${x - 5} ${y + 3.5}Z"/>`;
+      stancePts.push({kind: "convo", x, y, name: s.name, color: s.color,
+                      time: c.time, summary: c.summary, convo: c,
+                      with: (c.speakers || []).filter((n) => n !== s.name).join(", ")});
+    }
+    for (const e of data?.events || []) {
+      const shape = STANCE_EVENT_MARKS[e.event_type];
+      if (!shape || e.agent !== s.name) continue;
+      const step = e.step || 0, y = yAt(step);
+      if (y == null) continue;
+      const x = +px(step).toFixed(1);
+      marks += `<path class="mark${dim}" fill="${s.color}" d="${shape.d(x, y)}"/>`;
+      stancePts.push({kind: shape.kind, x, y, name: s.name, color: s.color,
+                      time: e.time, text: e.text,
+                      insights: e.extra && e.extra.insights});
+    }
+    return `<path class="line${dim}" stroke="${s.color}" d="${d.trim()}"/>${marks}${dots}`;
+  }).join("");
+
+  svg += `<circle id="stance-ring" class="ring" r="0" fill="none"/>`;
+  const painted = drawn.stance;
+  paint($("stance"), `<svg viewBox="0 0 ${SVG_W} 300" role="img" aria-label="Each agent's position on the datacenter over time, from 0 opposed to 100 in support">${svg}</svg>`);
+  if (drawn.stance !== painted) {
+    // Only on an actual repaint: polling re-runs this every couple of seconds,
+    // and dropping the tooltip each time would make a point unreadable.
+    stanceHide();
+    const plot = $("stance").querySelector("svg");
+    plot.onmousemove = stanceHover;
+    plot.onmouseleave = stanceHide;
+    plot.onclick = stanceClick;
+  }
+  paint($("stance-key"), series.map((s) => {
+    const last = s.points.filter((p) => p.score != null).pop();
+    const shown = last && (last.scale || STANCE_OLD_SCALE) !== 100
+      ? `${last.score}/${last.scale || STANCE_OLD_SCALE}` : last?.score;
+    return `<span><i style="background:${s.color}"></i>${esc(s.name)}${last ? ` <b>${shown}</b>` : ""}</span>`;
+  }).join(""));
+
+  const marked = new Set(stancePts.filter((p) => p.kind !== "reading")
+    .map((p) => p.kind));
+  const gaps = rows.filter((r) => r.score == null).length;
+  const models = [...new Set(rows.map((r) => r.model).filter(Boolean))];
+  const scales = [...new Set(rows.filter((r) => r.score != null)
+    .map((r) => r.scale || STANCE_OLD_SCALE))];
+  const methods = [...new Set(rows.map(stanceMethod))];
+  $("stance-note").textContent = [
+    `${rows.length} reading${rows.length === 1 ? "" : "s"}`,
+    gaps ? `${gaps} with no usable rating, drawn as gaps` : "",
+    scales.length > 1 ? `readings from two scales (${scales.sort((a, b) => a - b).join(" and ")}), plotted by position` : "",
+    methods.length > 1 ? "Mixed scoring methods: not directly comparable without calibration; lines break at method changes"
+      : methods[0] === "rubric_v1" ? "Rubric v1 (0–100)"
+      : "Legacy direct scores (1–scale), shown by their original relative position",
+    models.length > 1 ? `mixed models (${models.join(", ")}), so levels aren't comparable` : models[0] || "",
+    selected ? `hover a point for ${selected}'s reasoning` : "hover a point for the agent's reasoning",
+    marked.has("convo") ? "▲ conversation (click to read it)" : "",
+    marked.has("whisper") ? "◆ whisper" : "",
+    marked.has("reflection") ? "■ reflection" : "",
+  ].filter(Boolean).join(" · ");
+}
+
+/* ---------------- social interaction network ---------------- */
+
+function socialPositions(nodes, width) {
+  // Roster order alone determines positions; measurements and edges never do.
+  const names = nodes.map((n) => n.name).sort();
+  const cols = width < 600 ? 2 : 4;
+  return names.map((name, i) => ({name,
+    x: (i % cols + .5) * width / cols, y: 54 + Math.floor(i / cols) * 126}));
+}
+
+function socialEdgeWidth(count) {
+  return Math.min(8, 1 + 1.25 * Math.log1p(Math.max(0, count)));
+}
+
+function renderNetwork() {
+  const network = data?.network;
+  const nodes = network?.nodes || (data?.sim?.roster || []).map((a) => ({
+    name: a.name, color: "#9299A4", label: "Unrated", score: null,
+    conversations: 0, partners: 0,
+  }));
+  if (!nodes.length) {
+    paint($("social-network"), '<div class="empty">No simulation loaded.</div>');
+    paint($("social-legend"), "");
+    $("social-note").textContent = "";
+    return;
+  }
+  const width = Math.max(280, Math.round($("social-network").clientWidth || 800));
+  const positions = socialPositions(nodes, width);
+  const byName = new Map(positions.map((p) => [p.name, p]));
+  const height = Math.max(...positions.map((p) => p.y)) + 78;
+  let svg = (network?.edges || []).map((e) => {
+    const a = byName.get(e.source), b = byName.get(e.target);
+    if (!a || !b) return "";
+    const title = `${e.source} and ${e.target}\n${e.count} completed conversations\nLast: ${e.time || "Unknown time"}`;
+    return `<line class="social-edge" x1="${a.x}" y1="${a.y}" x2="${b.x}" y2="${b.y}" stroke-width="${socialEdgeWidth(e.count)}"><title>${esc(title)}</title></line>`;
+  }).join("");
+  svg += nodes.map((n) => {
+    const at = byName.get(n.name);
+    const legacy = n.scoring_version && n.scoring_version !== "rubric_v1";
+    const rating = n.score == null ? "Unrated; no valid measurement"
+      : `${n.score}/${n.scale || 100}: ${n.label}\nMethod: ${n.scoring_version}${legacy ? "; rubric color is visualization only" : ""}\nLast valid probe: ${n.time || "Unknown time"}`;
+    const title = `${n.name}\n${rating}\n${n.conversations || 0} completed conversations; ${n.partners || 0} distinct partners`;
+    const words = n.name.split(" ");
+    const labelWidth = Math.min(width / (width < 600 ? 2 : 4) - 8,
+      Math.max(...words.map((w) => w.length)) * 8 + 16);
+    return `<g class="social-node${n.name === selected ? " selected" : ""}" data-network-node="${esc(n.name)}" tabindex="0" role="button" aria-label="${esc(title)}">
+      <title>${esc(title)}</title><circle cx="${at.x}" cy="${at.y}" r="24" fill="${n.color}"/>
+      <rect class="label-background" x="${at.x - labelWidth / 2}" y="${at.y + 30}" width="${labelWidth}" height="34"/>
+      <text x="${at.x}" y="${at.y + 43}"><tspan x="${at.x}">${esc(words[0])}</tspan><tspan x="${at.x}" dy="16">${esc(words.slice(1).join(" "))}</tspan></text></g>`;
+  }).join("");
+  paint($("social-network"), `<svg viewBox="0 0 ${width} ${height}" role="group" aria-label="Cumulative completed conversations and latest valid stance">${svg}</svg>`);
+  const legend = (network?.bands || []).map((b) => `<span><i style="background:${b.color}"></i>${esc(b.label)} (${b.min === b.max ? b.min : `${b.min}–${b.max}`})</span>`).join("");
+  paint($("social-legend"), legend + '<span><i style="background:#9299A4"></i>Unrated</span>');
+  $("social-note").textContent = `${network?.conversations || 0} completed conversations, including inherited history. Edges show frequency, not proven causal influence. Colors retain the last valid measurement.`;
+}
+
+$("social-network").addEventListener("click", (e) => {
+  const node = e.target.closest("[data-network-node]");
+  if (node) selectAgent(node.dataset.networkNode);
+});
+$("social-network").addEventListener("keydown", (e) => {
+  if (e.key !== "Enter" && e.key !== " ") return;
+  const node = e.target.closest("[data-network-node]");
+  if (node) { e.preventDefault(); selectAgent(node.dataset.networkNode); }
+});
+const graphResize = new ResizeObserver(() => { renderStance(); renderNetwork(); });
+graphResize.observe($("social-network"));
+graphResize.observe($("stance"));
+
+let logTimer = null;
+async function loadLog() {
+  clearTimeout(logTimer);
+  if ($("p-log").hidden) return;
+  try {
+    const res = await fetch("/dashboard/log/");
+    const {lines} = await res.json();
+    const quiet = $("log-quiet").checked;
+    const shown = quiet ? lines.filter((l) => / \| (reverie|plan|dashboard) +\| /.test(l) || /WARNING|ERROR/.test(l)) : lines;
+    const box = $("p-log");
+    const atBottom = box.scrollHeight - box.scrollTop - box.clientHeight < 40;
+    paint($("log"), shown.map((l) => `<div class="${/ERROR/.test(l) ? "error" : /WARNING/.test(l) ? "warn" : ""}">${esc(l)}</div>`).join("") || `<div class="empty">The log is empty.</div>`);
+    if (atBottom) box.scrollTop = box.scrollHeight;
+  } catch (e) { /* server restarting; try again */ }
+  logTimer = setTimeout(loadLog, 2000);
+}
+$("log-quiet").onchange = loadLog;
+
+/* ---------------- roster + inspector ---------------- */
+
+function renderRoster() {
+  const roster = data?.sim?.roster || [];
+  paint($("roster"), roster.map((a) => `
+    <li><button class="agent" type="button" data-name="${esc(a.name)}" aria-current="${a.name === selected}">
+      <img class="sprite" src="${sprite(a.name)}" alt="">
+      <span style="min-width:0">
+        <span class="name">${esc(a.name)}</span>
+        ${a.chatting_with ? `<span class="talk"> talking with ${esc(a.chatting_with.split(" ")[0])}</span>` : ""}
+        <div class="doing">${esc(a.act_description || "Not started")}</div>
+      </span>
+      <span class="emoji" aria-hidden="true">${esc(a.act_pronunciatio || "")}</span>
+    </button></li>`).join("") || `<li class="empty" style="padding:16px">Agents appear here once a simulation is running.</li>`);
+}
+
+$("roster").addEventListener("click", (e) => {
+  const b = e.target.closest(".agent");
+  if (!b) return;
+  selectAgent(b.dataset.name);
+});
+
+function selectAgent(name) {
+  selected = name;
+  try { localStorage.setItem("dash-agent", selected); } catch (err) { /* private mode */ }
+  $("map").contentWindow?.postMessage({type: "focus", name: selected}, location.origin);
+  drawn.roster = null;
+  memOpen.clear();  // episode timestamps belong to the agent they came from
+  poll();
+}
+
+function renderAgent() {
+  const a = data?.sim?.agent;
+  if (!a) {
+    paint($("who"), "");
+    ["a-now", "a-plan", "a-mind", "a-profile"].forEach((id) => paint($(id), `<div class="empty">Pick an agent to see what they're doing and thinking.</div>`));
+    return;
+  }
+  const sub = [a.age ? `${a.age} years old` : "", a.living_area ? place(a.living_area) : ""].filter(Boolean).join(", ");
+  paint($("who"), `<img class="sprite" src="${sprite(a.name)}" alt=""><div><h2>${esc(a.name)}</h2><div class="meta">${esc(sub)}</div></div>`);
+
+  // Now
+  const started = a.act_start_time ? /(\d{2}):(\d{2})/.exec(a.act_start_time) : null;
+  const timing = started ? `Since ${started[1]}:${started[2]}${a.act_duration ? `, for ${a.act_duration} min` : ""}` : "";
+  const chat = a.chat && a.chat.length ? `
+    <div class="section chatbox">
+      <div class="who-talks">Talking with ${esc(a.chatting_with || "someone")}</div>
+      <div class="lines">${a.chat.map((l) => `<div class="line"><b>${esc(l[0])}:</b> ${esc(l[1])}</div>`).join("")}</div>
+    </div>` : "";
+  paint($("a-now"), `
+    <p class="now-action">${esc(a.act_pronunciatio || "")} ${esc(a.act_description || "Hasn't started yet")}</p>
+    <p class="place">${esc(place(a.act_address))}${timing ? `. ${esc(timing)}` : ""}${a.path_left ? `. Walking, ${a.path_left} tiles to go` : ""}</p>
+    ${chat}
+    <div class="section"><h3>${view ? "How they saw things when the run was saved" : "How they see things right now"}</h3><p class="quote">${esc(a.currently || "")}</p></div>
+    ${(a.history || []).length > 1 ? `<div class="section"><h3>How their view changed</h3><ul class="hist">${a.history.map((h) => `
+      <li><div class="when">${esc(h.time || "")}, step ${h.step}</div>${esc(h.currently)}</li>`).join("")}</ul></div>` : ""}
+    <div class="section" ${view ? "hidden" : ""}><h3>Tell ${esc(a.first_name)} something</h3>
+      <form class="form" data-whisper="${esc(a.name)}">
+        <input name="text" autocomplete="off" placeholder="e.g. The council moved the vote to Friday">
+        <button class="btn" type="submit">Whisper</button>
+      </form>
+      <div class="hint">It becomes one of their memories, as if they'd heard it themselves.</div>
+    </div>`);
+
+  // Plan
+  let t = 0;
+  const idx = a.schedule_idx;
+  const rows = (a.schedule || []).map(([task, dur], i) => {
+    const row = `<li class="${i === idx ? "current" : i < idx ? "done" : ""}"><span class="t">${clock(t)}</span><span>${esc(task)}</span><span class="d">${dur}m</span></li>`;
+    t += dur;
+    return row;
+  }).join("");
+  paint($("a-plan"), `
+    ${(a.daily_req || []).length ? `<div class="section"><h3>Goals for today</h3><ol class="goals">${a.daily_req.map((g) => `<li>${esc(g)}</li>`).join("")}</ol></div>` : ""}
+    <div class="section"><h3>Schedule</h3>${rows ? `<ul class="sched">${rows}</ul>` : `<div class="empty">No schedule yet. It's written when their day starts.</div>`}</div>`);
+  // Follow the current task when the agent or their task changes, but not on
+  // every poll, so scrolling back through the day isn't undone each second.
+  const planKey = `${a.name}:${idx}`;
+  if (planKey !== scrollPlanToCurrent.key && !$("a-plan").hidden) scrollPlanToCurrent();
+
+  // Mind: the reflection meter, then one memory category at a time.
+  const [trig, trigMax] = a.reflect_trigger || [0, 0];
+  const fill = trigMax ? Math.max(0, Math.min(100, 100 - (trig / trigMax) * 100)) : 0;
+  const c = a.memory_counts || {};
+  const chips = MEM_CATS.map((k) => `
+    <button class="chip" type="button" data-mem="${k.key}" aria-pressed="${k.key === memCat}">${k.label}<span class="count">${c[k.key] || 0}</span></button>`).join("");
+  paint($("a-mind"), `
+    <div class="section"><h3>Next reflection</h3>
+      <div class="meter"><div style="width:${fill}%"></div></div>
+      <div class="hint">They stop to reflect when enough important things have happened. ${Math.round(fill)}% of the way there.</div></div>
+    <div class="chips" role="group" aria-label="Memory categories">${chips}</div>
+    ${memCategory(a, memCat)}`);
+
+  // Profile. The last three are only set on casts built for measuring belief
+  // change, so each is left out when empty rather than shown as a blank.
+  const trait = (title, text) => text
+    ? `<div class="section"><h3>${title}</h3><p class="quote">${esc(text)}</p></div>` : "";
+  paint($("a-profile"), `
+    ${trait("Personality", a.innate)}
+    ${trait("Background", a.learned)}
+    ${trait("Daily life", a.lifestyle)}
+    ${trait("What they care about", a.values)}
+    ${trait("What's at stake for them", a.stake)}
+    ${trait("How they change their mind", a.persuadability)}`);
+}
+
+function scrollPlanToCurrent() {
+  const pane = $("a-plan");
+  const cur = pane.querySelector(".sched li.current");
+  const a = data?.sim?.agent;
+  scrollPlanToCurrent.key = a ? `${a.name}:${a.schedule_idx}` : null;
+  if (!cur) return;
+  // Scroll only the pane (scrollIntoView would also scroll the page).
+  const offset = cur.getBoundingClientRect().top - pane.getBoundingClientRect().top;
+  pane.scrollTop += offset - pane.clientHeight / 2 + cur.offsetHeight / 2;
+}
+
+function memList(nodes, empty) {
+  return (nodes || []).length ? `<ul class="mem">${nodes.map((n) => `
+    <li><div>${esc(n.description)}<div class="when">${shortTime(n.created)}</div></div>${poignancy(n.poignancy)}</li>`).join("")}</ul>`
+    : `<div class="empty">${empty}</div>`;
+}
+
+/* ---------------- memory categories ---------------- */
+
+// The four kinds of thing an agent stores, in the order they pile up: it sees,
+// it talks, it thinks about both, and sometimes it steps back and reflects.
+// `key` matches memory_counts and the payload lists.
+const MEM_CATS = [
+  {key: "event", label: "Seen"},
+  {key: "chat", label: "Conversations"},
+  {key: "thought", label: "Thoughts"},
+  {key: "reflection", label: "Reflections"},
+];
+let memCat = "event";
+// Which reflection episodes are expanded, by timestamp. The meter above the list
+// moves on every poll, so the pane is repainted often; without this the episode
+// you just opened would shut again a second later.
+const memOpen = new Set();
+
+function memShowing(shown, total) {
+  return total > shown ? `<div class="hint">Showing the ${shown} most recent of ${total}.</div>` : "";
+}
+
+function memCategory(a, key) {
+  const total = (a.memory_counts || {})[key] || 0;
+  if (key === "chat") {
+    const chats = a.chats || [];
+    return `<div class="section"><h3>Conversations</h3>${chats.length ? chats.map((n) => `
+      <details class="llm"><summary><div><div class="a">${esc(n.description)}</div><div class="when">${shortTime(n.created)}</div></div>${poignancy(n.poignancy)}</summary>
+      <div class="lines" style="margin-top:8px">${(n.lines || []).map((l) => `<div class="line"><b>${esc(l[0])}:</b> ${esc(l[1])}</div>`).join("")}</div></details>`).join("")
+      : `<div class="empty">No conversations yet.</div>`}
+      ${memShowing(chats.length, total)}</div>`;
+  }
+  if (key === "reflection") {
+    const eps = memEpisodes(a.reflections);
+    return `<div class="section"><h3>Reflections</h3>${eps.length ? eps.map((ep) => `
+      <details class="ep llm" data-ep="${esc(ep.created)}" ${memOpen.has(ep.created) ? "open" : ""}><summary><div><div class="a"><span class="mark" aria-hidden="true">&#9632;</span>${esc(ep.headline.description)}</div>
+      <div class="when">${shortTime(ep.created)} &middot; ${ep.nodes.length} insight${ep.nodes.length === 1 ? "" : "s"}</div></div>${poignancy(ep.headline.poignancy)}</summary>
+      ${memList(ep.nodes, "")}</details>`).join("")
+      : `<div class="empty">No reflections yet. They happen once enough important things have piled up &mdash; the meter above is the countdown.</div>`}
+      ${memShowing(eps.length, total)}</div>`;
+  }
+  const nodes = key === "event" ? a.events : a.thoughts;
+  const empty = key === "event" ? "Nothing noticed yet." : "No thoughts yet.";
+  return `<div class="section"><h3>${key === "event" ? "Things they noticed" : "Thoughts"}</h3>
+    ${memList(nodes, empty)}${memShowing((nodes || []).length, total)}</div>`;
+}
+
+// One reflection writes several insights at a single timestamp, which is the
+// same thing the ■ marker on the stance graph stands for. Group by that
+// timestamp so an episode reads as one event, headlined by its most poignant
+// insight — the line the graph's tooltip shows.
+function memEpisodes(nodes) {
+  const by = new Map();
+  (nodes || []).forEach((n) => {
+    if (!by.has(n.created)) by.set(n.created, []);
+    by.get(n.created).push(n);
+  });
+  return [...by].map(([created, group]) => ({
+    created, nodes: group,
+    headline: group.reduce((best, n) => ((n.poignancy || 0) > (best.poignancy || 0) ? n : best), group[0]),
+  }));
+}
+
+$("inspector").addEventListener("click", (e) => {
+  const chip = e.target.closest(".chip[data-mem]");
+  if (chip) {
+    memCat = chip.dataset.mem;
+    renderAgent();
+    return;
+  }
+  // Let <details> open itself; just remember that it is open.
+  const ep = e.target.closest("details.ep[data-ep]")?.dataset.ep;
+  if (ep && e.target.closest("summary")) {
+    if (memOpen.has(ep)) memOpen.delete(ep); else memOpen.add(ep);
+  }
+});
+
+$("inspector").addEventListener("submit", (e) => {
+  const form = e.target.closest("[data-whisper]");
+  if (!form) return;
+  e.preventDefault();
+  const text = form.text.value.trim();
+  if (!text) return;
+  send(`call -- whisper ${form.dataset.whisper} ;; ${text}`);
+  form.text.value = "";
+});
+
+/* ---------------- interview ---------------- */
+
+$("ask-form").onsubmit = (e) => {
+  e.preventDefault();
+  const q = $("ask-input").value.trim();
+  if (!q || !selected) return;
+  send(`call -- interview ${selected} ;; ${q}`, true);
+  $("ask-input").value = "";
+};
+$("ask-reset").onclick = () => { if (selected) send(`call -- interview ${selected} ;; end_convo`, true); };
+
+function renderInterview() {
+  $("ask-form").hidden = !!view;
+  if (view) { paint($("ask-log"), `<div class="empty">Interviews need the run loaded. Use "Start a new run from here" to continue this run and talk to its agents.</div>`); return; }
+  if (!selected) { paint($("ask-log"), `<div class="empty">Pick an agent to interview.</div>`); return; }
+  const prefix = `call -- interview ${selected} ;; `;
+  let bubbles = [];
+  for (const r of data?.results || []) {
+    if (!r.cmd.startsWith(prefix)) continue;
+    const q = r.cmd.slice(prefix.length);
+    if (q === "end_convo") { bubbles = []; continue; }
+    bubbles.push(`<div class="bubble me">${esc(q)}</div>`);
+    bubbles.push(`<div class="bubble them">${esc(r.ok ? r.output : "That question failed. The Console tab has the error.")}</div>`);
+  }
+  for (const cmd of pending.values()) {
+    if (cmd.startsWith(prefix) && !cmd.endsWith("end_convo")) {
+      bubbles.push(`<div class="bubble me">${esc(cmd.slice(prefix.length))}</div><div class="bubble them wait">Thinking</div>`);
+    }
+  }
+  paint($("ask-log"), bubbles.join("") || `<div class="empty">Ask ${esc(selected.split(" ")[0])} anything, e.g. "How do you feel about the datacenter?"</div>`);
+}
+
+/* ---------------- header + map ---------------- */
+
+function renderHeader() {
+  const s = data?.status || "stopped";
+  const sim = data?.sim;
+  const live = s === "idle" || s === "running";
+  const label = {running: `Running, ${sim?.run_left ?? 0} steps left`, idle: "Ready", starting: "Starting", stopped: "Stopped", finished: "Finished"}[s] || s;
+  $("status").dataset.s = view ? "saved" : s;
+  $("status").textContent = view ? "Saved run, read-only" : label;
+  $("sim-extra").textContent = sim && (live || view) ? `from ${sim.fork_sim_code}, steps ${sim.start_step ?? "?"} to ${sim.step}` : "";
+
+  // Staging runs use a cheaper model; flag them wherever a run is shown.
+  // With no run loaded, show the mode the next run will start in.
+  const env = (live || view) ? (sim?.run_env || "production") : data?.run_env;
+  const model = (live || view) ? sim?.chat_model : null;
+  $("env-badge").hidden = env !== "staging";
+  $("env-badge").title = env === "staging"
+    ? `Staging: ${model || "the staging model"} and a default spending cap. Results aren't comparable with production runs.` : "";
+
+  // Run picker: the live run first, then saved runs, newest first.
+  const liveName = live ? liveSim : null;
+  const opts = [];
+  if (liveName) opts.push(`<option value="${esc(liveName)}">${esc(liveName)} (live)</option>`);
+  else opts.push(`<option value="">${s === "starting" ? `${esc(data?.launch?.sim || "Starting")} (starting)` : "No live run"}</option>`);
+  const option = (r) => {
+    const t = parseGameTime(r.curr_time);
+    return `<option value="${esc(r.name)}">${esc(r.name)}, saved ${t ? t.toLocaleDateString(undefined, {weekday: "short"}) + " " + t.toTimeString().slice(0, 5) : `at step ${r.step}`}</option>`;
+  };
+  const saved = (data?.sims || []).filter((r) => r.name !== liveName);
+  const dc = saved.filter((r) => r.maze === "the_ville_datacenter");
+  const other = saved.filter((r) => r.maze !== "the_ville_datacenter");
+  if (dc.length) opts.push(`<optgroup label="Datacenter runs">${dc.map(option).join("")}</optgroup>`);
+  if (other.length) opts.push(`<optgroup label="Other simulations">${other.map(option).join("")}</optgroup>`);
+  paint($("run-select"), opts.join(""));
+  $("run-select").value = view || liveName || "";
+
+  $("viewing").hidden = !view;
+  if (view && sim) {
+    const run = sim.step - (sim.start_step || 0);
+    $("viewing-text").textContent = `You're looking at ${view} as it was saved: ${run} steps (${spanLabel(run, sim.sec_per_step)} of game time) after continuing from ${sim.fork_sim_code || "the start"}. Nothing here can be changed.`;
+  }
+
+  const d = (live || view) ? parseGameTime(sim?.curr_time) : null;
+  $("clock-time").textContent = d ? d.toTimeString().slice(0, 5) : "--:--";
+  $("clock-date").textContent = d ? d.toLocaleDateString(undefined, {weekday: "long", month: "long", day: "numeric"}) : (s === "starting" ? "Loading the town" : "Start a simulation to begin");
+
+  $("btn-run").disabled = !!view || s === "starting";
+  for (const id of ["btn-save", "btn-fin"]) $(id).disabled = !live || !!view;
+  $("btn-stop").disabled = s !== "running" || !!view;
+  $("console-form").hidden = !!view;
+  document.querySelector("#console-foot .chips").hidden = !!view;
+
+  // The live map drives the live run, so it stays up while a run is going,
+  // even when you're looking at a saved run.
+  const liveKey = live ? `live:${data.liveSim}:${data.livePid}` : null;
+  const key = !view ? liveKey : s === "running" ? liveKey : replayKey;
+  $("map-tag").hidden = !(view && key);
+  $("map-tag").textContent = key === liveKey ? `Live map of ${data.liveSim}` : `Replaying ${view}`;
+  $("replay-box").hidden = !view || s === "running";
+  $("btn-new-2").hidden = !!view || s === "starting";
+  if (key !== mapKey) {
+    mapKey = key;
+    $("map").hidden = !key;
+    $("map-empty").hidden = !!key;
+    $("map").src = !key ? "about:blank" : key.startsWith("replay:") ? key.slice(7) : "/simulator_home?embed=1";
+    // Phaser builds the scene shortly after load; then center on the open agent.
+    $("map").onload = () => setTimeout(() => {
+      if (selected) $("map").contentWindow?.postMessage({type: "focus", name: selected}, location.origin);
+    }, 1500);
+  }
+  $("map-empty-text").textContent = view
+    ? "Replay this run on the map. It plays back every step from the one you pick."
+    : s === "starting" ? "Loading the town. This takes a few seconds." : "The town is quiet. Start a simulation to see it move.";
+  if (view && sim && !$("replay-step").value) $("replay-step").value = sim.start_step || 0;
+}
+
+let replayKey = null;
+$("btn-replay").onclick = () => {
+  const step = Math.max(0, parseInt($("replay-step").value, 10) || 0);
+  replayKey = `replay:/replay/${encodeURIComponent(view)}/${step}/?embed=1`;
+  poll();
+};
+
+function switchRun(name) {
+  view = name && name !== (data?.status === "idle" || data?.status === "running" ? data.liveSim : null) ? name : null;
+  replayKey = null;
+  $("replay-step").value = "";
+  pending.clear();
+  poll(); pollUsage();
+}
+$("run-select").onchange = (e) => switchRun(e.target.value);
+$("btn-back-live").onclick = () => switchRun(null);
+$("btn-fork-here").onclick = () => openRun(view);
+
+async function poll() {
+  clearTimeout(poll.t);
+  try {
+    const q = selected ? `?agent=${encodeURIComponent(selected)}` : "";
+    const res = await fetch(`/dashboard/state/${q}`);
+    data = await res.json();
+    data.liveSim = data.sim?.sim_code;
+    data.livePid = data.sim?.pid;
+    liveSim = data.liveSim;
+    if (view) {
+      // Saved run: same shape as the live state, read from its folder.
+      const runRes = await fetch(`/dashboard/run/${encodeURIComponent(view)}/${q}`);
+      if (runRes.ok) Object.assign(data, await runRes.json());
+      else { view = null; toast("That run couldn't be loaded."); }
+    }
+    const names = (data.sim?.roster || []).map((a) => a.name);
+    if (names.length && !names.includes(selected)) {
+      let saved = null;
+      try { saved = localStorage.getItem("dash-agent"); } catch (err) { /* private mode */ }
+      selected = names.includes(saved) ? saved : names[0];
+      poll.t = setTimeout(poll, 0);
+      return;
+    }
+    watchRuns();
+    renderHeader(); renderSettings(); renderRoster(); renderAgent(); renderInterview();
+    renderTitle();
+    renderConvos(); renderEvents(); renderResults(); renderStance(); renderNetwork();
+  } catch (e) { /* frontend server restarting */ }
+  poll.t = setTimeout(poll, 1000);
+}
+
+/* ---------------- launch ---------------- */
+
+// One dialog for every way of running: with no run loaded it starts one
+// (optionally loading seed memories and running straight away); with a run
+// loaded it can load seed memories and/or run more steps.
+let runMode = "live";
+
+function seedCount(events) {
+  return (events || []).filter((e) => e.event_type === "history_whisper").length;
+}
+
+function showSeedHint(count, forkName) {
+  if (count) {
+    $("r-history").value = "";
+    $("r-history-hint").textContent = `${runMode === "start" ? forkName : "This run"} already has ${count} seed memories. Loading a file again adds each one a second time.`;
+  } else {
+    // Fresh base simulations have none yet; pre-select the matching file.
+    const match = runMode === "start" ? HISTORIES.find((h) => forkName.startsWith("base_") && h.includes(forkName.replace(/^base_the_ville_/, ""))) : null;
+    $("r-history").value = match || "";
+    $("r-history-hint").textContent = "No seed memories yet. A fresh base simulation needs them so agents know about the proposal and each other.";
+  }
+}
+
+async function loadForkSeeds() {
+  const fork = $("r-fork").value;
+  const sims = data?.sims || [];
+  // Runs are named stg-<name> in staging and prod-<name> in production (the
+  // server applies it too); a prefix from the other mode is swapped.
+  const prefix = data?.run_env === "production" ? "prod-" : "stg-";
+  const base = fork.replace(/-\d+$/, "").replace(/^(stg|prod)-/, "");
+  let n = 2;
+  while (sims.some((s) => s.name === `${prefix}${base}-${n}`)) n += 1;
+  $("r-sim").value = `${prefix}${base}-${n}`;
+  $("r-history-hint").textContent = "Checking this run's seed memories.";
+  try {
+    const res = await fetch(`/dashboard/run/${encodeURIComponent(fork)}/`);
+    const body = await res.json();
+    if (fork === $("r-fork").value) showSeedHint(seedCount(body.events), fork);
+  } catch (e) { $("r-history-hint").textContent = ""; }
+}
+
+function updateRunSpans() {
+  const sps = data?.sim?.sec_per_step;
+  const n = parseInt($("r-steps").value, 10) || 0;
+  $("r-span").textContent = n ? `steps (${spanLabel(n, sps)} of game time)` : runMode === "start" ? "steps (0 loads the run without running it)" : "steps";
+  const a = parseInt($("r-autosave").value, 10) || 0;
+  $("r-autosave-span").textContent = a ? `steps (${spanLabel(a, sps)} of game time)` : "steps (off)";
+}
+
+function openRun(fork) {
+  const s = data?.status;
+  const live = s === "idle" || s === "running";
+  if (s === "starting") { toast("A run is starting. Wait for it to load."); return; }
+  if (typeof fork === "string" && live) { toast(`Finish ${data.liveSim} first. Only one run can be loaded at a time.`); return; }
+  runMode = live ? "live" : "start";
+  const start = runMode === "start";
+  $("r-start").hidden = !start;
+  $("r-sim").required = start;
+  $("r-title").textContent = start ? "Start a run" : `Run ${data.liveSim}`;
+  const env = start ? data?.run_env : data?.sim?.run_env;
+  $("r-intro").textContent = (start
+    ? "Pick a saved run to continue from. It's copied, so the original stays as it is."
+    : s === "running" ? "A run is going now. This one starts when it ends." : "Choose what to load and how far to run.")
+    + (env === "staging" ? " Staging mode (run_env in utils.py): a cheaper model and a default spending cap, so results aren't comparable with production runs. Staging runs stay out of git."
+      : start ? " Production mode: the run is named prod-… and can be committed to git." : "");
+  $("r-go").textContent = start ? "Start" : "Run";
+  $("r-history").innerHTML = `<option value="">None</option>` + HISTORIES.map((h) => `<option>${esc(h)}</option>`).join("");
+  if ($("r-steps").value === "") $("r-steps").value = 360;
+  const st = data?.settings || {};
+  $("r-autosave").value = st.autosave_steps ?? 360;
+  $("r-budget").value = st.budget_usd ?? "";
+  const spent = live ? data?.sim?.run_cost : null;
+  $("r-budget-hint").textContent = `A run stops and saves when its estimated API cost reaches this. Leave empty for no cap${env === "staging" ? ", which in staging means staging_budget_usd from utils.py" : ""}.${spent != null ? ` This run has spent about ${usd(spent)}.` : ""}`;
+  $("r-error").textContent = "";
+  if (start) {
+    const sims = data?.sims || [];
+    $("r-fork").innerHTML = sims.map((x) => `<option value="${esc(x.name)}">${esc(x.name)} (${esc(x.curr_time || `step ${x.step}`)})</option>`).join("");
+    if (typeof fork === "string") $("r-fork").value = fork;
+    loadForkSeeds();
+  } else {
+    showSeedHint(seedCount(data?.events), data.liveSim);
+  }
+  updateRunSpans();
+  $("run-dialog").showModal();
+}
+
+$("r-fork").onchange = loadForkSeeds;
+$("r-steps").oninput = updateRunSpans;
+$("r-autosave").oninput = updateRunSpans;
+document.querySelectorAll("[data-steps]").forEach((b) => {
+  b.onclick = () => { $("r-steps").value = b.dataset.steps; updateRunSpans(); };
+});
+$("btn-new-2").onclick = () => openRun();
+
+$("r-go").onclick = async () => {
+  const start = runMode === "start";
+  if (start && !$("r-sim").reportValidity()) return;
+  const steps = parseInt($("r-steps").value, 10) || 0;
+  const history = $("r-history").value;
+  if (!start && !steps && !history) { $("r-error").textContent = "Pick seed memories, a number of steps, or both."; return; }
+  if ("Notification" in window && Notification.permission === "default") Notification.requestPermission();
+  $("r-go").disabled = true;
+  try {
+    // Settings first, so the cap and auto-save apply from the first step.
+    const st = data?.settings || {};
+    const autosave = $("r-autosave").value;
+    const budget = $("r-budget").value.trim();
+    if (String(st.autosave_steps ?? "") !== autosave || String(st.budget_usd ?? "") !== budget) {
+      const res = await fetch("/dashboard/settings/", {method: "POST", body: JSON.stringify({autosave_steps: autosave, budget_usd: budget})});
+      const body = await res.json();
+      if (!res.ok) { $("r-error").textContent = body.error; return; }
+    }
+    if (start) {
+      const res = await fetch("/dashboard/launch/", {method: "POST", body: JSON.stringify({fork: $("r-fork").value, sim: $("r-sim").value.trim(), history, run_steps: steps})});
+      const body = await res.json();
+      if (!res.ok) { $("r-error").textContent = body.error; return; }
+      view = null;
+      toast(steps ? `Starting. Then ${history ? "loading seed memories and " : ""}running ${steps} steps.` : "Starting. The map loads when the town is ready.");
+    } else {
+      // Commands run in order: seed memories first, then the run.
+      if (history && !(await send(`call -- load history ${history}`, true))) return;
+      if (steps && !(await send(`run ${steps}`, true))) return;
+      const what = [history && "loading seed memories", steps && `running ${steps} steps`].filter(Boolean).join(", then ");
+      toast(data?.status === "running" ? `Queued: ${what}. It starts when the current run ends.` : `Started: ${what}.`);
+    }
+    $("run-dialog").close();
+    poll();
+  } finally {
+    $("r-go").disabled = false;
+  }
+};
+
+
+/* ---------------- API usage ---------------- */
+
+const usd = (n) => n == null ? "n/a" : n >= 100 ? `$${n.toFixed(0)}` : n >= 1 ? `$${n.toFixed(2)}` : n >= 0.01 ? `$${n.toFixed(3)}` : n >= 0.0001 ? `$${n.toFixed(4)}` : n > 0 ? "under $0.0001" : "$0";
+const num = (n) => n >= 1e6 ? `${(n / 1e6).toFixed(2)}M` : n >= 1e4 ? `${(n / 1e3).toFixed(1)}k` : String(Math.round(n || 0));
+
+function usageRow(label, t) {
+  return `<tr><td>${label}</td><td>${num(t.calls)}</td><td>${num(t.chat)}</td><td>${num(t.embedding)}</td>
+    <td>${num(t.in)}</td><td>${num(t.cached)}</td><td>${num(t.out)}</td><td>${t.errors || 0}</td><td><b>${usd(t.cost)}</b></td></tr>`;
+}
+
+function bars(groups, empty) {
+  if (!groups.length) return `<div class="empty">${empty}</div>`;
+  const max = Math.max(...groups.map((g) => g.cost), 1e-9);
+  return `<div class="bars">${groups.map((g) => `
+    <div class="bar"><span>${esc(g.name)}</span>
+      <div class="track" title="${num(g.calls)} calls, ${num(g.in + g.out)} tokens"><div style="width:${(g.cost / max) * 100}%"></div></div>
+      <span class="v">${usd(g.cost)}</span></div>`).join("")}</div>`;
+}
+
+let usage = null;
+async function pollUsage() {
+  clearTimeout(pollUsage.t);
+  try {
+    usage = await (await fetch(`/dashboard/usage/${view ? `?sim=${encodeURIComponent(view)}` : ""}`)).json();
+    renderUsage();
+  } catch (e) { /* server restarting */ }
+  pollUsage.t = setTimeout(pollUsage, 3000);
+}
+
+function renderUsage() {
+  const u = usage;
+  const pill = $("cost-pill");
+  pill.hidden = !u?.since;
+  if (u?.since) pill.textContent = !u.run.calls && view ? `API usage wasn't tracked for ${view}`
+    : `${usd(u.run.cost)} ${view ? "in " + view : "this run"}, ${num(u.run.calls)} API calls`;
+  if (!u) return;
+  if (!u.since) {
+    paint($("p-usage"), `<div class="empty">No API calls recorded yet. Every call is tracked from now on, with its tokens and cost. Calls made before tracking started aren't counted.</div>`);
+    return;
+  }
+  const r5 = u.last5;
+  const perMin = (x) => x / (r5.minutes || 5);
+  const since = new Date(u.since * 1000).toLocaleString(undefined, {month: "short", day: "numeric", hour: "2-digit", minute: "2-digit"});
+  const lat = u.latency;
+  paint($("p-usage"), `
+    ${u.unpriced.length ? `<div class="warn-box">No price set for ${u.unpriced.map(esc).join(", ")}, so those calls count as $0. Add it to PRICES in translator/dashboard.py.</div>` : ""}
+    <div class="usage-top">
+      <div><b>${usd(u.run.cost)}</b><span>this run</span></div>
+      <div><b>${num(u.run.calls)}</b><span>API calls this run</span></div>
+      <div><b>${num(u.run.in + u.run.out)}</b><span>tokens this run</span></div>
+      <div><b>${u.per_game_hour == null ? "n/a" : usd(u.per_game_hour)}</b><span>${u.per_game_hour == null ? "per game hour, shown after a run" : "per game hour, on average"}</span></div>
+    </div>
+    <table class="usage">
+      <thead><tr><th></th><th>Calls</th><th>Chat</th><th>Embed</th><th>Input tok</th><th>Cached</th><th>Output tok</th><th>Failed</th><th>Cost</th></tr></thead>
+      <tbody>
+        ${usageRow("Last 5 min", r5)}
+        ${usageRow(`This run (${esc(u.sim || "none")})`, u.run)}
+        ${usageRow("Today", u.today)}
+        ${usageRow("All time", u.all)}
+      </tbody>
+    </table>
+    <div class="section"><h3>Right now</h3>
+      <p style="margin:0">${r5.calls ? `${perMin(r5.calls).toFixed(1)} calls and ${num(perMin(r5.in + r5.out))} tokens a minute, about ${usd(perMin(r5.cost) * 60)} per real hour at this pace.` : "No calls in the last 5 minutes."}
+      ${lat.avg != null ? ` Responses take ${lat.avg.toFixed(1)}s on average; the slowest 5% take over ${lat.p95.toFixed(1)}s.` : ""}
+      ${u.run.cached ? ` ${Math.round((u.run.cached / Math.max(u.run.in, 1)) * 100)}% of input tokens this run were cached and billed at half price.` : ""}</p>
+    </div>
+    <div class="section"><h3>Cost by agent, this run</h3>${bars(u.agents, "No agent calls yet this run.")}</div>
+    <div class="section"><h3>What triggered the calls, this run</h3>${bars(u.sources.map((g) => ({...g, name: g.name === "step" ? "simulation steps" : g.name})), "No calls yet this run.")}</div>
+    <div class="section"><h3>By model, all time</h3>${bars(u.models, "")}</div>
+    <div class="section"><h3>Failed calls</h3>${u.errors.length ? u.errors.map((e) => `
+      <div class="err-row"><b>${new Date(e.ts * 1000).toLocaleTimeString()}</b> ${esc(e.model)}${e.status ? `, HTTP ${e.status}` : ""}${e.persona ? `, ${esc(e.persona)}` : ""}<div class="mono">${esc(e.error)}</div></div>`).join("")
+      : `<div class="empty" style="padding:0">None. Failed calls, such as rate limits (HTTP 429), would show up here.</div>`}</div>
+    <div class="hint">Tracking since ${since}. Costs are estimates from token counts and the prices in translator/dashboard.py (${Object.entries(u.prices).filter(([k]) => u.models.some((m) => m.name.startsWith(k))).map(([k, p]) => `${k}: $${p[0]} in, $${p[1]} cached, $${p[2]} out per 1M`).join("; ") || "standard tier"}). Check the OpenAI usage page for the exact bill.</div>`);
+}
+$("cost-pill").onclick = () => $("tab-usage").click();
+
+pollUsage();
+
+/* ---------------- auto-save + spending cap ---------------- */
+
+function renderSettings() {
+  // A loaded run reports the settings it actually uses (in staging, a
+  // missing cap becomes the staging cap); otherwise show what's saved.
+  const loaded = !view && (data?.status === "idle" || data?.status === "running");
+  const st = (loaded && data?.sim?.settings) || data?.settings || {};
+  const sim = view ? null : data?.sim;
+  const every = st.autosave_steps || 0;
+  const cap = st.budget_usd;
+  const spent = sim?.run_cost;
+  const parts = [every ? `Auto-save every ${spanLabel(every, sim?.sec_per_step)}` : "Auto-save off"];
+  parts.push(cap == null ? "no spending cap" : spent != null ? `${usd(spent)} of ${usd(cap)} cap` : `${usd(cap)} cap`);
+  if (sim?.last_autosave != null && sim.curr_time) {
+    const t = parseGameTime(sim.curr_time);
+    if (t) {
+      t.setSeconds(t.getSeconds() - (sim.step - sim.last_autosave) * (sim.sec_per_step || 10));
+      parts.push(`last saved ${t.toTimeString().slice(0, 5)}`);
+    }
+  }
+  $("settings-pill").textContent = parts.join(", ");
+  $("settings-pill").hidden = !!view;
+
+  // Hide once the cap is raised above what's been spent, or removed.
+  const hit = !view && sim?.budget_hit && cap != null && spent != null && spent >= cap;
+  $("budget-banner").hidden = !hit;
+  if (hit) $("budget-text").textContent = `The run stopped at the ${usd(cap)} spending cap (${usd(spent)} spent) and was saved. Raise the cap to keep running.`;
+}
+
+function openSettings() {
+  const st = data?.settings || {};
+  $("s-autosave").value = st.autosave_steps ?? 360;
+  $("s-opinion").value = st.opinion_steps ?? 360;
+  $("s-budget").value = st.budget_usd ?? "";
+  const spent = view ? null : data?.sim?.run_cost;
+  $("s-budget-hint").textContent = `When a run's estimated API cost reaches this, it stops after the current step and saves. Leave empty for no cap.${spent != null ? ` This run has spent about ${usd(spent)} so far.` : ""}`;
+  updateAutosaveSpan();
+  $("s-error").textContent = "";
+  $("settings").showModal();
+}
+function stepsSpan(input, out) {
+  const n = parseInt($(input).value, 10) || 0;
+  $(out).textContent = n ? `steps (${spanLabel(n, data?.sim?.sec_per_step)} of game time)` : "steps (off)";
+}
+function updateAutosaveSpan() {
+  stepsSpan("s-autosave", "s-autosave-span");
+  stepsSpan("s-opinion", "s-opinion-span");
+}
+$("s-autosave").oninput = updateAutosaveSpan;
+$("s-opinion").oninput = updateAutosaveSpan;
+$("settings-pill").onclick = openSettings;
+$("btn-budget-edit").onclick = openSettings;
+$("s-go").onclick = async () => {
+  const res = await fetch("/dashboard/settings/", {method: "POST", body: JSON.stringify({
+    autosave_steps: $("s-autosave").value, opinion_steps: $("s-opinion").value,
+    budget_usd: $("s-budget").value.trim()})});
+  const body = await res.json();
+  if (!res.ok) { $("s-error").textContent = body.error; return; }
+  $("settings").close();
+  toast("Settings saved. They apply from the next step.");
+  poll();
+};
+
+/* ---------------- run finished: notify, tab title ---------------- */
+
+const seenResults = new Set();
+let resultsPrimed = false;
+let finishedUnseen = false;
+
+function announce(title, body) {
+  toast(`${title}. ${body}`);
+  if (document.hidden) {
+    finishedUnseen = true;
+    if ("Notification" in window && Notification.permission === "granted") {
+      new Notification(title, {body, tag: "town-run"});
+    }
+  }
+}
+
+function watchRuns() {
+  // Only the live run's results; a saved run's history isn't news.
+  if (view) return;
+  const results = data?.results || [];
+  const key = (r) => r.id || `${r.time}|${r.cmd}`;
+  if (!resultsPrimed) { results.forEach((r) => seenResults.add(key(r))); resultsPrimed = true; return; }
+  for (const r of results) {
+    if (seenResults.has(key(r))) continue;
+    seenResults.add(key(r));
+    if (/^run \d+/i.test(r.cmd)) {
+      announce(r.ok ? (/Stopped early/.test(r.output) ? "Run stopped at the spending cap" : "Run finished") : "Run failed",
+               r.ok ? r.output : "The Console tab has the error.");
+    }
+  }
+}
+
+function renderTitle() {
+  const s = data?.status;
+  const left = data?.sim?.run_left;
+  document.title = finishedUnseen ? "Run finished, Town Control"
+    : !view && s === "running" ? `${left ?? ""} steps left, Town Control` : "Town Control";
+}
+
+document.addEventListener("visibilitychange", () => {
+  if (document.hidden) return;
+  finishedUnseen = false;
+  renderTitle();
+  // The map pauses while the tab is hidden but the run doesn't, so reload it
+  // at the current step instead of letting it replay the backlog.
+  if (mapKey && mapKey.startsWith("live:")) { mapKey = null; poll(); }
+});
+
+// Ask once, from a click, so the browser allows it.
+$("btn-run").addEventListener("click", () => {
+  if ("Notification" in window && Notification.permission === "default") Notification.requestPermission();
+});
+poll();
+</script>
+</body>
+</html>
