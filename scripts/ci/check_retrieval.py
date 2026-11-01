@@ -16,6 +16,9 @@ each of which was wrong or divergent at some point:
 - A retrieval with touch=False leaves last_accessed alone, so the hourly
   stance probe can read memory without resetting the recency clock on what it
   read and changing what the agent retrieves next.
+- last_accessed survives a save and reload. It used not to be written out, so
+  every resumed or forked run flattened recency across the whole stream; a
+  nodes.json from before it was saved still loads, falling back to created.
 - Every retrieval run by a console command passes touch=False. Commands are
   the observer's side of the simulation: the dashboard interview retrieves 50
   memories to answer a question, and with the default it would stamp all 50
@@ -29,10 +32,12 @@ import contextlib
 import datetime
 import inspect
 import io
+import json
 import os
 import random
 import re
 import sys
+import tempfile
 import textwrap
 
 BACKEND = os.path.join(os.path.dirname(__file__), "..", "..",
@@ -44,7 +49,8 @@ os.chdir(BACKEND)
 sys.path.insert(0, BACKEND)
 
 from persona.cognitive_modules import reflect, retrieve
-from persona.memory_structures.associative_memory import ConceptNode
+from persona.memory_structures.associative_memory import (
+  AssociativeMemory, ConceptNode)
 
 problems = []
 NOW = datetime.datetime(2023, 2, 13, 12, 0, 0)
@@ -188,6 +194,55 @@ if set(touched.values()) != {NOW}:
   problems.append("new_retrieve no longer marks the nodes it returns as "
                   "accessed, so the agent's own retrievals do not refresh "
                   "recency")
+
+# -- last_accessed survives a save and reload --------------------------------
+# It is the only input to recency, and it used not to be written out at all:
+# every resumed or forked run reset it to created for every node at once, which
+# flattens recency across the whole stream and makes a past ranking
+# unreconstructable offline (scripts/sweep_reserved_slots.py documents the
+# second half of that). A nodes.json written before it was saved must still
+# load, with those nodes falling back to created.
+def memory_dir(tmp, nodes=None):
+  os.makedirs(tmp, exist_ok=True)
+  for name, blank in [("nodes.json", nodes if nodes is not None else {}),
+                      ("embeddings.json", {}),
+                      ("kw_strength.json", {"kw_strength_event": {},
+                                            "kw_strength_thought": {}})]:
+    with open(os.path.join(tmp, name), "w") as f:
+      json.dump(blank, f)
+  return tmp
+
+
+CREATED = NOW - datetime.timedelta(hours=48)
+with tempfile.TemporaryDirectory() as tmp:
+  a_mem = AssociativeMemory(memory_dir(os.path.join(tmp, "in")))
+  saved = a_mem.add_event(CREATED, None, "s", "p", "o", "desc",
+                          {"kw"}, 5, ("key a", [1.0, 0.0]), None)
+  saved.last_accessed = NOW
+  out = os.path.join(tmp, "out")
+  os.makedirs(out)
+  a_mem.save(out)
+
+  with open(os.path.join(out, "nodes.json")) as f:
+    written = json.load(f)
+  reloaded = AssociativeMemory(out).seq_event[0]
+  if reloaded.last_accessed != NOW:
+    problems.append(f"last_accessed did not survive a save and reload: wrote "
+                    f"{NOW}, read back {reloaded.last_accessed}. Recency "
+                    f"decays from it, so every resumed run would restart the "
+                    f"recency clock on the whole memory stream at once")
+
+  for row in written.values():
+    row.pop("last_accessed", None)
+  legacy = memory_dir(os.path.join(tmp, "legacy"), written)
+  with open(os.path.join(legacy, "embeddings.json"), "w") as f:
+    json.dump({"key a": [1.0, 0.0]}, f)
+  old = AssociativeMemory(legacy).seq_event[0]
+  if old.last_accessed != CREATED:
+    problems.append(f"a nodes.json without last_accessed loaded with "
+                    f"last_accessed {old.last_accessed} instead of falling "
+                    f"back to created {CREATED}, so saved runs from before it "
+                    f"was persisted no longer load the way they used to")
 
 # -- Console commands retrieve read-only -------------------------------------
 # open_server is the observer's side of the simulation. The dashboard interview
