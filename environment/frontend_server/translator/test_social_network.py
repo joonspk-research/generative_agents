@@ -156,3 +156,23 @@ class NetworkTests(SimpleTestCase):
     self.assertEqual(live["network"]["conversations"], 351)
     self.assertEqual(saved["network"]["conversations"], 350)
     self.assertEqual(len(saved["network"]["nodes"]), 3)
+
+  def test_analysis_fields_stay_in_the_log_and_out_of_the_payload(self):
+    # Every reading records the cosines and bands that chose its evidence, for
+    # offline analysis. The graph needs the numbers, so neither that record nor
+    # the node ids should be paid for on every poll.
+    meta = Path("storage/test/reverie")
+    meta.mkdir()
+    (meta / "meta.json").write_text(json.dumps(
+      {"step": 10, "persona_names": self.names}))
+    self.append("opinions.jsonl", self.opinion(
+      1, 61, "moderate_support", evidence=["node_1"],
+      selection={"memories": [{"id": "node_1", "cos": 0.6, "band": "recent"}],
+                 "bands": {"recent": 1, "mid": 0, "old": 0}}))
+    saved = self.client.get("/dashboard/run/test/").json()
+    row, = saved["opinions"]
+    self.assertEqual((row["score"], row["category"]), (61, "moderate_support"))
+    self.assertNotIn("selection", row)
+    self.assertNotIn("evidence", row)
+    logged = json.loads((self.folder / "opinions.jsonl").read_text())
+    self.assertEqual(logged["selection"]["bands"]["recent"], 1)

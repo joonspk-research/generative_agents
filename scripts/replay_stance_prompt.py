@@ -19,15 +19,17 @@ What this replays and what it cannot:
   example_output   replayed exactly, both live in run_gpt_prompt.
   collapse()       partially. Its deduplication is applied to the recorded
                    evidence, so the repeats it drops are visible. Its other
-                   half is not: live, RETRIEVE_N asks retrieval for three times
-                   EVIDENCE_N and the freed slots are backfilled with distinct
-                   statements. Only the cited 30 ids are on disk, not what
-                   retrieval would have returned at that step, so a replayed
+                   half is not: live, the whole pool is ranked by cosine and a
+                   slot freed by deduplication goes to the next distinct
+                   statement. Only the cited ids are on disk, so a replayed
                    prompt is short where a live one would be full. The replayed
                    score is therefore based on no more evidence than the
-                   original, never less -- the comparison stays fair.
+                   original, never less -- the comparison stays fair. Rows
+                   logged after the selection field exists carry the rejected
+                   candidates and their cosines, which closes this gap for
+                   them; rows from before it do not.
   is_asleep        not replayed through persona state; read from the movement
-                   snapshot for that step, which carries act_description.
+                   snapshots across the hour, which carry act_description.
   RELEVANCE_FLOOR  not replayed; applied to the relevance already recorded on
                    each row.
 
@@ -51,7 +53,8 @@ _ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(_ROOT, "reverie", "backend_server"))
 
 import utils  # noqa: E402  (reverie/backend_server/utils.py, for fs_storage)
-from opinion_probe import RELEVANCE_FLOOR, collapse  # noqa: E402
+from opinion_probe import (  # noqa: E402
+  RELEVANCE_FLOOR, asleep_reason, collapse)
 from persona.prompt_template.run_gpt_prompt import (  # noqa: E402
   run_gpt_prompt_datacenter_stance)
 
@@ -81,6 +84,9 @@ def sleeping_at(sim, step, name, _cache={}):
   awake quietly un-withholds the midnight readings, which are the ones most
   likely to be of a sleeping agent -- on the measured run that was seven of
   eight.
+
+  Returns None when no snapshot names this persona at all, which the hour
+  window needs to tell apart from a snapshot that says awake.
   """
   folder = os.path.join(utils.fs_storage, sim, "movement")
   for candidate in (step, step - 1, step - 2):
@@ -94,7 +100,29 @@ def sleeping_at(sim, step, name, _cache={}):
     snapshot = _cache[candidate]
     if snapshot and name in snapshot:
       return "sleep" in (snapshot[name].get("description") or "").lower()
-  return False
+  return None
+
+
+def sleeping_through_hour(sim, step, name, per_step):
+  """is_asleep's hour window, read from movement instead of the schedule.
+
+  The live probe samples f_daily_schedule every ten game minutes and withholds
+  only if every task in the hour is sleep. There is no saved schedule to walk
+  here -- f_daily_schedule is rewritten nightly and only its final state is on
+  disk -- but the movement files are a step-by-step record of what each agent
+  was actually doing, which is the better evidence anyway.
+
+  Sampled over 3600 game seconds from the probe's step, so the window follows
+  the run's own sec_per_step rather than assuming the hourly cadence that
+  opinion_steps happens to be set to. Steps past the end of the run have no
+  file and are skipped; if nothing in the window is on disk the single-step
+  reading stands.
+  """
+  stride = max(1, round(600 / per_step))
+  seen = [sleeping_at(sim, step + k * stride, name)
+          for k in range(round(3600 / per_step / stride))]
+  found = [s for s in seen if s is not None]
+  return bool(found) and all(found)
 
 
 def stub(name, age, curr_time):
@@ -147,15 +175,35 @@ def main(argv):
 
   memory = {name: load_nodes(args.sim, name) for name in ages}
 
+  with open(os.path.join(utils.fs_storage, args.sim, "reverie",
+                         "meta.json"), encoding="utf-8") as f:
+    per_step = json.load(f)["sec_per_step"]
+
   skipped = collections.Counter()
   kept = []
   for row in rows:
-    if sleeping_at(args.sim, row["step"], row["name"]):
-      skipped["asleep"] += 1
+    when = datetime.datetime.strptime(row["time"], TIME_FMT)
+    if sleeping_through_hour(args.sim, row["step"], row["name"], per_step):
+      skipped[asleep_reason(when)] += 1
       continue
-    shown = (row.get("relevance") or {}).get("shown")
-    if shown is None or shown < RELEVANCE_FLOOR:
-      skipped["low_relevance"] += 1
+    # <best> where <shown> is missing, which is the whole point of the new
+    # selection: the pool's closest memory can no longer be crowded out of
+    # the prompt, so the two are the same number and a row the old code
+    # withheld for low relevance is replayable from the cosine it recorded.
+    measured = row.get("relevance") or {}
+    shown = measured.get("shown")
+    if shown is None:
+      shown = measured.get("best")
+    if shown is None:
+      # Withheld before anything was measured -- no cosine on disk to apply
+      # the floor to. Counted apart from a real below-floor row, because
+      # most of these are rows the hour window has just un-withheld and
+      # calling them no_relevant_memory would claim a measurement that was
+      # never taken.
+      skipped["relevance_unrecorded"] += 1
+      continue
+    if shown < RELEVANCE_FLOOR:
+      skipped["no_relevant_memory"] += 1
       continue
     kept += [row]
 

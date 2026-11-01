@@ -2,26 +2,34 @@
 Reads where each agent stands on the datacenter, on a 0-100 rubric, so the
 dashboard can graph how those positions move over the run.
 
-The probe is an observer, not a participant. It retrieves with touch=False and
-writes nothing back, so asking an agent its position every game hour does not
-change what that agent retrieves, plans or reflects on afterwards. Without
-that, the probe would reset the recency clock on exactly the datacenter
-memories it read, and the graph would be measuring its own interference.
+The probe is an observer, not a participant. It reads memory itself and calls
+no retrieval, so it cannot stamp last_accessed and asking an agent its
+position every game hour does not change what that agent retrieves, plans or
+reflects on afterwards. Otherwise the probe would reset the recency clock on
+exactly the datacenter memories it read, and the graph would be measuring its
+own interference.
 
-Each reading also records the memories it was based on, which is what makes a
-move in the line explainable. Results go to
+Each reading also records the memories it was based on and the cosines that
+chose them, which is what makes a move in the line explainable. Results go to
 storage/<sim>/experiment/opinions.jsonl (see experiment_logger.py).
 
-The evidence a reading is built from comes from two sources, ranked
+The evidence a reading is built from comes from two sources, selected
 separately and merged in time order:
 
-  memories       seq_event and seq_thought, ranked by new_retrieve's
-                 composite of recency, relevance and importance, then
-                 deduplicated by collapse() and cut to those close enough to
-                 the question to be evidence about it.
-  spoken lines   RESERVED_N slots for what the agent actually said, ranked by
-                 relevance alone (rank_utterances), read straight off the
-                 chat nodes because seq_chat is not in new_retrieve's pool.
+  memories       seq_event and seq_thought, by raw cosine to the stance
+                 question across the whole pool, keeping only what is close
+                 enough to be evidence about it, deduplicated by collapse()
+                 and allocated over age bands (allocate).
+  spoken lines   RESERVED_N slots for what the agent actually said, by latest
+                 conversation and then cosine (select_utterances), read
+                 straight off the chat nodes because seq_chat is not in
+                 new_retrieve's pool.
+
+Relevance selects rather than merely vetoing. new_retrieve's composite of
+recency, relevance and importance stays exactly as it is for the agents' own
+planning and reflection, where those are the right priorities; for an observer
+asking one fixed question all run they are not. See probe for what the
+composite cost when it chose the evidence.
 
 The second source exists because the first one has the positions stripped out
 of it. Measured over a full game day, 0.6% of pool events and 3.2% of pool
@@ -34,19 +42,27 @@ summaries and 85 once her own words are in front of the model, and Elena
 Chen, who is paid to analyse the load and wants nothing either way, reads 85
 on her summaries and 40 on her words.
 
-Three reasons a reading is deliberately withheld rather than guessed at, all
-measured on a full game day of eight agents (192 readings):
+Reasons a reading is deliberately withheld rather than guessed at, measured on
+a full game day of eight agents:
 
-  asleep         64 of them, 33%, were taken of agents who were in bed. A
-                 sleeping agent learns nothing about the datacenter, so those
-                 hours can only repeat the last real reading or wander; five of
-                 41 consecutive asleep-to-asleep pairs moved by ten points or
-                 more, one agent going 50, 70, 50, 70 without waking.
-  low relevance  the probe abstained at a mean relevance of 0.39 and scored at
-                 a mean of 0.60. Below the floor the same evidence came back
-                 as "none" on one hour and 70 on the next -- Marcus Williams at
-                 0.333 did exactly that six times against three.
-  no memory      an agent that has not stepped has nothing to read.
+  asleep_night        the agent is in bed for the whole hour, at night. A
+  asleep_daytime      sleeping agent learns nothing about the datacenter, so
+                      those hours can only repeat the last real reading or
+                      wander; five of 41 consecutive asleep-to-asleep pairs
+                      moved by ten points or more, one agent going 50, 70, 50,
+                      70 without waking. Split because 28 agent-hours of it
+                      were scheduled mid-day -- a planner defect, not a
+                      night. See is_asleep and asleep_reason.
+  no_relevant_memory  nothing in the pool clears RELEVANCE_FLOOR. The probe
+                      abstained at a mean relevance of 0.39 and scored at a
+                      mean of 0.60; below the floor the same evidence came
+                      back as "none" on one hour and 70 on the next -- Marcus
+                      Williams at 0.333 did exactly that six times against
+                      three.
+  no_memory           an agent that has not stepped has nothing to read.
+  abstained           the model was asked and declined to place the agent.
+  evaluator_invalid   the model was asked and never answered usably
+                      (run_gpt_prompt_datacenter_stance).
 
 A withheld reading is logged with a null score and a reason, not dropped. The
 chart lifts the pen on a null (dashboard.html), so a gap is visible as a gap
@@ -54,8 +70,7 @@ instead of being interpolated through.
 """
 import re
 
-from persona.cognitive_modules.retrieve import (
-  cos_sim, extract_relevance, new_retrieve)
+from persona.cognitive_modules.retrieve import cos_sim, extract_relevance
 from persona.prompt_template.gpt_structure import get_embedding
 from persona.prompt_template.run_gpt_prompt import (
   STANCE_QUESTION, STANCE_SCALE, STANCE_SCORING_VERSION,
@@ -63,14 +78,47 @@ from persona.prompt_template.run_gpt_prompt import (
 
 # Memories each rating is based on, the same number a normal retrieval uses.
 EVIDENCE_N = 30
-# Retrieval is asked for more than that because collapse() throws repeats away
-# and the prompt should still arrive with EVIDENCE_N distinct statements in it.
-# Three times over was enough on every reading of the measured run.
-RETRIEVE_N = EVIDENCE_N * 3
 # How many of the EVIDENCE_N slots are held for the agent's own spoken lines.
 # They have to be reserved rather than won: see rank_utterances for why these
 # lines lose a shared ranking every time.
 RESERVED_N = 10
+
+# Memory slots per age band, measured back from the probe's own clock. Ranking
+# by relevance alone (see probe) has no time term in it at all, so on a long
+# run the best EVIDENCE_N collapse onto whichever period the agent discussed
+# the datacenter most intensely -- and the line then reports a position the
+# agent has since moved off. Banding guarantees the prompt holds something
+# from now and something from before, which is the least the model needs to
+# answer what the prompt actually asks: where does this agent stand at the end
+# of these memories. The taper weights the present without erasing the past.
+# <limit> is the band's upper age in game hours; None is everything older.
+BANDS = (("recent", 12, 8), ("mid", 36, 7), ("old", None, 5))
+
+# Most statements an age band will take from a single timestamp. perceive.py
+# writes one event per tick for a conversation that is still going and both
+# participants perceive both sides, so a single chat arrives as a dozen
+# near-identical lines; collapse() removes the ones that are textually the
+# same, and this stops what survives -- the chat summary, a perceived event, a
+# thought about it -- from crowding a band on its own.
+PER_TIMESTAMP_N = 3
+
+# Of the RESERVED_N quote slots, how many are held for the agent's latest
+# conversations rather than won on relevance. Measured over a game day, one
+# agent's quote block was byte-identical for 18 consecutive probes across 25
+# game hours while they held two conversations that never reached a prompt:
+# relevance alone has no reason to prefer what was just said, and a
+# conversation the agent has just had is precisely what the graph exists to
+# detect.
+RECENT_UTTERANCE_N = 4
+
+# Highest-scoring rejected candidates recorded per reading, so a reading can be
+# read back against what it nearly used without storing the whole pool.
+REJECTED_N = 5
+
+# Hours counted as night when labelling a withheld asleep reading. A labelling
+# convention only -- nothing is gated on it. See probe for why the two cases
+# are worth telling apart.
+NIGHT_FROM, NIGHT_TO = 22, 6
 
 # Raw cosine, below which the model's answer stopped depending on the evidence.
 # See the module docstring: 0.39 mean when abstaining against 0.59 when
@@ -116,14 +164,124 @@ def collapse(nodes):
   return kept
 
 
-def is_asleep(persona):
-  """Whether the agent is in bed at the moment of the probe.
+def band_of(created, curr_time):
+  """Which BANDS age band a statement falls in, at the probe's clock."""
+  hours = (curr_time - created).total_seconds() / 3600
+  for name, limit, _ in BANDS:
+    if limit is None or hours <= limit:
+      return name
+  return BANDS[-1][0]
 
-  Reads the current action rather than the clock, because agents keep their own
-  schedules and revise_identity rewrites them nightly -- there is no hour of
-  the day at which the whole cast is reliably asleep or reliably up.
+
+def allocate(ranked, curr_time, budget):
+  """Fills <budget> evidence slots from <ranked>, best first, across BANDS.
+
+  <ranked> comes in best-relevance-first and already deduplicated. Each band
+  takes up to its own quota, and no single timestamp takes more than
+  PER_TIMESTAMP_N.
+
+  A band with nothing to put in it gives its slots back rather than wasting
+  them: once every band has had its quota, the slots still free go to the best
+  remaining candidates from any band, in the same order. So banding can only
+  change which of the relevant memories are shown, never how many -- early in
+  a run, when everything is in one band, the result is exactly the best
+  <budget> by relevance. The per-timestamp cap holds through the spill too,
+  or one conversation would take back the slots banding just denied it.
+
+  Underfilling is the honest outcome when the cap or the pool runs out: on a
+  measured game day the prompt held a mean of 5.8 statements against 20 slots,
+  so supply, not allocation, is the usual constraint.
+
+  Returns (kept, rejected, occupancy): the nodes to show, [(node, reason)] for
+  the ones that lost a slot, and the band counts that resulted.
   """
-  return "sleep" in (persona.scratch.act_description or "").lower()
+  quota = {name: n for name, _, n in BANDS}
+  occupancy = {name: 0 for name in quota}
+  at_stamp = {}
+  kept, deferred = [], []
+
+  def take(node, band):
+    occupancy[band] += 1
+    at_stamp[node.created] = at_stamp.get(node.created, 0) + 1
+    kept.append(node)
+
+  for node in ranked:
+    band = band_of(node.created, curr_time)
+    if len(kept) >= budget:
+      deferred += [(node, "budget_full")]
+    elif at_stamp.get(node.created, 0) >= PER_TIMESTAMP_N:
+      deferred += [(node, "timestamp_cap")]
+    elif occupancy[band] >= quota[band]:
+      deferred += [(node, "band_full")]
+    else:
+      take(node, band)
+
+  rejected = []
+  for node, reason in deferred:
+    band = band_of(node.created, curr_time)
+    if (reason == "band_full" and len(kept) < budget
+        and at_stamp.get(node.created, 0) < PER_TIMESTAMP_N):
+      take(node, band)
+    else:
+      rejected += [(node, reason)]
+  return kept, rejected, occupancy
+
+
+def is_asleep(persona):
+  """Whether the agent is in bed for the whole game hour this reading covers.
+
+  The hour, not the instant. The probe fires at the top of the hour, before
+  the day's next action has been installed, so reading act_description alone
+  withheld a reading from an agent who woke twenty minutes later: 28 of 177
+  asleep withholdings over a measured game day had that agent active
+  elsewhere within the same game hour.
+
+  f_daily_schedule is the whole decomposed day as [task, minutes] pairs and
+  get_f_daily_schedule_index already takes a forward look-ahead in minutes
+  (scratch.py), so the coming hour can be read off the schedule without
+  waiting for it to arrive. Withheld only if every task in that hour is a
+  sleep task; one non-sleep task makes the hour awake and the reading is
+  taken.
+
+  Read-only, like the rest of the probe: this looks the schedule up, it does
+  not advance or revise it.
+
+  Falls back to the current action before the first plan exists, when
+  f_daily_schedule is still empty -- the same guard dashboard_bridge.py uses.
+  The clock is no use either way, because agents keep their own schedules and
+  revise_identity rewrites them nightly: there is no hour at which the whole
+  cast is reliably asleep or reliably up.
+  """
+  def sleeping(task):
+    return "sleep" in (task or "").lower()
+
+  schedule = getattr(persona.scratch, "f_daily_schedule", None)
+  if not schedule:
+    return sleeping(persona.scratch.act_description)
+  # Every ten minutes of the hour, so a task shorter than the hour is still
+  # seen. Indices repeat for a long task and run off the end late in the day.
+  reached = {persona.scratch.get_f_daily_schedule_index(advance=minute)
+             for minute in range(0, 60, 10)}
+  tasks = [schedule[i][0] for i in sorted(reached) if i < len(schedule)]
+  if not tasks:
+    return sleeping(persona.scratch.act_description)
+  return all(sleeping(task) for task in tasks)
+
+
+def asleep_reason(curr_time):
+  """Which asleep label a withheld reading carries.
+
+  Night sleep is the agent behaving normally and the reading is simply not
+  available. Daytime sleep is a planning defect: over a measured game day 28
+  agent-hours were scheduled mid-day sleep, 13 of them one agent's, and
+  burying those in the same label as 3 a.m. hides a bug in the planner behind
+  an expected gap in the graph.
+  """
+  if curr_time is None:
+    return "asleep_night"
+  hour = curr_time.hour
+  night = hour >= NIGHT_FROM or hour < NIGHT_TO
+  return "asleep_night" if night else "asleep_daytime"
 
 
 _EMBEDDINGS = {}
@@ -227,6 +385,53 @@ def rank_utterances(utterances, n):
   return [(created, line) for _, created, line in ranked[:n]]
 
 
+def select_utterances(utterances, n):
+  """The n spoken lines to quote: the latest conversations, then the closest.
+
+  RECENT_UTTERANCE_N slots go to the agent's most recent conversations and the
+  rest to rank_utterances across everything earlier. Relevance alone is blind
+  to a conversation having just happened, which is how one agent's quote block
+  stayed byte-identical for 18 probes across two conversations it never
+  showed (see RECENT_UTTERANCE_N).
+
+  The grain is the conversation, not the turn. own_utterances inherits every
+  line's timestamp from the parent chat node, so all of one conversation's
+  turns share a <created> and there is nothing finer to rank them by -- which
+  is also why the recent slots are filled in dialogue order rather than by
+  cosine. Ordering them by relevance put a reply ahead of the line it was
+  replying to.
+
+  Returns [(created, line)] oldest first, dialogue order kept within a
+  conversation. probe merges these with the memories using a stable sort on
+  <created> alone, so that order survives into the prompt.
+  """
+  position = {}
+  for i, pair in enumerate(utterances):
+    position.setdefault(pair, i)
+
+  # own_utterances walks seq_chat newest node first, so consecutive runs of one
+  # timestamp are one conversation, newest conversation first.
+  conversations = []
+  for pair in utterances:
+    if not conversations or conversations[-1][0] != pair[0]:
+      conversations += [(pair[0], [])]
+    conversations[-1][1].append(pair)
+
+  recent = []
+  for _, lines in conversations:
+    if len(recent) >= min(RECENT_UTTERANCE_N, n):
+      break
+    recent += lines[:min(RECENT_UTTERANCE_N, n) - len(recent)]
+
+  taken = set(recent)
+  earlier = [pair for pair in utterances if pair not in taken]
+  # Asking rank_utterances to rank nothing still embeds the question, which is
+  # an API call for an agent who has not spoken, or whose every line fit in
+  # the recent slots.
+  chosen = recent + (rank_utterances(earlier, n - len(recent)) if earlier else [])
+  return sorted(chosen, key=lambda pair: (pair[0], position[pair]))
+
+
 def pool_relevance(persona):
   """Raw cosine from every retrievable memory to the stance question.
 
@@ -253,11 +458,20 @@ def measure_relevance(raw, retrieved):
   Returns {"shown", "best"}: the closest memory the model was actually given,
   and the closest one in the whole memory stream. "shown" is what says whether
   a reading had anything to work from at all, and is what RELEVANCE_FLOOR is
-  applied to. The gap between the two says whether a relevant memory existed
-  and lost its place in the top EVIDENCE_N to recency and importance, which are
-  weighted equally with relevance (gw = [1, 1, 1]). On the measured run that
-  gap was 0.0000 for five of eight agents and never above 0.15, so nothing
-  relevant is being crowded out at EVIDENCE_N = 30.
+  applied to.
+
+  The gap between the two used to say whether a relevant memory existed and
+  lost its place to recency and importance, which new_retrieve weights equally
+  with relevance (gw = [1, 1, 1]). It did: on a measured game day 22 of 31
+  withheld readings held a memory above the floor that the composite ranking
+  never offered, so the probe reported having nothing relevant to read while
+  the agent's single most relevant memory sat in the pool.
+
+  Now that probe selects by relevance (see probe), the pool's closest memory is
+  the global maximum and so ranks first overall, first in its band and first at
+  its timestamp -- no allocation can evict it. So the gap closes to zero
+  whenever anything clears the floor at all, and these two numbers agreeing is
+  the invariant to check rather than a finding about EVIDENCE_N.
   """
   if not raw:
     return {"shown": None, "best": None}
@@ -300,73 +514,126 @@ def probe(persona, with_metadata=False):
   None when the model was actually asked; and <quoted> is quoted_span's record
   of the spoken lines that went in beside the memories.
 
-  The evidence block is built from two sources that are ranked separately and
-  then merged in time order: the retrievable memories, ranked by
-  new_retrieve's composite score, and the agent's own spoken lines, ranked by
-  relevance alone (see rank_utterances for why they cannot share one
-  ranking). RESERVED_N slots go to the spoken lines when there are that many,
-  and the reservation is a ceiling rather than a quota -- an agent who has
-  said less gives the unused slots back to the memories, and early in a run,
-  before anyone has spoken, the prompt is exactly what it was before.
+  The evidence block is built from two sources that are selected separately
+  and then merged in time order: the retrievable memories, by raw cosine to
+  the stance question across the whole pool and then allocated over age bands
+  (allocate), and the agent's own spoken lines, by latest conversation and
+  cosine (select_utterances). They cannot share one ranking -- see
+  rank_utterances. RESERVED_N slots go to the spoken lines when there are that
+  many, and the reservation is a ceiling rather than a quota -- an agent who
+  has said less gives the unused slots back to the memories, and early in a
+  run, before anyone has spoken, the prompt is exactly what it was before.
+
+  Memories are selected by relevance alone, and not by new_retrieve's
+  composite of recency, relevance and importance. The composite is right for
+  the agent, whose own planning and reflection still use it untouched; it is
+  wrong for an observer. new_retrieve min-max normalizes relevance within each
+  call, so it cannot say whether anything is on topic, and the raw cosine used
+  to be applied afterwards as a veto -- able to reject what the composite
+  offered but never to nominate what it missed. The probe asks one fixed
+  question all run, so closeness to that question is the whole of what it
+  needs. Measured over a game day: one agent's reading rested on 5 of its
+  1,679 memories, five of eight agents sat on a single anchor memory for the
+  whole run, and 22 of 31 withheld readings had a memory above the floor that
+  the composite never offered. Dropping the composite also drops the second of
+  the two question embeddings each reading used to pay for, since
+  pool_relevance computes the same cosines.
+
+  Every reading records the selection that produced it, under "selection":
+  the cosine and band of each statement shown, the cosine of each line quoted,
+  the highest-scoring candidates that lost a slot and why, and the band
+  occupancy that resulted. pool_relevance already computes all of it and used
+  to discard everything but two numbers, so this costs no extra call and is
+  what makes a reading re-derivable after the fact.
   """
   def result(score, rationale, evidence, relevance, withheld, quoted,
-             category=None, conditions=None):
+             category=None, conditions=None, selection=None):
     if with_metadata:
       return {"score": score, "rationale": rationale, "evidence": evidence,
               "relevance": relevance, "withheld": withheld, "quoted": quoted,
               "category": category, "conditions": conditions or [],
+              "selection": selection or {},
               "scoring_version": STANCE_SCORING_VERSION}
     return score, rationale, evidence, relevance, withheld, quoted
 
   if is_asleep(persona):
     # Before retrieval, which embeds the question and so costs a call.
     return result(None, f"{persona.scratch.name} is asleep.", [],
-            {"shown": None, "best": None}, "asleep", quoted_span([]))
+            {"shown": None, "best": None},
+            asleep_reason(persona.scratch.curr_time), quoted_span([]))
 
-  if not any("idle" not in node.embedding_key
-             for node in persona.a_mem.seq_event + persona.a_mem.seq_thought):
+  pool = [node for node in persona.a_mem.seq_event + persona.a_mem.seq_thought
+          if "idle" not in node.embedding_key]
+  if not pool:
     return result(None, "No retrievable memories yet.", [],
                   {"shown": None, "best": None}, "no_memory", quoted_span([]))
 
-  quoted = rank_utterances(own_utterances(persona), RESERVED_N)
+  quoted = select_utterances(own_utterances(persona), RESERVED_N)
 
-  retrieved = new_retrieve(persona, [STANCE_QUESTION], RETRIEVE_N,
-                           touch=False)[STANCE_QUESTION]
   raw = pool_relevance(persona)
   # A statement that is not close enough to the datacenter is not evidence
-  # about the datacenter, and until now only the closest one in the prompt was
-  # ever tested: the floor below decided whether to ask at all and then every
-  # statement went in regardless of its own cosine. Measured over the last
-  # eight prompts of a game day, 35% of the 240 statements sat below the floor
-  # and 14% below 0.35 -- 27 of Luis Hernandez's 30, and 21 of Rachel Nguyen's
-  # with one at 0.108. Dropping them can leave a prompt short of EVIDENCE_N,
-  # which is the honest outcome: there were not that many relevant memories.
-  # The gate is unchanged by this, because at least one statement survives
-  # exactly when the old max-based test passed.
-  retrieved = [node for node in collapse(retrieved)
-               if raw.get(node.node_id, 0.0) >= RELEVANCE_FLOOR]
-  retrieved = retrieved[:EVIDENCE_N - len(quoted)]
+  # about the datacenter. Measured over the last eight prompts of a game day,
+  # 35% of the 240 statements sat below the floor and 14% below 0.35 -- 27 of
+  # Luis Hernandez's 30, and 21 of Rachel Nguyen's with one at 0.108. Dropping
+  # them can leave a prompt short of EVIDENCE_N, which is the honest outcome:
+  # there were not that many relevant memories. Sorting after the filter, and
+  # over a pool in insertion order, keeps the result stable without a tiebreak.
+  ordered = sorted(pool, key=lambda node: -raw.get(node.node_id, 0.0))
+  above = collapse([node for node in ordered
+                    if raw.get(node.node_id, 0.0) >= RELEVANCE_FLOOR])
+  retrieved, rejected, occupancy = allocate(
+    above, persona.scratch.curr_time, EVIDENCE_N - len(quoted))
+
   evidence = [node.node_id for node in retrieved]
   relevance = measure_relevance(raw, retrieved)
+  rejected += [(node, "below_floor") for node in ordered
+               if raw.get(node.node_id, 0.0) < RELEVANCE_FLOOR]
+  question = embed(STANCE_QUESTION)
+  selection = {
+    "memories": [{"id": node.node_id,
+                  "cos": round(float(raw[node.node_id]), 4),
+                  "band": band_of(node.created, persona.scratch.curr_time),
+                  "created": node.created.strftime("%Y-%m-%d %H:%M:%S")}
+                 for node in retrieved],
+    # The line itself is already in the transcript; the cosine is the part
+    # that was computed and thrown away, and it is what says whether a floor
+    # on spoken lines could ever have been measured.
+    "quoted": [{"cos": round(float(cos_sim(embed(line), question)), 4),
+                "created": created.strftime("%Y-%m-%d %H:%M:%S")}
+               for created, line in quoted],
+    "rejected": [{"id": node.node_id,
+                  "cos": round(float(raw.get(node.node_id, 0.0)), 4),
+                  "reason": reason}
+                 for node, reason in sorted(
+                   rejected,
+                   key=lambda row: -raw.get(row[0].node_id, 0.0))[:REJECTED_N]],
+    "bands": occupancy,
+  }
 
   shown = relevance["shown"]
   if shown is None:
     # Asking anyway produces a number, and that number is the prompt's opinion
     # of the name rather than the agent's opinion of the datacenter. Spoken
     # lines are not allowed to lift this gate even when there are ten of them:
-    # they sit at a median cosine of 0.24, so RELEVANCE_FLOOR cannot be
-    # applied to them, and no separate floor for them has been measured yet.
+    # they sit at a median cosine of 0.24 against 0.51 for the statements
+    # already in a prompt, only 61 of 431 outscored the weakest statement
+    # already there and for one agent none of 97 did, so RELEVANCE_FLOOR
+    # cannot be applied to them and no separate floor has been measured.
+    # "selection" now carries their cosines, which is what would measure one.
     best = relevance["best"]
     return result(None, f"Nothing in {persona.scratch.name}'s memory is close "
             f"enough to the datacenter to rate"
             f"{'' if best is None else f' (relevance {best:.2f})'}.",
-            evidence, relevance, "low_relevance", quoted_span(quoted))
+            evidence, relevance, "no_relevant_memory", quoted_span(quoted),
+            selection=selection)
 
   # Oldest first, each line dated, memories and spoken lines interleaved.
-  # Retrieval returns these ranked by score, and a shuffled undated list is
+  # Selection returns these ranked by relevance, and a shuffled undated list is
   # unreadable as a trajectory: the model cannot tell what this agent thought
   # an hour ago from what it thought yesterday, which is the one distinction
-  # the graph exists to show. Spoken lines are marked as spoken so the prompt
+  # the graph exists to show. The sort is stable and select_utterances hands
+  # back its lines in dialogue order, so turns of one conversation stay in the
+  # order they were spoken. Spoken lines are marked as spoken so the prompt
   # can tell the model to weigh this person's own words above a summary of a
   # conversation they were in.
   lines = [(node.created, node.embedding_key) for node in retrieved]
@@ -379,4 +646,4 @@ def probe(persona, with_metadata=False):
     persona, statements, with_metadata=True)[0]
   return result(rating["score"], rating["rationale"], evidence, relevance,
                 rating["withheld"], quoted_span(quoted), rating["category"],
-                rating["conditions"])
+                rating["conditions"], selection)

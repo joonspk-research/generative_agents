@@ -30,13 +30,20 @@ is not treated as missing. Python rejects fractions, booleans, numeric strings,
 unknown categories, out-of-band scores, empty rationales, and malformed conditions.
 An explicit abstention has null category and score, with `withheld: "abstained"`.
 Exhausted invalid/model responses use `withheld: "evaluator_invalid"`. Sleep,
-low-relevance, and empty-memory withholding also produce versioned nulls.
+no-relevant-memory, and empty-memory withholding also produce versioned nulls
+(the sleep and relevance labels were since split and renamed; see
+`docs/retrieval-methodology-implementation.md`).
 50 requires evidence of genuine neutral/mixed views; it is never a fallback.
 
 Evidence selection remains observer-only: relevance-filtered, canonically
 deduplicated events/thoughts, with up to ten reserved own-utterance slots within
 thirty evidence slots. Speech attribution, chronology, the 0.45 memory similarity
-floor, `touch=False`, and the nonpersistent embedding cache are preserved.
+floor, read-only access, and the nonpersistent embedding cache are preserved.
+How the statements inside those slots are chosen has since changed — relevance
+selects them rather than vetoing a composite ranking, and the probe no longer
+calls retrieval at all, so read-only no longer rests on `touch=False`. See
+`docs/retrieval-methodology-implementation.md`; the scoring described here is
+unaffected.
 Only name and age are passed from scratch; broader identity fields remain excluded.
 The old text parser and default scorer/probe tuple shapes remain available to
 existing replay callers. The sweep tool uses the structured scorer when its

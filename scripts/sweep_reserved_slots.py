@@ -17,14 +17,23 @@ template is the no-utterances baseline.
 What is faithful and what is not:
 
   pool statements  the ids the live retrieval actually chose, read off the log,
-                   then filtered by the per-statement relevance floor.
-                   new_retrieve's composite ranking cannot be recomputed after
-                   the fact (last_accessed at that step is not recoverable), so
-                   this is the same compromise replay_stance_prompt.py makes:
-                   no more evidence than the original reading had, never more.
-  quoted lines     rebuilt, and restricted to conversations that had already
-                   happened at that step. Without that cut an early reading
-                   would be rated on words the agent had not said yet.
+                   then filtered by the relevance floor and put through the
+                   live ranking and allocate(). The ranking itself is now
+                   exact, where the composite it replaced could not be
+                   recomputed after the fact: cosine needs only embeddings.json
+                   and the bands only <created>, both of which are on disk.
+                   What stays a compromise is the candidate set -- these are
+                   the statements the old selection surfaced, so a sweep sees
+                   no more evidence than the original reading had. Rebuilding
+                   the full pool is possible now and would change what the
+                   sweep compares against the numbers already published in
+                   §11.5, which is why it is not done here.
+  quoted lines     rebuilt through select_utterances, so the reserved slots
+                   split between the latest conversations and the closest
+                   earlier ones exactly as they do live, and restricted to
+                   conversations that had already happened at that step.
+                   Without that cut an early reading would be rated on words
+                   the agent had not said yet.
   prompt           the template run_gpt_prompt currently loads, unless
                    --template overrides it. It is read out of the source rather
                    than written here for the reason given in
@@ -49,8 +58,10 @@ sys.path.insert(0, os.path.join(_ROOT, "reverie", "backend_server"))
 
 import numpy as np
 import utils
-from replay_stance_prompt import load_nodes, sleeping_at, stub, TIME_FMT
-from opinion_probe import EVIDENCE_N, RELEVANCE_FLOOR, collapse, embed
+from replay_stance_prompt import (
+  load_nodes, sleeping_through_hour, stub, TIME_FMT)
+from opinion_probe import (
+  EVIDENCE_N, RELEVANCE_FLOOR, allocate, collapse, embed, select_utterances)
 from persona.prompt_template.gpt_structure import (
   ChatGPT_safe_generate_response, generate_prompt)
 from persona.prompt_template import run_gpt_prompt
@@ -103,10 +114,11 @@ def utterances_before(nodes, name, when):
 
 def build(row, nodes, embeddings, question, reserved):
   """The statements block the probe would send, at this RESERVED_N."""
-  quoted = sorted(((cos(embed(line), question), created, line)
-                   for created, line in utterances_before(
-                     nodes, row["name"], row["time_iso"])),
-                  key=lambda r: r[0], reverse=True)[:reserved]
+  spoken = utterances_before(nodes, row["name"], row["time_iso"])
+  # Newest conversation first, which is the order own_utterances hands
+  # select_utterances and the order its recent slots are read in.
+  spoken.sort(key=lambda pair: pair[0], reverse=True)
+  quoted = select_utterances(spoken, reserved)
 
   cited = [nodes[i] for i in (row.get("evidence") or []) if i in nodes]
   kept = collapse([type("N", (), {"embedding_key": n["embedding_key"],
@@ -115,11 +127,20 @@ def build(row, nodes, embeddings, question, reserved):
                if k.node["embedding_key"] in embeddings
                and cos(embeddings[k.node["embedding_key"]], question)
                >= RELEVANCE_FLOOR]
-  survivors = survivors[:EVIDENCE_N - len(quoted)]
+  # Cosine order, then the bands, as probe() now does -- not the log's order
+  # truncated to the budget. Both inputs are on disk, so unlike the composite
+  # this is the live ranking and not an approximation of it.
+  survivors.sort(key=lambda n: -cos(embeddings[n["embedding_key"]], question))
+  banded = [type("N", (), {"created": datetime.datetime.strptime(
+                             n["created"], NODE_FMT), "node": n})()
+            for n in survivors]
+  at = datetime.datetime.strptime(row["time"], TIME_FMT)
+  survivors = [n.node for n in
+               allocate(banded, at, EVIDENCE_N - len(quoted))[0]]
 
   lines = [(n["created"], n["embedding_key"]) for n in survivors]
   lines += [(created, f'{row["name"]} said: "{line}"')
-            for _, created, line in quoted]
+            for created, line in quoted]
   block = "\n".join(
     f'{datetime.datetime.strptime(c, NODE_FMT).strftime("%B %d, %H:%M")} -- {t}'
     for c, t in sorted(lines, key=lambda r: r[0]))
@@ -173,14 +194,22 @@ def main(sim, template, reserves, per_agent):
               encoding="utf-8") as f:
       embs[folder] = json.load(f)
 
+  # The hour is_asleep samples is 3600 game seconds, which is this many steps.
+  with open(os.path.join(utils.fs_storage, sim, "reverie", "meta.json"),
+            encoding="utf-8") as f:
+    per_step = json.load(f)["sec_per_step"]
+
   # Both live gates are deterministic, so a row either of them would withhold is
   # skipped rather than re-read: there is no point spending a call on a reading
   # the probe would not make.
   keep = collections.defaultdict(list)
   for row in rows:
-    if sleeping_at(sim, row["step"], row["name"]):
+    if sleeping_through_hour(sim, row["step"], row["name"], per_step):
       continue
-    shown = (row.get("relevance") or {}).get("shown")
+    measured = row.get("relevance") or {}
+    shown = measured.get("shown")
+    if shown is None:
+      shown = measured.get("best")
     if shown is None or shown < RELEVANCE_FLOOR:
       continue
     row["time_iso"] = datetime.datetime.strptime(

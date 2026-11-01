@@ -113,11 +113,12 @@ def _run_log(sim, name, n, start):
 
 
 def _opinions(sim, start):
-  """Stance readings for the graph. The memory ids behind each rating stay in
-  the file for analysis; the graph only needs the numbers."""
+  """Stance readings for the graph. The memory ids and the cosines behind each
+  rating stay in the file for analysis; the graph only needs the numbers."""
   rows = _run_log(sim, "opinions.jsonl", 4000, start)
   for r in rows:
     r.pop("evidence", None)
+    r.pop("selection", None)
   return rows
 
 

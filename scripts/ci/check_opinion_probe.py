@@ -10,8 +10,16 @@ graphs it, so two things have to hold:
   parse failure (poignancy returns 4); here that would be a fabricated opinion
   sitting in the graph next to real ones, indistinguishable from an agent that
   is torn.
-- The probe retrieves read-only. check_retrieval.py proves touch=False leaves
-  last_accessed alone; this checks the probe actually passes it.
+- The probe reads memory read-only. The only write to last_accessed is inside
+  new_retrieve, so a probe that selects by relevance itself and never calls it
+  cannot reset the recency clock on what it read. check_retrieval.py proves
+  the touch=False half, for the console commands that do retrieve.
+- The probe selects its evidence by relevance to the stance question, over age
+  bands. new_retrieve's composite of recency, relevance and importance is the
+  agent's own priority order and stays untouched for planning and reflection;
+  as the observer's selection criterion it left one agent's reading resting on
+  5 of its 1,679 memories and withheld 22 readings that had a relevant memory
+  in the pool all along.
 - The prompt does not hand the model a list of numbers to choose from. With
   anchors spelled out as "1 -- against, 3 -- leans against, 5 -- torn, ...",
   gpt-4o-mini used only those six values across 192 readings and nothing else,
@@ -87,11 +95,23 @@ for raw in ["0", "101", "-3", "", None, "neutral", "I'd rather not say",
                     f"failed reading can't be told apart from an empty one")
 
 # -- The probe reads memory without marking it as accessed -------------------
+# The probe used to call new_retrieve(touch=False), and the rule here was that
+# it passed the keyword. It now selects by relevance itself and calls no
+# retrieval at all, which is the same invariant held more simply: the only
+# write to last_accessed is inside new_retrieve (retrieve.py), so a probe that
+# never reaches it cannot reset the recency clock on what it read, with or
+# without a keyword. Checked as source text because the call could sit in any
+# helper in the module, not only in probe().
 with open(os.path.join(BACKEND, "opinion_probe.py"), encoding="utf-8") as f:
   source = f.read()
-if not re.search(r"new_retrieve\([^)]*touch=False", source, re.S):
-  problems.append("opinion_probe.probe does not retrieve with touch=False, so "
-                  "probing an agent changes what that agent retrieves next")
+retrievals = [call for call in re.findall(r"new_retrieve\s*\([^)]*\)", source,
+                                          re.S)
+              if "touch=False" not in call]
+if retrievals:
+  problems.append(f"opinion_probe retrieves without touch=False "
+                  f"({retrievals[0].split(chr(10))[0]}...), so probing an "
+                  f"agent resets the recency clock on the memories it read "
+                  f"and changes what that agent retrieves next")
 
 # -- The probe reads the newest memory last, and dated -----------------------
 # Retrieval hands back its 30 nodes ranked by score. Fed to the model in that
@@ -243,13 +263,42 @@ for helper, why in [
     ("RELEVANCE_FLOOR", "without it a reading with no relevant memory in it "
                         "still produces a confident number"),
     ("collapse", "one conversation arrives as a dozen near-identical "
-                 "perception events, which filled up to 80% of the prompt")]:
+                 "perception events, which filled up to 80% of the prompt"),
+    ("pool_relevance", "the probe would be back to selecting evidence by "
+                       "new_retrieve's composite, which ranks a fresh thought "
+                       "about lunch above the agent's most relevant memory: "
+                       "22 of 31 withheld readings held a memory above the "
+                       "floor that the composite never offered"),
+    ("allocate", "relevance alone has no time term, so on a long run the best "
+                 "EVIDENCE_N collapse onto whichever period the agent "
+                 "discussed this most and the line reports a position the "
+                 "agent has since moved off")]:
   if helper not in probe_src:
     problems.append(f"opinion_probe.probe no longer uses {helper}: {why}")
-if opinion_probe.RETRIEVE_N <= opinion_probe.EVIDENCE_N:
-  problems.append("opinion_probe.RETRIEVE_N is not greater than EVIDENCE_N, so "
-                  "collapsing repeated statements shrinks the prompt instead "
-                  "of making room in it for distinct ones")
+
+# -- Age bands cover every statement, and total the slots they are given -----
+if sum(n for _, _, n in opinion_probe.BANDS) != (opinion_probe.EVIDENCE_N
+                                                 - opinion_probe.RESERVED_N):
+  problems.append(f"opinion_probe.BANDS allocate "
+                  f"{sum(n for _, _, n in opinion_probe.BANDS)} slots against "
+                  f"the {opinion_probe.EVIDENCE_N - opinion_probe.RESERVED_N} "
+                  f"left after RESERVED_N; over-allocating lets one band take "
+                  f"slots banding exists to reserve for another, and "
+                  f"under-allocating leaves slots no band can ever fill")
+if opinion_probe.BANDS[-1][1] is not None:
+  problems.append("the oldest band in opinion_probe.BANDS has an upper age "
+                  "limit, so a memory older than it falls in no band and the "
+                  "agent's earliest position on the datacenter -- the one a "
+                  "move is measured against -- can never be shown")
+if not 0 < opinion_probe.RECENT_UTTERANCE_N < opinion_probe.RESERVED_N:
+  problems.append(f"RECENT_UTTERANCE_N is "
+                  f"{opinion_probe.RECENT_UTTERANCE_N} against RESERVED_N "
+                  f"{opinion_probe.RESERVED_N}; at zero a conversation the "
+                  f"agent just had need never reach the prompt, and at "
+                  f"RESERVED_N relevance stops choosing any quote at all")
+if opinion_probe.PER_TIMESTAMP_N <= 0:
+  problems.append("opinion_probe.PER_TIMESTAMP_N is not positive, so no "
+                  "statement could be shown at all")
 if opinion_probe.EVIDENCE_N <= 0:
   problems.append("opinion_probe.EVIDENCE_N is not positive, so ratings would "
                   "be based on no memories at all")

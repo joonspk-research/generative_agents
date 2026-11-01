@@ -32,7 +32,11 @@ So three things matter per reading, and none of them is the score:
                    at all. Read this against the convos column, never on its
                    own: an agent who never spoke to anyone has nothing to cite,
                    and zero citations there means the run was short, not that
-                   the channel is broken.
+                   the channel is broken. Read it against the quote column
+                   too -- spoken lines reach the prompt on their own reserved
+                   slots and are not cited node ids, so an agent can be at
+                   zero in both chat and plan with its conversations arriving
+                   intact.
 
 Seed share is exact: whisper thoughts are the nodes created at the earliest
 timestamp in memory, before the first step. The datacenter column is keyword
@@ -46,11 +50,13 @@ Two further things this reports, both from measuring a full game day:
               from 20 to 26 held 7 between them. A measurement does not pile
               30% of its mass on one integer with empty bins either side, so
               the mode's share is checked on every run.
-  withheld    the probe now declines to rate a sleeping agent, or one whose
-              closest memory falls below opinion_probe.RELEVANCE_FLOOR, and
-              records which. Those are deliberate gaps and are counted apart
-              from the readings where the model was asked and answered
-              unusably.
+  withheld    the probe declines to rate an agent asleep for the whole hour,
+              one with no memory yet, or one whose closest memory falls below
+              opinion_probe.RELEVANCE_FLOOR, and records which. Those are
+              deliberate gaps and are counted apart from the readings where
+              the model was asked and answered unusably. The labels are
+              printed as logged, so a run predating the asleep_night /
+              asleep_daytime split still reads correctly.
 """
 import collections
 import glob
@@ -138,7 +144,7 @@ def analyze(sim):
 
   per_agent = collections.defaultdict(lambda: {
     "scores": [], "gaps": 0, "seed": [], "dc": [], "newest": [],
-    "channels": collections.Counter(), "missing": 0})
+    "channels": collections.Counter(), "missing": 0, "quoted": 0})
 
   for row in rows:
     name = row.get("name")
@@ -151,6 +157,12 @@ def analyze(sim):
       a["gaps"] += 1
     else:
       a["scores"].append(int(score))
+
+    # Spoken lines reach the prompt without being cited node ids: they are
+    # drawn from seq_chat's filling, which <evidence> never names. Counting
+    # them is what keeps an agent whose conversations arrived this way from
+    # being reported as a dropped channel.
+    a["quoted"] += (row.get("quoted") or {}).get("n") or 0
 
     cited = [i for i in (row.get("evidence") or [])]
     found = [i for i in cited if i in nodes]
@@ -170,7 +182,7 @@ def analyze(sim):
 
   hdr = (f"{'agent':<18}{'n':>4}{'gaps':>6}{'score':>12}"
          f"{'seed%':>7}{'dc/30':>7}{'newest':>8}"
-         f"{'convos':>8}{'chat':>6}{'plan':>6}  channel")
+         f"{'convos':>8}{'chat':>6}{'plan':>6}{'quote':>7}  channel")
   print(hdr)
   print("-" * len(hdr))
   totals = collections.Counter()
@@ -182,11 +194,12 @@ def analyze(sim):
     seed = f"{100 * statistics.fmean(a['seed']):.0f}" if a["seed"] else "--"
     dc = f"{statistics.fmean(a['dc']):.1f}" if a["dc"] else "--"
     newest = f"{100 * statistics.fmean(a['newest']):.0f}%" if a["newest"] else "--"
-    spoke, cited = convos[name], (a["channels"]["chat_event"]
-                                  + a["channels"]["planning"])
+    spoke = convos[name]
+    reached = (a["channels"]["chat_event"] + a["channels"]["planning"]
+               + a["quoted"])
     if not spoke:
       channel = "no convos"  # nothing to reach the probe; not a failure
-    elif cited:
+    elif reached:
       channel = "ok"
     else:
       channel = "DROPPED"
@@ -194,7 +207,7 @@ def analyze(sim):
     print(f"{name:<18}{len(a['scores']) + a['gaps']:>4}{a['gaps']:>6}"
           f"{span:>12}{seed:>7}{dc:>7}{newest:>8}{spoke:>8}"
           f"{a['channels']['chat_event']:>6}{a['channels']['planning']:>6}"
-          f"  {channel}")
+          f"{a['quoted']:>7}  {channel}")
 
   print(f"\nevidence by channel: {dict(totals)}")
   missing = sum(a["missing"] for a in per_agent.values())
@@ -236,16 +249,20 @@ def analyze(sim):
       print("  -> over half of every rating rests on the opening whisper "
             "seeding. A flat line here is the instrument, not the agents.")
   convo = totals["chat_event"] + totals["planning"]
+  quoted = sum(a["quoted"] for a in per_agent.values())
   spoke = sum(1 for n in per_agent if convos[n])
   print(f"conversation-derived evidence cited {convo} times "
-        f"({100 * convo / max(sum(totals.values()), 1):.0f}% of all evidence); "
+        f"({100 * convo / max(sum(totals.values()), 1):.0f}% of all evidence), "
+        f"plus {quoted} lines quoted directly; "
         f"{spoke}/{len(per_agent)} agents spoke to anyone")
   if silent:
-    print(f"  -> {', '.join(silent)} held conversations that never reached a "
-          f"rating. That is the channel failing. It is not crowding-out: "
-          f"measure_relevance put best-minus-shown at zero for most agents, so "
-          f"look at whether opinion_probe.collapse is folding away distinct "
-          f"statements before suspecting EVIDENCE_N.")
+    print(f"  -> {', '.join(silent)} held conversations that reached no "
+          f"rating through any channel -- neither a cited chat node nor a "
+          f"quoted line. That is the channel failing. It is not crowding-out: "
+          f"relevance now selects the evidence rather than vetoing it, so the "
+          f"pool's closest memory is always shown; look at whether "
+          f"opinion_probe.collapse is folding away distinct statements before "
+          f"suspecting EVIDENCE_N.")
   elif spoke < len(per_agent):
     print("  -> every agent who spoke had it cited. The agents with nothing "
           "cited never spoke, so this run is too short to say whether "
