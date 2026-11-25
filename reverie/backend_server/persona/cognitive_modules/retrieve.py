@@ -130,24 +130,12 @@ def top_highest_x_values(d, x):
 
 
 def extract_recency(persona, nodes):
-  """
-  Gets the current Persona object and a list of nodes that are in a 
-  chronological order, and outputs a dictionary that has the recency score
-  calculated.
-
-  INPUT: 
-    persona: Current persona whose memory we are retrieving. 
-    nodes: A list of Node object in a chronological order. 
-  OUTPUT: 
-    recency_out: A dictionary whose keys are the node.node_id and whose values
-                 are the float that represents the recency score. 
-  """
-  recency_vals = [persona.scratch.recency_decay ** i 
-                  for i in range(1, len(nodes) + 1)]
-  
-  recency_out = dict()
-  for count, node in enumerate(nodes): 
-    recency_out[node.node_id] = recency_vals[count]
+  """Score each memory by the simulated hours since its last access."""
+  recency_out = {}
+  for node in nodes:
+    elapsed = persona.scratch.curr_time - node.last_accessed
+    hours = elapsed.total_seconds() / 3600
+    recency_out[node.node_id] = persona.scratch.recency_decay ** hours
 
   return recency_out
 
@@ -218,14 +206,8 @@ def new_retrieve(persona, focal_points, n_count=30):
   # <retrieved> is the main dictionary that we are returning
   retrieved = dict() 
   for focal_pt in focal_points: 
-    # Getting all nodes from the agent's memory (both thoughts and events) and
-    # sorting them by the datetime of creation.
-    # You could also imagine getting the raw conversation, but for now. 
-    nodes = [[i.last_accessed, i]
-              for i in persona.a_mem.seq_event + persona.a_mem.seq_thought
-              if "idle" not in i.embedding_key]
-    nodes = sorted(nodes, key=lambda x: x[0])
-    nodes = [i for created, i in nodes]
+    nodes = [node for node in persona.a_mem.seq_event + persona.a_mem.seq_thought
+             if "idle" not in node.embedding_key]
 
     # Calculating the component dictionaries and normalizing them.
     recency_out = extract_recency(persona, nodes)
